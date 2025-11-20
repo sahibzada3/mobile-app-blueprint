@@ -5,7 +5,7 @@ import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
-import { Camera as CameraIcon, FlipHorizontal, Sun, Droplets, Moon } from "lucide-react";
+import { Camera as CameraIcon, FlipHorizontal, Sun, Droplets, Moon as MoonIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Camera() {
@@ -150,7 +150,7 @@ export default function Camera() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Moon className="w-4 h-4 text-muted-foreground" />
+                <MoonIcon className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Darkness</span>
               </div>
               <span className="text-sm text-muted-foreground">{darkness}%</span>
