@@ -48,15 +48,29 @@ export default function Feed() {
     try {
       const { data, error } = await supabase
         .from("photos")
-        .select(`
-          *,
-          profiles:user_id (username, avatar_url)
-        `)
+        .select("*")
         .order("created_at", { ascending: false })
         .limit(20);
 
       if (error) throw error;
-      setPhotos(data || []);
+
+      // Load profiles separately for each photo
+      const photosWithProfiles = await Promise.all(
+        (data || []).map(async (photo) => {
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("username, avatar_url")
+            .eq("id", photo.user_id)
+            .single();
+
+          return {
+            ...photo,
+            profiles: profileData,
+          };
+        })
+      );
+
+      setPhotos(photosWithProfiles);
     } catch (error: any) {
       console.error("Error loading photos:", error);
     }
