@@ -5,16 +5,17 @@ import { User } from "@supabase/supabase-js";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, LogOut, Camera } from "lucide-react";
+import { Heart, LogOut, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { getWeatherData } from "@/services/weatherService";
+import PhotoCard from "@/components/PhotoCard";
 
 export default function Feed() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [weather, setWeather] = useState<any>(null);
+  const [photos, setPhotos] = useState<any[]>([]);
 
   useEffect(() => {
     // Check current session
@@ -37,8 +38,29 @@ export default function Feed() {
     // Fetch weather data
     getWeatherData().then(setWeather);
 
+    // Load photos
+    loadPhotos();
+
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const loadPhotos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("photos")
+        .select(`
+          *,
+          profiles:user_id (username, avatar_url)
+        `)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      setPhotos(data || []);
+    } catch (error: any) {
+      console.error("Error loading photos:", error);
+    }
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -68,9 +90,9 @@ export default function Feed() {
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-4 py-6">
+      <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
         {weather && (
-          <Card className="mb-6 shadow-nature bg-gradient-to-br from-card to-card/50 backdrop-blur-sm border-primary/20">
+          <Card className="shadow-nature bg-gradient-to-br from-card to-card/50 backdrop-blur-sm border-primary/20">
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <div className="text-5xl">{weather.icon}</div>
@@ -93,7 +115,7 @@ export default function Feed() {
           </Card>
         )}
 
-        <div className="text-center py-12">
+        <div className="text-center py-6">
           <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
             <Heart className="w-10 h-10 text-primary" />
           </div>
@@ -106,13 +128,20 @@ export default function Feed() {
           </Button>
         </div>
 
-        {/* Placeholder for future feed items */}
-        <Card className="shadow-nature">
-          <CardContent className="p-6 text-center text-muted-foreground">
-            <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p>No photos yet. Be the first to share!</p>
-          </CardContent>
-        </Card>
+        {photos.length > 0 ? (
+          <div className="space-y-6">
+            {photos.map((photo) => (
+              <PhotoCard key={photo.id} photo={photo} currentUserId={user?.id} />
+            ))}
+          </div>
+        ) : (
+          <Card className="shadow-nature">
+            <CardContent className="p-6 text-center text-muted-foreground">
+              <Camera className="w-12 h-12 mx-auto mb-2 opacity-50" />
+              <p>No photos yet. Be the first to share!</p>
+            </CardContent>
+          </Card>
+        )}
       </main>
 
       <BottomNav />
