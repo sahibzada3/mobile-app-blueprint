@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Clock, Camera, Lightbulb } from "lucide-react";
+import { Trophy, Clock, Camera, Lightbulb, Moon, Sun } from "lucide-react";
 import { challenges, Challenge } from "@/data/challenges";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function Challenges() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [dailyChallenges, setDailyChallenges] = useState<Challenge[]>([]);
   const [weeklyChallenges, setWeeklyChallenges] = useState<Challenge[]>([]);
 
@@ -91,11 +93,14 @@ export default function Challenges() {
   return (
     <div className="min-h-screen bg-gradient-soft pb-20">
       <header className="sticky top-0 bg-card/80 backdrop-blur-lg border-b border-border z-40">
-        <div className="max-w-lg mx-auto px-4 py-3">
+        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Trophy className="w-6 h-6 text-secondary" />
             <h1 className="text-xl font-display font-bold text-primary">Challenges</h1>
           </div>
+          <Button variant="ghost" size="icon" onClick={toggleTheme}>
+            {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+          </Button>
         </div>
       </header>
 
