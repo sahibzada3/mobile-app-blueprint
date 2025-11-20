@@ -41,7 +41,26 @@ export default function Feed() {
     // Load photos
     loadPhotos();
 
-    return () => subscription.unsubscribe();
+    // Subscribe to realtime updates
+    const channel = supabase
+      .channel('photos-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'photos'
+        },
+        () => {
+          loadPhotos();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+      supabase.removeChannel(channel);
+    };
   }, [navigate]);
 
   const loadPhotos = async () => {

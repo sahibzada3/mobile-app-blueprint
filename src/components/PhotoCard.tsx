@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,40 @@ interface PhotoCardProps {
 export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+
+  useEffect(() => {
+    loadLikes();
+  }, [photo.id, currentUserId]);
+
+  const loadLikes = async () => {
+    try {
+      // Get total likes for this photo
+      const { data: allLikes, error: countError } = await supabase
+        .from("votes")
+        .select("id")
+        .eq("photo_id", photo.id)
+        .eq("vote_type", "like");
+
+      if (countError) throw countError;
+      setLikeCount(allLikes?.length || 0);
+
+      // Check if current user has liked
+      if (currentUserId) {
+        const { data: userLike, error: userError } = await supabase
+          .from("votes")
+          .select("id")
+          .eq("photo_id", photo.id)
+          .eq("user_id", currentUserId)
+          .eq("vote_type", "like")
+          .maybeSingle();
+
+        if (userError) throw userError;
+        setLiked(!!userLike);
+      }
+    } catch (error: any) {
+      console.error("Error loading likes:", error);
+    }
+  };
 
   const handleLike = async () => {
     if (!currentUserId) {
