@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Camera, UserPlus, Users } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Camera, UserPlus, Users, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import BottomNav from "@/components/BottomNav";
+import GroupChatInterface from "@/components/spotlight/GroupChatInterface";
 
 interface Chain {
   id: string;
@@ -274,43 +276,79 @@ export default function SpotlightChain() {
           </div>
         </Card>
 
-        <h2 className="text-xl font-semibold mb-4">Contributions</h2>
-        {contributions.length === 0 ? (
-          <Card className="p-8 text-center">
-            <p className="text-muted-foreground">No contributions yet. Be the first to add a photo!</p>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {contributions.map((contribution) => (
-              <Card key={contribution.id} className="overflow-hidden">
-                <img
-                  src={contribution.photos.image_url}
-                  alt="Contribution"
-                  className="w-full h-64 object-cover"
-                />
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={contribution.profiles?.avatar_url || ""} />
-                      <AvatarFallback>
-                        {contribution.profiles?.username?.[0]?.toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">{contribution.profiles?.username}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(contribution.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  {contribution.photos.caption && (
-                    <p className="text-sm text-muted-foreground">{contribution.photos.caption}</p>
-                  )}
-                </div>
+        <h2 className="text-xl font-semibold mb-4">Chain Content</h2>
+        
+        <Tabs defaultValue="contributions" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="contributions">
+              <Camera className="w-4 h-4 mr-2" />
+              Contributions
+            </TabsTrigger>
+            <TabsTrigger value="chat">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Group Chat
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="contributions">
+            {contributions.length === 0 ? (
+              <Card className="p-8 text-center">
+                <p className="text-muted-foreground">No contributions yet. Be the first to add a photo!</p>
               </Card>
-            ))}
-          </div>
-        )}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {contributions.map((contribution) => (
+                  <Card key={contribution.id} className="overflow-hidden">
+                    <img
+                      src={contribution.photos.image_url}
+                      alt="Contribution"
+                      className="w-full h-64 object-cover"
+                    />
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={contribution.profiles?.avatar_url || ""} />
+                          <AvatarFallback>
+                            {contribution.profiles?.username?.[0]?.toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">{contribution.profiles?.username}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(contribution.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      {contribution.photos.caption && (
+                        <p className="text-sm text-muted-foreground">{contribution.photos.caption}</p>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="chat">
+            {isParticipant && user ? (
+              <div className="h-[600px]">
+                <GroupChatInterface
+                  chainId={chainId!}
+                  chainTitle={chain.title}
+                  currentUserId={user.id}
+                />
+              </div>
+            ) : (
+              <Card className="p-8 text-center">
+                <MessageCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <p className="text-muted-foreground mb-2">Join this chain to access the group chat</p>
+                <p className="text-sm text-muted-foreground">
+                  Chat with other participants and share your thoughts about the chain
+                </p>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
 
       <BottomNav />
