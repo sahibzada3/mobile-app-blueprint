@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, LogOut, Camera, Moon, Sun, Lightbulb, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
-import { getWeatherData } from "@/services/weatherService";
 import PhotoCard from "@/components/PhotoCard";
+import WeatherWidget from "@/components/weather/WeatherWidget";
 import { useTheme } from "@/hooks/useTheme";
 import NotificationBell from "@/components/notifications/NotificationBell";
 
@@ -17,7 +17,6 @@ export default function Feed() {
   const { theme, toggleTheme } = useTheme();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [weather, setWeather] = useState<any>(null);
   const [photos, setPhotos] = useState<any[]>([]);
 
   useEffect(() => {
@@ -39,7 +38,7 @@ export default function Feed() {
     });
 
     // Fetch weather data
-    getWeatherData().then(setWeather);
+    // Weather is now loaded in WeatherWidget component
 
     // Load photos
     loadPhotos();
@@ -133,31 +132,10 @@ export default function Feed() {
       </header>
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
-        {weather && (
-          <Card className="shadow-nature bg-gradient-to-br from-card to-card/50 backdrop-blur-sm border-primary/20">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="text-5xl">{weather.icon}</div>
-                <div className="flex-1">
-                  <div className="flex items-baseline gap-2 mb-1">
-                    <span className="text-3xl font-bold font-display">{weather.temperature}°C</span>
-                    <span className="text-muted-foreground">{weather.condition}</span>
-                  </div>
-                  <div className="mt-4 p-3 bg-primary/5 rounded-lg border border-primary/10">
-                    <div className="flex items-start gap-2">
-                      <Camera className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <p className="text-sm text-foreground/90 leading-relaxed">
-                        {weather.photographyTip}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* Weather Widget */}
+        <WeatherWidget />
 
-        <Card 
+        <Card
           className="shadow-nature cursor-pointer hover:shadow-lg transition-shadow bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20"
           onClick={() => navigate("/ideas")}
         >

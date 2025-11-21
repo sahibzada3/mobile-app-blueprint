@@ -14,6 +14,7 @@ import Challenges from "./pages/Challenges";
 import ChallengeDetail from "./pages/ChallengeDetail";
 import Profile from "./pages/Profile";
 import ProfileSettings from "./pages/ProfileSettings";
+import WeatherRecommendations from "./pages/WeatherRecommendations";
 import Spotlight from "./pages/Spotlight";
 import SpotlightChain from "./pages/SpotlightChain";
 import Ideas from "./pages/Ideas";
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/spotlight" element={<Spotlight />} />
             <Route path="/spotlight/:chainId" element={<SpotlightChain />} />
             <Route path="/ideas" element={<Ideas />} />
+            <Route path="/weather" element={<WeatherRecommendations />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/settings" element={<ProfileSettings />} />
             <Route path="/profile/:userId" element={<Profile />} />
