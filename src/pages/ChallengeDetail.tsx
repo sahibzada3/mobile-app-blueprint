@@ -13,12 +13,14 @@ import SubmitDialog from "@/components/challenges/SubmitDialog";
 import SubmissionModal from "@/components/challenges/SubmissionModal";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSound } from "@/hooks/useSound";
+import { useConfetti } from "@/hooks/useConfetti";
 
 export default function ChallengeDetail() {
   const { challengeId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { playSound } = useSound();
+  const { celebrateTopThree, celebrateNewSubmission } = useConfetti();
   const [challenge, setChallenge] = useState<any>(null);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [previousSubmissions, setPreviousSubmissions] = useState<any[]>([]);
@@ -133,22 +135,31 @@ export default function ChallengeDetail() {
       
       const newSubmissions = submissionsData || [];
 
-      // Detect changes and play sounds
+      // Detect changes and play sounds/confetti
       if (previousSubmissions.length > 0) {
         // Check for new submissions
         if (newSubmissions.length > previousSubmissions.length) {
           playSound('newSubmission');
+          celebrateNewSubmission();
           sonnerToast.success('New submission!', {
             description: 'A new entry has been added to the challenge'
           });
         }
 
-        // Check for position changes
+        // Check for position changes and celebrate top 3
         newSubmissions.forEach((submission, newIndex) => {
           const oldIndex = previousSubmissions.findIndex(s => s.id === submission.id);
           if (oldIndex !== -1 && oldIndex !== newIndex) {
             if (newIndex < oldIndex) {
               playSound('positionUp');
+              
+              // Celebrate if user moved into top 3
+              if (newIndex < 3 && user && submission.user_id === user.id) {
+                celebrateTopThree(newIndex + 1);
+                sonnerToast.success(`🎉 You're in ${newIndex === 0 ? '1st' : newIndex === 1 ? '2nd' : '3rd'} place!`, {
+                  description: 'Amazing work! Keep it up!'
+                });
+              }
             } else {
               playSound('positionDown');
             }
