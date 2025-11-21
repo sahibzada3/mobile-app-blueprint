@@ -5,9 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
+import { Send, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+
+interface TypingPresence {
+  user_id: string;
+  typing: boolean;
+  timestamp: number;
+}
 
 interface Message {
   id: string;
@@ -35,17 +41,27 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [friendTyping, setFriendTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const presenceChannelRef = useRef<any>(null);
 
   useEffect(() => {
     fetchMessages();
-    subscribeToMessages();
+    const unsubscribe = subscribeToMessages();
+    setupTypingPresence();
+
+    return () => {
+      unsubscribe();
+      cleanupTypingPresence();
+    };
   }, [friendId]);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, friendTyping]);
 
   const fetchMessages = async () => {
     const { data, error } = await supabase
@@ -77,6 +93,61 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
         .update({ read: true })
         .in("id", unreadIds);
     }
+  };
+
+  const setupTypingPresence = () => {
+    const channelName = `typing-${[currentUserId, friendId].sort().join('-')}`;
+    
+    presenceChannelRef.current = supabase.channel(channelName);
+    
+    presenceChannelRef.current
+      .on('presence', { event: 'sync' }, () => {
+        const state = presenceChannelRef.current.presenceState();
+        const presences = Object.values(state).flat() as TypingPresence[];
+        
+        const friendIsTyping = presences.some(
+          (p: TypingPresence) => p.user_id === friendId && p.typing
+        );
+        
+        setFriendTyping(friendIsTyping);
+      })
+      .subscribe();
+  };
+
+  const cleanupTypingPresence = () => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    if (presenceChannelRef.current) {
+      presenceChannelRef.current.untrack();
+      supabase.removeChannel(presenceChannelRef.current);
+    }
+  };
+
+  const updateTypingStatus = async (typing: boolean) => {
+    if (!presenceChannelRef.current) return;
+
+    await presenceChannelRef.current.track({
+      user_id: currentUserId,
+      typing,
+      timestamp: Date.now()
+    });
+  };
+
+  const handleTyping = () => {
+    if (!isTyping) {
+      setIsTyping(true);
+      updateTypingStatus(true);
+    }
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      updateTypingStatus(false);
+    }, 2000);
   };
 
   const subscribeToMessages = () => {
@@ -126,6 +197,13 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
+
+    // Clear typing status when sending
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    setIsTyping(false);
+    updateTypingStatus(false);
 
     const { error } = await supabase
       .from("messages")
@@ -233,6 +311,36 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
                 </div>
               </motion.div>
             ))}
+            
+            {friendTyping && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mb-4 flex justify-start"
+              >
+                <div className="bg-muted rounded-lg p-3 flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <motion.div
+                      className="w-2 h-2 bg-foreground/60 rounded-full"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 1, repeat: Infinity, delay: 0 }}
+                    />
+                    <motion.div
+                      className="w-2 h-2 bg-foreground/60 rounded-full"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
+                    />
+                    <motion.div
+                      className="w-2 h-2 bg-foreground/60 rounded-full"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
+                    />
+                  </div>
+                  <span className="text-xs text-muted-foreground">{friendName} is typing...</span>
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
         </ScrollArea>
         <div className="border-t p-4 flex gap-2">
@@ -254,7 +362,10 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
           <Input
             placeholder="Type a message..."
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => {
+              setNewMessage(e.target.value);
+              handleTyping();
+            }}
             onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
           />
           <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
