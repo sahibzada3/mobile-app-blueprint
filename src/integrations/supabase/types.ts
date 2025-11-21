@@ -83,6 +83,48 @@ export type Database = {
           },
         ]
       }
+      chain_messages: {
+        Row: {
+          chain_id: string
+          content: string | null
+          created_at: string | null
+          id: string
+          image_url: string | null
+          sender_id: string
+        }
+        Insert: {
+          chain_id: string
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          sender_id: string
+        }
+        Update: {
+          chain_id?: string
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chain_messages_chain_id_fkey"
+            columns: ["chain_id"]
+            isOneToOne: false
+            referencedRelation: "spotlight_chains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chain_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chain_participants: {
         Row: {
           chain_id: string
