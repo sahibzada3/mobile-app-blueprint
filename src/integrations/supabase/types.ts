@@ -83,11 +83,51 @@ export type Database = {
           },
         ]
       }
+      chain_message_reactions: {
+        Row: {
+          created_at: string | null
+          emoji: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          emoji: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          emoji?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chain_message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "chain_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chain_message_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chain_messages: {
         Row: {
           chain_id: string
           content: string | null
           created_at: string | null
+          edited_at: string | null
           id: string
           image_url: string | null
           sender_id: string
@@ -96,6 +136,7 @@ export type Database = {
           chain_id: string
           content?: string | null
           created_at?: string | null
+          edited_at?: string | null
           id?: string
           image_url?: string | null
           sender_id: string
@@ -104,6 +145,7 @@ export type Database = {
           chain_id?: string
           content?: string | null
           created_at?: string | null
+          edited_at?: string | null
           id?: string
           image_url?: string | null
           sender_id?: string
@@ -302,11 +344,51 @@ export type Database = {
           },
         ]
       }
+      message_reactions: {
+        Row: {
+          created_at: string | null
+          emoji: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          emoji: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          emoji?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           chain_id: string | null
           content: string | null
           created_at: string | null
+          edited_at: string | null
           id: string
           image_url: string | null
           read: boolean | null
@@ -317,6 +399,7 @@ export type Database = {
           chain_id?: string | null
           content?: string | null
           created_at?: string | null
+          edited_at?: string | null
           id?: string
           image_url?: string | null
           read?: boolean | null
@@ -327,6 +410,7 @@ export type Database = {
           chain_id?: string | null
           content?: string | null
           created_at?: string | null
+          edited_at?: string | null
           id?: string
           image_url?: string | null
           read?: boolean | null
