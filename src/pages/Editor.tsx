@@ -1,32 +1,41 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Save, Type } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Save, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
+import TypographyControls from "@/components/editor/TypographyControls";
+import MusicSelector from "@/components/editor/MusicSelector";
 
 export default function Editor() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const chainId = searchParams.get("chainId");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [user, setUser] = useState<any>(null);
   const [photoData, setPhotoData] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
+  
+  // Typography states
   const [overlayText, setOverlayText] = useState("");
   const [fontFamily, setFontFamily] = useState("Playfair Display");
   const [fontSize, setFontSize] = useState(48);
   const [textColor, setTextColor] = useState("#FFFFFF");
   const [textOpacity, setTextOpacity] = useState(100);
+  const [textAlign, setTextAlign] = useState<"left" | "center" | "right">("center");
+  const [textPositionY, setTextPositionY] = useState(50);
+  
+  // Music state
+  const [selectedMusic, setSelectedMusic] = useState<string | null>(null);
+  
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    // Check authentication and get photo data
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         navigate("/login");
@@ -48,7 +57,7 @@ export default function Editor() {
     if (photoData && canvasRef.current) {
       drawCanvas();
     }
-  }, [photoData, overlayText, fontFamily, fontSize, textColor, textOpacity]);
+  }, [photoData, overlayText, fontFamily, fontSize, textColor, textOpacity, textAlign, textPositionY]);
 
   const drawCanvas = () => {
     const canvas = canvasRef.current;
@@ -67,21 +76,31 @@ export default function Editor() {
         ctx.font = `${fontSize}px "${fontFamily}", serif`;
         ctx.fillStyle = textColor;
         ctx.globalAlpha = textOpacity / 100;
-        ctx.textAlign = "center";
+        ctx.textAlign = textAlign;
         ctx.textBaseline = "middle";
         
         // Add text shadow for better readability
-        ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-        ctx.shadowBlur = 10;
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 2;
+        ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
+        ctx.shadowBlur = 15;
+        ctx.shadowOffsetX = 3;
+        ctx.shadowOffsetY = 3;
 
         const lines = overlayText.split("\n");
-        const lineHeight = fontSize * 1.2;
-        const startY = canvas.height / 2 - ((lines.length - 1) * lineHeight) / 2;
+        const lineHeight = fontSize * 1.3;
+        const yPosition = (canvas.height * textPositionY) / 100;
+        const startY = yPosition - ((lines.length - 1) * lineHeight) / 2;
+
+        let xPosition: number;
+        if (textAlign === "left") {
+          xPosition = canvas.width * 0.1;
+        } else if (textAlign === "right") {
+          xPosition = canvas.width * 0.9;
+        } else {
+          xPosition = canvas.width / 2;
+        }
 
         lines.forEach((line, index) => {
-          ctx.fillText(line, canvas.width / 2, startY + index * lineHeight);
+          ctx.fillText(line, xPosition, startY + index * lineHeight);
         });
       }
     };
@@ -95,7 +114,7 @@ export default function Editor() {
     try {
       const canvas = canvasRef.current;
       const blob = await new Promise<Blob | null>((resolve) => {
-        canvas.toBlob(resolve, "image/jpeg", 0.9);
+        canvas.toBlob(resolve, "image/jpeg", 0.95);
       });
 
       if (!blob) throw new Error("Failed to create image");
@@ -112,28 +131,53 @@ export default function Editor() {
         .getPublicUrl(fileName);
 
       const filters = JSON.parse(sessionStorage.getItem("photoFilters") || "{}");
-      const { error: dbError } = await supabase
+      
+      const { data: photoData, error: dbError } = await supabase
         .from("photos")
         .insert({
           user_id: user.id,
           image_url: publicUrl,
           caption,
+          music_track: selectedMusic,
           typography_data: overlayText ? {
             text: overlayText,
             font: fontFamily,
             size: fontSize,
             color: textColor,
             opacity: textOpacity,
+            align: textAlign,
+            positionY: textPositionY,
           } : null,
           filters,
-        });
+        })
+        .select()
+        .single();
 
       if (dbError) throw dbError;
 
+      // If this is for a chain, add contribution
+      if (chainId && photoData) {
+        const { error: chainError } = await supabase
+          .from("chain_contributions")
+          .insert({
+            chain_id: chainId,
+            user_id: user.id,
+            photo_id: photoData.id,
+          });
+
+        if (chainError) throw chainError;
+      }
+
       sessionStorage.removeItem("capturedPhoto");
       sessionStorage.removeItem("photoFilters");
+      
       toast.success("Photo saved successfully!");
-      navigate("/feed");
+      
+      if (chainId) {
+        navigate(`/spotlight/${chainId}`);
+      } else {
+        navigate("/feed");
+      }
     } catch (error: any) {
       toast.error(error.message || "Failed to save photo");
     } finally {
@@ -152,108 +196,79 @@ export default function Editor() {
   return (
     <div className="min-h-screen bg-gradient-soft pb-20">
       <header className="sticky top-0 bg-card/80 backdrop-blur-lg border-b border-border z-40">
-        <div className="max-w-lg mx-auto px-4 py-3">
+        <div className="max-w-2xl mx-auto px-4 py-3">
           <h1 className="text-xl font-display font-bold text-primary">Edit Photo</h1>
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-4 py-6 space-y-4">
-        <div className="relative aspect-square bg-black rounded-lg overflow-hidden">
+      <main className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+        <div className="relative aspect-square bg-black rounded-lg overflow-hidden shadow-nature">
           <canvas ref={canvasRef} className="w-full h-full object-contain" />
         </div>
 
-        <Card className="p-4 space-y-4 shadow-nature">
-          <div className="space-y-2">
-            <Label htmlFor="caption">Caption</Label>
-            <Textarea
-              id="caption"
-              placeholder="Share your thoughts about this moment..."
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              rows={3}
-            />
+        <Card className="p-4 shadow-nature">
+          <Tabs defaultValue="basic" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="basic">
+                <ImageIcon className="w-4 h-4 mr-2" />
+                Basic
+              </TabsTrigger>
+              <TabsTrigger value="typography">Typography</TabsTrigger>
+              <TabsTrigger value="music">Music</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="basic" className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="caption">Caption</Label>
+                <Textarea
+                  id="caption"
+                  placeholder="Share your thoughts about this moment..."
+                  value={caption}
+                  onChange={(e) => setCaption(e.target.value)}
+                  rows={4}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="typography" className="space-y-4 mt-4">
+              <TypographyControls
+                overlayText={overlayText}
+                fontFamily={fontFamily}
+                fontSize={fontSize}
+                textColor={textColor}
+                textOpacity={textOpacity}
+                textAlign={textAlign}
+                textPositionY={textPositionY}
+                onTextChange={setOverlayText}
+                onFontChange={setFontFamily}
+                onSizeChange={setFontSize}
+                onColorChange={setTextColor}
+                onOpacityChange={setTextOpacity}
+                onAlignChange={setTextAlign}
+                onPositionYChange={setTextPositionY}
+              />
+            </TabsContent>
+
+            <TabsContent value="music" className="space-y-4 mt-4">
+              <MusicSelector
+                selectedTrack={selectedMusic}
+                onSelectTrack={setSelectedMusic}
+              />
+            </TabsContent>
+          </Tabs>
+
+          <div className="mt-6 pt-4 border-t">
+            <Button onClick={savePhoto} disabled={saving} className="w-full shadow-glow">
+              {saving ? (
+                <>Saving...</>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  {chainId ? "Add to Chain" : "Save & Share"}
+                </>
+              )}
+            </Button>
           </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 mb-2">
-              <Type className="w-4 h-4 text-primary" />
-              <Label>Typography Overlay</Label>
-            </div>
-            <Textarea
-              placeholder="Add poetic text overlay..."
-              value={overlayText}
-              onChange={(e) => setOverlayText(e.target.value)}
-              rows={2}
-            />
-          </div>
-
-          {overlayText && (
-            <>
-              <div className="space-y-2">
-                <Label>Font</Label>
-                <Select value={fontFamily} onValueChange={setFontFamily}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Playfair Display">Playfair Display</SelectItem>
-                    <SelectItem value="Montserrat">Montserrat</SelectItem>
-                    <SelectItem value="Inter">Inter</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Font Size</Label>
-                  <span className="text-sm text-muted-foreground">{fontSize}px</span>
-                </div>
-                <Slider
-                  value={[fontSize]}
-                  onValueChange={([value]) => setFontSize(value)}
-                  min={24}
-                  max={96}
-                  step={4}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="textColor">Text Color</Label>
-                <Input
-                  id="textColor"
-                  type="color"
-                  value={textColor}
-                  onChange={(e) => setTextColor(e.target.value)}
-                  className="h-10"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Opacity</Label>
-                  <span className="text-sm text-muted-foreground">{textOpacity}%</span>
-                </div>
-                <Slider
-                  value={[textOpacity]}
-                  onValueChange={([value]) => setTextOpacity(value)}
-                  min={0}
-                  max={100}
-                  step={5}
-                />
-              </div>
-            </>
-          )}
-
-          <Button onClick={savePhoto} disabled={saving} className="w-full shadow-glow">
-            {saving ? (
-              <>Saving...</>
-            ) : (
-              <>
-                <Save className="w-4 h-4 mr-2" />
-                Save & Share
-              </>
-            )}
-          </Button>
         </Card>
       </main>
 
