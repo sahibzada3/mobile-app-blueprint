@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { getWeatherData } from "@/services/weatherService";
 import PhotoCard from "@/components/PhotoCard";
 import { useTheme } from "@/hooks/useTheme";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 export default function Feed() {
   const navigate = useNavigate();
@@ -120,6 +121,7 @@ export default function Feed() {
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="text-2xl font-display font-bold text-primary">Frame</h1>
           <div className="flex items-center gap-2">
+            <NotificationBell />
             <Button variant="ghost" size="icon" onClick={toggleTheme}>
               {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </Button>

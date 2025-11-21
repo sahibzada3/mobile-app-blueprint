@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogOut, User as UserIcon, Camera, Heart, Image, Moon, Sun } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -91,6 +92,7 @@ export default function Profile() {
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="text-xl font-display font-bold text-primary">Profile</h1>
           <div className="flex items-center gap-2">
+            <NotificationBell />
             <Button variant="ghost" size="icon" onClick={toggleTheme}>
               {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </Button>
