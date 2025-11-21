@@ -34,7 +34,6 @@ export interface PhotographyIdea {
   weatherConditions?: string[];
   equipment?: string[];
   imageUrl?: string;
-  videoUrl?: string; // YouTube, Vimeo, or direct video URL
   tutorial?: {
     step: number;
     title: string;
@@ -58,7 +57,6 @@ export const photographyIdeas: PhotographyIdea[] = [
     ],
     bestTime: "Any time of day",
     imageUrl: ruleOfThirds,
-    videoUrl: "https://www.youtube.com/embed/QrAbeOHwood", // Example: Rule of thirds tutorial
     tutorial: [
       { step: 1, title: "Enable Grid Overlay", instruction: "Turn on the grid display in your camera settings to see the rule of thirds lines." },
       { step: 2, title: "Position Your Subject", instruction: "Place your main subject at one of the four intersection points where the lines cross." },
@@ -114,7 +112,6 @@ export const photographyIdeas: PhotographyIdea[] = [
     bestTime: "First hour after sunrise, last hour before sunset",
     weatherConditions: ["Clear", "Partly Cloudy"],
     imageUrl: sunsetGolden,
-    videoUrl: "https://www.youtube.com/embed/xcCG8YJAZJs", // Example: Golden hour photography tutorial
     tutorial: [
       { step: 1, title: "Check Golden Hour Time", instruction: "Use a weather app to find exact sunrise/sunset times. Arrive 30 minutes early to set up." },
       { step: 2, title: "Scout Your Location", instruction: "Walk around to find the best angle. Look for interesting foreground elements to add depth." },
