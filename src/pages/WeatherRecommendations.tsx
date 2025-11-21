@@ -17,7 +17,8 @@ import {
   Clock, 
   Loader2,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  Calendar
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -31,6 +32,16 @@ import winterImg from "@/assets/ideas/snow-scenes.jpg";
 import windImg from "@/assets/ideas/storm-drama.jpg";
 import mistyImg from "@/assets/ideas/coastal-waves.jpg";
 import wildlifeImg from "@/assets/ideas/macro-nature.jpg";
+
+interface DailyForecast {
+  date: string;
+  dayName: string;
+  temperature: { min: number; max: number };
+  condition: string;
+  icon: string;
+  weatherCode: number;
+  recommendation: string;
+}
 
 interface WeatherRecommendation {
   temperature: number;
@@ -51,6 +62,7 @@ interface WeatherRecommendation {
     bestTime: string;
     image: string;
   }>;
+  weeklyForecast: DailyForecast[];
 }
 
 export default function WeatherRecommendations() {
@@ -80,7 +92,7 @@ export default function WeatherRecommendations() {
 
       // Fetch weather and astronomical data
       const response = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=sunrise,sunset&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&forecast_days=7`
       );
 
       if (!response.ok) throw new Error("Failed to fetch weather data");
@@ -126,6 +138,26 @@ export default function WeatherRecommendations() {
         data.current.relative_humidity_2m
       );
 
+      // Process weekly forecast
+      const weeklyForecast: DailyForecast[] = data.daily.time.map((date: string, index: number) => {
+        const dayDate = new Date(date);
+        const dayName = index === 0 ? 'Today' : dayDate.toLocaleDateString('en-US', { weekday: 'short' });
+        const weatherCode = data.daily.weather_code[index];
+        
+        return {
+          date: dayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          dayName,
+          temperature: {
+            min: Math.round(data.daily.temperature_2m_min[index]),
+            max: Math.round(data.daily.temperature_2m_max[index])
+          },
+          condition: getWeatherCondition(weatherCode),
+          icon: getWeatherIcon(weatherCode),
+          weatherCode,
+          recommendation: getDailyRecommendation(weatherCode)
+        };
+      });
+
       setWeatherData({
         temperature: Math.round(data.current.temperature_2m),
         condition: getWeatherCondition(weatherCode),
@@ -139,7 +171,8 @@ export default function WeatherRecommendations() {
         goldenHourEvening,
         blueHourMorning,
         blueHourEvening,
-        recommendations
+        recommendations,
+        weeklyForecast
       });
 
     } catch (err: any) {
@@ -178,6 +211,23 @@ export default function WeatherRecommendations() {
       71: "🌨️", 80: "🌦️", 95: "⛈️"
     };
     return icons[code] || "☀️";
+  };
+
+  const getDailyRecommendation = (weatherCode: number): string => {
+    const recommendations: { [key: number]: string } = {
+      0: "Perfect for golden hour and landscape photography",
+      1: "Great for outdoor portraits with natural light",
+      2: "Ideal for dramatic cloud formations and landscapes",
+      3: "Excellent soft lighting for macro and portraits",
+      45: "Capture mysterious fog and atmospheric shots",
+      48: "Perfect for moody, minimalist compositions",
+      51: "Great for water droplet macro photography",
+      61: "Capture rain reflections and urban scenes",
+      71: "Winter wonderland and frost photography",
+      80: "Dynamic weather for dramatic sky shots",
+      95: "Storm photography with lightning potential"
+    };
+    return recommendations[weatherCode] || "Good conditions for general photography";
   };
 
   const getPhotographyRecommendations = (
@@ -471,6 +521,43 @@ export default function WeatherRecommendations() {
             </Card>
           ))}
         </div>
+
+        {/* 7-Day Forecast */}
+        <Card className="shadow-nature border-0">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              7-Day Forecast
+            </CardTitle>
+            <CardDescription>Plan your photography week ahead</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {weatherData.weeklyForecast.map((day, index) => (
+              <div 
+                key={index}
+                className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-accent/5 to-transparent hover:from-accent/10 transition-all cursor-pointer border border-border/50"
+              >
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="text-center min-w-[60px]">
+                    <p className="font-semibold">{day.dayName}</p>
+                    <p className="text-xs text-muted-foreground">{day.date}</p>
+                  </div>
+                  <div className="text-3xl">{day.icon}</div>
+                  <div className="flex-1">
+                    <p className="font-medium">{day.condition}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{day.recommendation}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 ml-4">
+                  <div className="text-right">
+                    <p className="text-sm font-semibold">{day.temperature.max}°</p>
+                    <p className="text-xs text-muted-foreground">{day.temperature.min}°</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
 
         {/* Call to Action */}
         <Card className="shadow-nature border-0 bg-gradient-to-r from-primary/10 to-accent/10">
