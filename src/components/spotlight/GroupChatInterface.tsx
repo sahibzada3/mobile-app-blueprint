@@ -74,10 +74,7 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
   const fetchParticipants = async () => {
     const { data, error } = await supabase
       .from("chain_participants")
-      .select(`
-        *,
-        profiles(id, username, avatar_url)
-      `)
+      .select("*")
       .eq("chain_id", chainId);
 
     if (error) {
@@ -85,7 +82,23 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
       return;
     }
 
-    setParticipants(data || []);
+    // Load profiles for participants
+    const participantsWithProfiles = await Promise.all(
+      (data || []).map(async (participant) => {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id, username, avatar_url")
+          .eq("id", participant.user_id)
+          .single();
+        
+        return { 
+          ...participant, 
+          profiles: profile || { id: '', username: 'Unknown', avatar_url: null }
+        };
+      })
+    );
+
+    setParticipants(participantsWithProfiles);
   };
 
   const fetchMessages = async () => {
