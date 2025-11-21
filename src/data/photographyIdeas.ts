@@ -34,6 +34,11 @@ export interface PhotographyIdea {
   weatherConditions?: string[];
   equipment?: string[];
   imageUrl?: string;
+  tutorial?: {
+    step: number;
+    title: string;
+    instruction: string;
+  }[];
 }
 
 export const photographyIdeas: PhotographyIdea[] = [
@@ -52,6 +57,13 @@ export const photographyIdeas: PhotographyIdea[] = [
     ],
     bestTime: "Any time of day",
     imageUrl: ruleOfThirds,
+    tutorial: [
+      { step: 1, title: "Enable Grid Overlay", instruction: "Turn on the grid display in your camera settings to see the rule of thirds lines." },
+      { step: 2, title: "Position Your Subject", instruction: "Place your main subject at one of the four intersection points where the lines cross." },
+      { step: 3, title: "Align the Horizon", instruction: "If shooting landscapes, align the horizon with either the top or bottom third line, not the center." },
+      { step: 4, title: "Leave Breathing Room", instruction: "Give space in the direction your subject is facing or moving for a more natural composition." },
+      { step: 5, title: "Take the Shot", instruction: "Review your image and adjust positioning if needed to ensure key elements follow the grid." }
+    ],
   },
   {
     id: "leading-lines",
@@ -100,6 +112,13 @@ export const photographyIdeas: PhotographyIdea[] = [
     bestTime: "First hour after sunrise, last hour before sunset",
     weatherConditions: ["Clear", "Partly Cloudy"],
     imageUrl: sunsetGolden,
+    tutorial: [
+      { step: 1, title: "Check Golden Hour Time", instruction: "Use a weather app to find exact sunrise/sunset times. Arrive 30 minutes early to set up." },
+      { step: 2, title: "Scout Your Location", instruction: "Walk around to find the best angle. Look for interesting foreground elements to add depth." },
+      { step: 3, title: "Set Camera Settings", instruction: "Start with Manual mode: ISO 100-400, aperture f/8-f/11 for landscapes, shutter speed 1/125s." },
+      { step: 4, title: "Position Yourself", instruction: "Stand with the sun to your side or behind your subject for warm rim lighting and dimensional shadows." },
+      { step: 5, title: "Shoot Multiple Exposures", instruction: "Take several shots as light changes rapidly. Adjust exposure compensation as needed." }
+    ],
   },
   {
     id: "blue-hour",
@@ -151,6 +170,13 @@ export const photographyIdeas: PhotographyIdea[] = [
     bestTime: "Early morning",
     weatherConditions: ["Fog", "Mist"],
     imageUrl: fogMystery,
+    tutorial: [
+      { step: 1, title: "Check Weather Forecast", instruction: "Look for cool, humid mornings. Fog forms when temperature and dew point are close." },
+      { step: 2, title: "Arrive Before Dawn", instruction: "Get to location while it is still dark. Fog is thickest just after sunrise." },
+      { step: 3, title: "Increase Exposure", instruction: "Fog tricks your camera meter. Add +1 to +2 exposure compensation to avoid gray fog." },
+      { step: 4, title: "Find Dark Subjects", instruction: "Look for trees, buildings, or people as dark silhouettes against the bright fog for contrast." },
+      { step: 5, title: "Capture Layers", instruction: "Position yourself to show multiple fog layers at different distances for depth and mystery." }
+    ],
   },
   {
     id: "rain-reflections",
@@ -237,6 +263,13 @@ export const photographyIdeas: PhotographyIdea[] = [
     weatherConditions: ["Cloudy", "Any"],
     equipment: ["Tripod", "ND filter", "Remote shutter"],
     imageUrl: waterfall,
+    tutorial: [
+      { step: 1, title: "Set Up Your Tripod", instruction: "Place tripod on stable ground. Make sure it is level and won't move during exposure." },
+      { step: 2, title: "Attach ND Filter", instruction: "Screw on a 3-6 stop ND filter to reduce light. This allows longer exposures in daylight." },
+      { step: 3, title: "Set Manual Mode", instruction: "Switch to Manual: ISO 100, aperture f/11-f/16 for sharpness, then adjust shutter speed." },
+      { step: 4, title: "Calculate Exposure", instruction: "Start with 1-4 second shutter speed. Use a remote or timer to avoid camera shake." },
+      { step: 5, title: "Compose and Shoot", instruction: "Frame waterfall with surrounding rocks or foliage. Take test shots and adjust shutter speed for silkiness." }
+    ],
   },
   {
     id: "mountain-layers",
@@ -306,6 +339,13 @@ export const photographyIdeas: PhotographyIdea[] = [
     weatherConditions: ["Clear"],
     equipment: ["Tripod", "Wide lens", "Intervalometer"],
     imageUrl: nightStars,
+    tutorial: [
+      { step: 1, title: "Find Dark Location", instruction: "Drive away from city lights. Use a light pollution map to find the darkest spot within reach." },
+      { step: 2, title: "Set Up Equipment", instruction: "Mount camera on sturdy tripod. Attach wide-angle lens (14-24mm) and intervalometer." },
+      { step: 3, title: "Configure Camera", instruction: "Manual mode: ISO 800-1600, aperture f/2.8-f/4, shutter 25-30 seconds. Set intervalometer for 200+ shots." },
+      { step: 4, title: "Point North", instruction: "Use compass app to aim camera north (northern hemisphere) to capture circular star trails around Polaris." },
+      { step: 5, title: "Start Sequence", instruction: "Start intervalometer and let it run for 1-3 hours. Use software to stack images into star trails." }
+    ],
   },
   {
     id: "panorama-stitching",
