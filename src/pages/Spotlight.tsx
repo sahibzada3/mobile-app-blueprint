@@ -6,10 +6,12 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Users, TrendingUp, Clock } from "lucide-react";
+import { Plus, Users, TrendingUp, Clock, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import BottomNav from "@/components/BottomNav";
 import CreateChainDialog from "@/components/spotlight/CreateChainDialog";
+import FriendsList from "@/components/spotlight/FriendsList";
+import ChatInterface from "@/components/spotlight/ChatInterface";
 
 interface Chain {
   id: string;
@@ -33,6 +35,11 @@ export default function Spotlight() {
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [selectedFriend, setSelectedFriend] = useState<{
+    id: string;
+    name: string;
+    avatar: string | null;
+  } | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -166,9 +173,13 @@ export default function Spotlight() {
         </div>
 
         <Tabs defaultValue="all" className="space-y-4">
-          <TabsList>
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="all">All Chains</TabsTrigger>
             <TabsTrigger value="trending">Trending</TabsTrigger>
+            <TabsTrigger value="chat">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Chat
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="all" className="space-y-3">
@@ -202,6 +213,42 @@ export default function Spotlight() {
                 </div>
               ))
             )}
+          </TabsContent>
+
+          <TabsContent value="chat">
+            <div className="grid md:grid-cols-3 gap-4 h-[calc(100vh-250px)]">
+              <div className="md:col-span-1">
+                {user && (
+                  <FriendsList
+                    currentUserId={user.id}
+                    onSelectFriend={(id, name, avatar) =>
+                      setSelectedFriend({ id, name, avatar })
+                    }
+                    selectedFriendId={selectedFriend?.id}
+                  />
+                )}
+              </div>
+              <div className="md:col-span-2">
+                {selectedFriend && user ? (
+                  <ChatInterface
+                    friendId={selectedFriend.id}
+                    friendName={selectedFriend.name}
+                    friendAvatar={selectedFriend.avatar}
+                    currentUserId={user.id}
+                  />
+                ) : (
+                  <Card className="h-full flex items-center justify-center">
+                    <div className="text-center text-muted-foreground">
+                      <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                      <p>Select a friend to start chatting</p>
+                      <p className="text-sm mt-2">
+                        Share pictures and discuss spotlight chains
+                      </p>
+                    </div>
+                  </Card>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
