@@ -5,7 +5,7 @@ import { User } from "@supabase/supabase-js";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, LogOut, Camera, Moon, Sun } from "lucide-react";
+import { Heart, LogOut, Camera, Moon, Sun, Lightbulb, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { getWeatherData } from "@/services/weatherService";
 import PhotoCard from "@/components/PhotoCard";
@@ -155,6 +155,26 @@ export default function Feed() {
           </Card>
         )}
 
+        <Card 
+          className="shadow-nature cursor-pointer hover:shadow-lg transition-shadow bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20"
+          onClick={() => navigate("/ideas")}
+        >
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="bg-primary/20 w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0">
+                <Lightbulb className="w-7 h-7 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-foreground mb-1">Photography Ideas & Tips</h3>
+                <p className="text-sm text-muted-foreground">
+                  Discover techniques, locations, and weather-based recommendations
+                </p>
+              </div>
+              <ChevronRight className="w-6 h-6 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="text-center py-6">
           <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
             <Heart className="w-10 h-10 text-primary" />
@@ -163,9 +183,14 @@ export default function Feed() {
           <p className="text-muted-foreground mb-6">
             Start capturing cinematic nature moments
           </p>
-          <Button onClick={() => navigate("/camera")} className="shadow-nature">
-            Open Camera
-          </Button>
+          <div className="flex gap-3 justify-center">
+            <Button onClick={() => navigate("/camera")} className="shadow-nature">
+              Open Camera
+            </Button>
+            <Button onClick={() => navigate("/ideas")} variant="outline" className="shadow-nature">
+              Get Ideas
+            </Button>
+          </div>
         </div>
 
         {photos.length > 0 ? (
