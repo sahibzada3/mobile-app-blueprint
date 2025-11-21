@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
 import BadgeDisplay from "@/components/challenges/BadgeDisplay";
 import SubmitDialog from "@/components/challenges/SubmitDialog";
+import SubmissionModal from "@/components/challenges/SubmissionModal";
 
 export default function ChallengeDetail() {
   const { challengeId } = useParams();
@@ -22,6 +23,8 @@ export default function ChallengeDetail() {
   const [userVotes, setUserVotes] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -224,6 +227,11 @@ export default function ChallengeDetail() {
     }
   };
 
+  const openSubmissionModal = (submission: any, index: number) => {
+    setSelectedSubmission({ ...submission, rank: index + 1 });
+    setModalOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-soft flex items-center justify-center">
@@ -378,7 +386,11 @@ export default function ChallengeDetail() {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {submissions.map((submission, index) => (
-                  <Card key={submission.id} className="overflow-hidden group hover:shadow-xl transition-all duration-300">
+                  <Card 
+                    key={submission.id} 
+                    className="overflow-hidden group hover:shadow-xl transition-all duration-300 cursor-pointer"
+                    onClick={() => openSubmissionModal(submission, index)}
+                  >
                     <div className="relative aspect-square bg-muted">
                       {submission.photo?.image_url ? (
                         <img
@@ -509,6 +521,19 @@ export default function ChallengeDetail() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Submission Modal */}
+      {selectedSubmission && (
+        <SubmissionModal
+          submission={selectedSubmission}
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          onVote={handleVote}
+          userVote={userVotes[selectedSubmission.photo_id]}
+          currentUserId={user?.id}
+          rank={selectedSubmission.rank}
+        />
+      )}
     </div>
   );
 }
