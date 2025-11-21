@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { toast } from "sonner";
 
 export default function Camera() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const challengeId = location.state?.challengeId;
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -73,7 +75,13 @@ export default function Camera() {
         // Store the photo data to pass to editor
         sessionStorage.setItem("capturedPhoto", canvas.toDataURL("image/jpeg", 0.9));
         sessionStorage.setItem("photoFilters", JSON.stringify({ brightness, saturation, darkness }));
-        navigate("/editor");
+        
+        // Pass challengeId to editor if present
+        if (challengeId) {
+          navigate("/editor", { state: { challengeId } });
+        } else {
+          navigate("/editor");
+        }
       }
     }, "image/jpeg", 0.9);
   };

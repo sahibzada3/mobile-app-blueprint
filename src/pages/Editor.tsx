@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,9 @@ import MusicSelector from "@/components/editor/MusicSelector";
 export default function Editor() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const chainId = searchParams.get("chainId");
+  const challengeId = location.state?.challengeId;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [user, setUser] = useState<any>(null);
   const [photoData, setPhotoData] = useState<string | null>(null);
@@ -168,13 +170,28 @@ export default function Editor() {
         if (chainError) throw chainError;
       }
 
+      // If this is for a challenge, create submission
+      if (challengeId && photoData) {
+        const { error: submissionError } = await supabase
+          .from("challenge_submissions")
+          .insert({
+            challenge_id: challengeId,
+            user_id: user.id,
+            photo_id: photoData.id,
+          });
+
+        if (submissionError) throw submissionError;
+      }
+
       sessionStorage.removeItem("capturedPhoto");
       sessionStorage.removeItem("photoFilters");
       
-      toast.success("Photo saved successfully!");
+      toast.success(challengeId ? "Challenge entry submitted!" : "Photo saved successfully!");
       
       if (chainId) {
         navigate(`/spotlight/${chainId}`);
+      } else if (challengeId) {
+        navigate(`/challenges/${challengeId}`);
       } else {
         navigate("/feed");
       }
@@ -264,7 +281,7 @@ export default function Editor() {
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  {chainId ? "Add to Chain" : "Save & Share"}
+                  {challengeId ? "Submit Entry" : chainId ? "Add to Chain" : "Save & Share"}
                 </>
               )}
             </Button>
