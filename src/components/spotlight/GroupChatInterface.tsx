@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -72,6 +73,7 @@ interface GroupChatInterfaceProps {
 }
 
 export default function GroupChatInterface({ chainId, chainTitle, currentUserId }: GroupChatInterfaceProps) {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -369,15 +371,19 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
     return parts.map((part, index) => {
       // Check if this part is a username (odd indices after split)
       if (index % 2 === 1) {
-        const isValidMention = participants.some(p => p.profiles.username === part);
-        if (isValidMention) {
+        const participant = participants.find(p => p.profiles.username === part);
+        if (participant) {
           return (
-            <span
+            <button
               key={index}
-              className="bg-primary/20 text-primary font-semibold px-1 rounded"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/profile/${participant.user_id}`);
+              }}
+              className="bg-primary/20 text-primary font-semibold px-1 rounded hover:bg-primary/30 transition-colors cursor-pointer inline-flex items-center"
             >
               @{part}
-            </span>
+            </button>
           );
         }
       }
