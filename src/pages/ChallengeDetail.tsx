@@ -33,6 +33,64 @@ export default function ChallengeDetail() {
     }
   }, [challengeId]);
 
+  // Real-time subscription for leaderboard updates
+  useEffect(() => {
+    if (!challengeId) return;
+
+    const channel = supabase
+      .channel(`challenge-${challengeId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'challenge_submissions',
+          filter: `challenge_id=eq.${challengeId}`
+        },
+        async (payload) => {
+          console.log('Submission update:', payload);
+          // Refetch submissions to get updated scores and rankings
+          await fetchChallengeData();
+          
+          if (payload.eventType === 'UPDATE') {
+            sonnerToast.info('Leaderboard updated!', {
+              description: 'Scores have changed'
+            });
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'votes'
+        },
+        async (payload) => {
+          console.log('Vote update:', payload);
+          // Check if this vote is for a submission in this challenge
+          const photoId = (payload.new as any)?.photo_id || (payload.old as any)?.photo_id;
+          if (!photoId) return;
+          
+          const { data: submission } = await supabase
+            .from('challenge_submissions')
+            .select('id')
+            .eq('photo_id', photoId)
+            .eq('challenge_id', challengeId)
+            .maybeSingle();
+          
+          if (submission) {
+            await fetchChallengeData();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [challengeId]);
+
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
