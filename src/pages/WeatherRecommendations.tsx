@@ -48,7 +48,6 @@ interface WeatherRecommendation {
   recommendations: Array<{
     title: string;
     description: string;
-    icon: string;
     bestTime: string;
     image: string;
   }>;
@@ -194,7 +193,6 @@ export default function WeatherRecommendations() {
       recommendations.push({
         title: "Golden Hour Photography",
         description: "Perfect clear conditions for stunning golden hour shots. The warm light will create beautiful tones and long shadows.",
-        icon: "🌅",
         bestTime: "Sunrise & Sunset",
         image: goldenHourImg
       });
@@ -204,7 +202,6 @@ export default function WeatherRecommendations() {
       recommendations.push({
         title: "Cloud Texture Shots",
         description: "Partially cloudy skies add drama and depth. Great for landscape photography with interesting cloud formations.",
-        icon: "🌤️",
         bestTime: "All Day",
         image: cloudTextureImg
       });
@@ -214,7 +211,6 @@ export default function WeatherRecommendations() {
       recommendations.push({
         title: "Even Lighting Photography",
         description: "Overcast conditions provide soft, even lighting ideal for portraits and macro photography. Colors appear more saturated.",
-        icon: "☁️",
         bestTime: "Midday",
         image: overcastImg
       });
@@ -224,7 +220,6 @@ export default function WeatherRecommendations() {
       recommendations.push({
         title: "Atmospheric Fog Shots",
         description: "Fog creates mysterious, moody atmospheres. Perfect for minimalist compositions and silhouettes.",
-        icon: "🌫️",
         bestTime: "Early Morning",
         image: fogImg
       });
@@ -234,7 +229,6 @@ export default function WeatherRecommendations() {
       recommendations.push({
         title: "Raindrop Macro Photography",
         description: "Capture water droplets on leaves, flowers, or surfaces. Use protective gear for your camera.",
-        icon: "💧",
         bestTime: "During/After Rain",
         image: rainImg
       });
@@ -244,7 +238,6 @@ export default function WeatherRecommendations() {
       recommendations.push({
         title: "Winter Wonderland",
         description: "Cold conditions may bring frost or snow. Look for ice crystals, frozen textures, and winter landscapes.",
-        icon: "❄️",
         bestTime: "Morning",
         image: winterImg
       });
@@ -254,7 +247,6 @@ export default function WeatherRecommendations() {
       recommendations.push({
         title: "Motion Blur Effects",
         description: "Strong winds create movement. Use slower shutter speeds to capture flowing grass, trees, or clouds.",
-        icon: "💨",
         bestTime: "Afternoon",
         image: windImg
       });
@@ -264,7 +256,6 @@ export default function WeatherRecommendations() {
       recommendations.push({
         title: "Misty Landscape Photography",
         description: "High humidity can create mist and haze. Perfect for ethereal landscape shots with soft, dreamy quality.",
-        icon: "🌊",
         bestTime: "Dawn",
         image: mistyImg
       });
@@ -274,7 +265,6 @@ export default function WeatherRecommendations() {
     recommendations.push({
       title: "Wildlife Activity",
       description: "Animals are most active during golden hours. Look for birds, insects, and other wildlife in natural settings.",
-      icon: "🦋",
       bestTime: "Dawn & Dusk",
       image: wildlifeImg
     });
@@ -467,8 +457,7 @@ export default function WeatherRecommendations() {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-                  <div className="text-4xl">{rec.icon}</div>
+                <div className="absolute bottom-3 right-3">
                   <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm">
                     <Clock className="w-3 h-3 mr-1" />
                     {rec.bestTime}
