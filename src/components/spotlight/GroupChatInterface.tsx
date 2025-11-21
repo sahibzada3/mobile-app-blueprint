@@ -5,9 +5,30 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Image as ImageIcon, Users } from "lucide-react";
+import { Send, Image as ImageIcon, Users, Smile, Edit2, Trash2, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+interface Reaction {
+  id: string;
+  message_id: string;
+  user_id: string;
+  emoji: string;
+  created_at: string;
+}
 
 interface Message {
   id: string;
@@ -16,10 +37,12 @@ interface Message {
   content: string | null;
   image_url: string | null;
   created_at: string;
+  edited_at: string | null;
   sender?: {
     username: string;
     avatar_url: string | null;
   };
+  reactions?: Reaction[];
 }
 
 interface Participant {
@@ -50,10 +73,15 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
   const [newMessage, setNewMessage] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
+  const [editedContent, setEditedContent] = useState("");
+  const [showReactions, setShowReactions] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const presenceChannelRef = useRef<any>(null);
+
+  const commonEmojis = ["❤️", "👍", "😂", "😮", "😢", "🙏"];
 
   useEffect(() => {
     fetchParticipants();
@@ -116,7 +144,18 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
       return;
     }
 
-    setMessages(data || []);
+    // Fetch reactions for all messages
+    const messagesWithReactions = await Promise.all(
+      (data || []).map(async (msg) => {
+        const { data: reactions } = await supabase
+          .from("chain_message_reactions")
+          .select("*")
+          .eq("message_id", msg.id);
+        return { ...msg, reactions: reactions || [] };
+      })
+    );
+
+    setMessages(messagesWithReactions);
   };
 
   const setupTypingPresence = () => {
@@ -253,13 +292,13 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
       const filePath = `${currentUserId}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("photos")
+        .from("chat-images")
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
-        .from("photos")
+        .from("chat-images")
         .getPublicUrl(filePath);
 
       const { error: messageError } = await supabase
@@ -279,6 +318,80 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
     } finally {
       setUploadingImage(false);
     }
+  };
+
+  const handleReaction = async (messageId: string, emoji: string) => {
+    const message = messages.find(m => m.id === messageId);
+    const existingReaction = message?.reactions?.find(
+      r => r.user_id === currentUserId && r.emoji === emoji
+    );
+
+    if (existingReaction) {
+      await supabase
+        .from("chain_message_reactions")
+        .delete()
+        .eq("id", existingReaction.id);
+    } else {
+      await supabase
+        .from("chain_message_reactions")
+        .insert({
+          message_id: messageId,
+          user_id: currentUserId,
+          emoji
+        });
+    }
+
+    fetchMessages();
+    setShowReactions(null);
+  };
+
+  const handleEditMessage = async () => {
+    if (!editingMessage || !editedContent.trim()) return;
+
+    const { error } = await supabase
+      .from("chain_messages")
+      .update({
+        content: editedContent.trim(),
+        edited_at: new Date().toISOString()
+      })
+      .eq("id", editingMessage.id);
+
+    if (error) {
+      toast.error("Failed to edit message");
+      return;
+    }
+
+    setEditingMessage(null);
+    setEditedContent("");
+    fetchMessages();
+    toast.success("Message edited");
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    const { error } = await supabase
+      .from("chain_messages")
+      .delete()
+      .eq("id", messageId);
+
+    if (error) {
+      toast.error("Failed to delete message");
+      return;
+    }
+
+    fetchMessages();
+    toast.success("Message deleted");
+  };
+
+  const groupReactions = (reactions: Reaction[]) => {
+    const grouped: { [emoji: string]: { count: number; userIds: string[] } } = {};
+    reactions.forEach(r => {
+      if (!grouped[r.emoji]) {
+        grouped[r.emoji] = { count: 0, userIds: [] };
+      }
+      grouped[r.emoji].count++;
+      grouped[r.emoji].userIds.push(r.user_id);
+    });
+    return grouped;
   };
 
   const formatTypingIndicator = () => {
@@ -323,6 +436,8 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
           <AnimatePresence>
             {messages.map((message) => {
               const isOwnMessage = message.sender_id === currentUserId;
+              const groupedReactions = groupReactions(message.reactions || []);
+              
               return (
                 <motion.div
                   key={message.id}
@@ -330,41 +445,127 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
                   animate={{ opacity: 1, y: 0 }}
                   className={`mb-4 flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
                 >
-                  <div className={`flex gap-2 max-w-[70%] ${isOwnMessage ? "flex-row-reverse" : ""}`}>
-                    {!isOwnMessage && (
-                      <Avatar className="w-8 h-8 mt-auto">
-                        <AvatarImage src={message.sender?.avatar_url || undefined} />
-                        <AvatarFallback className="text-xs">
-                          {message.sender?.username?.[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                    )}
-                    <div
-                      className={`rounded-lg p-3 ${
-                        isOwnMessage
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
-                      }`}
-                    >
+                  <div className="flex flex-col gap-1 max-w-[70%]">
+                    <div className={`flex gap-2 ${isOwnMessage ? "flex-row-reverse" : ""}`}>
                       {!isOwnMessage && (
-                        <p className="text-xs font-semibold mb-1 opacity-70">
-                          {message.sender?.username}
-                        </p>
+                        <Avatar className="w-8 h-8 mt-auto">
+                          <AvatarImage src={message.sender?.avatar_url || undefined} />
+                          <AvatarFallback className="text-xs">
+                            {message.sender?.username?.[0]}
+                          </AvatarFallback>
+                        </Avatar>
                       )}
-                      {message.image_url && (
-                        <img
-                          src={message.image_url}
-                          alt="Shared image"
-                          className="rounded-lg mb-2 max-w-full"
-                        />
-                      )}
-                      {message.content && <p className="text-sm">{message.content}</p>}
-                      <p className="text-xs opacity-70 mt-1">
-                        {new Date(message.created_at).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit"
-                        })}
-                      </p>
+                      
+                      <div className="flex flex-col gap-1 flex-1">
+                        <div
+                          className={`rounded-lg p-3 relative group ${
+                            isOwnMessage
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted"
+                          }`}
+                        >
+                          {isOwnMessage && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <MoreVertical className="h-3 w-3" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setEditingMessage(message);
+                                    setEditedContent(message.content || "");
+                                  }}
+                                >
+                                  <Edit2 className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleDeleteMessage(message.id)}
+                                  className="text-destructive"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
+
+                          {!isOwnMessage && (
+                            <p className="text-xs font-semibold mb-1 opacity-70">
+                              {message.sender?.username}
+                            </p>
+                          )}
+                          {message.image_url && (
+                            <img
+                              src={message.image_url}
+                              alt="Shared image"
+                              className="rounded-lg mb-2 max-w-full"
+                            />
+                          )}
+                          {message.content && <p className="text-sm">{message.content}</p>}
+                          <p className="text-xs opacity-70 mt-1">
+                            {new Date(message.created_at).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit"
+                            })}
+                            {message.edited_at && " (edited)"}
+                          </p>
+                        </div>
+                        
+                        {/* Reactions display */}
+                        {Object.keys(groupedReactions).length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {Object.entries(groupedReactions).map(([emoji, data]) => (
+                              <button
+                                key={emoji}
+                                onClick={() => handleReaction(message.id, emoji)}
+                                className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
+                                  data.userIds.includes(currentUserId)
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted hover:bg-muted/80"
+                                }`}
+                              >
+                                <span>{emoji}</span>
+                                <span>{data.count}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Reaction picker */}
+                        {showReactions === message.id && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="flex gap-1 p-2 bg-background border rounded-lg shadow-lg"
+                          >
+                            {commonEmojis.map(emoji => (
+                              <button
+                                key={emoji}
+                                onClick={() => handleReaction(message.id, emoji)}
+                                className="text-xl hover:scale-125 transition-transform"
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </div>
+
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 mt-auto opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => setShowReactions(showReactions === message.id ? null : message.id)}
+                      >
+                        <Smile className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </motion.div>
@@ -449,6 +650,27 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
           </Button>
         </div>
       </CardContent>
+
+      {/* Edit message dialog */}
+      <Dialog open={!!editingMessage} onOpenChange={() => setEditingMessage(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Message</DialogTitle>
+          </DialogHeader>
+          <Input
+            value={editedContent}
+            onChange={(e) => setEditedContent(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleEditMessage()}
+            placeholder="Edit your message..."
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingMessage(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditMessage}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
