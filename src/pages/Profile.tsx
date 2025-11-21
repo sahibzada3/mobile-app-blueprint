@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { LogOut, User as UserIcon, Camera, Heart, Image, Moon, Sun, Settings, Award, TrendingUp, Zap, Users, UserPlus, Share2, Lock, Globe, Eye, Grid, BookmarkIcon, UserCheck } from "lucide-react";
+import { LogOut, User as UserIcon, Camera, Heart, Moon, Sun, Settings, Award, TrendingUp, Zap, Users, UserPlus, Share2, Lock, Globe, Eye, ImageIcon, Star, Wind } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
 import NotificationBell from "@/components/notifications/NotificationBell";
@@ -22,7 +22,6 @@ export default function Profile() {
   const [stats, setStats] = useState({ photoCount: 0, totalLikes: 0, followers: 0, following: 0 });
   const [loading, setLoading] = useState(true);
   const [isPrivate, setIsPrivate] = useState(false);
-  const [showStories, setShowStories] = useState(true);
 
   useEffect(() => {
     loadProfile();
@@ -160,126 +159,131 @@ export default function Profile() {
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-4 pt-4 pb-6 space-y-4">
-        {/* Stories Section */}
-        {showStories && (
-          <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-            <div className="flex flex-col items-center gap-2 flex-shrink-0">
-              <div className="relative">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border-2 border-border cursor-pointer hover-scale">
-                  <Camera className="w-8 h-8 text-primary" />
-                </div>
-                <div className="absolute bottom-0 right-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center border-2 border-card">
-                  <span className="text-xs text-primary-foreground font-bold">+</span>
-                </div>
-              </div>
-              <span className="text-xs text-muted-foreground">Your Story</span>
+      <main className="max-w-lg mx-auto px-4 pt-4 pb-6 space-y-6">
+        {/* Nature Photography Profile Card */}
+        <Card className="shadow-nature overflow-hidden border-0 bg-gradient-to-br from-primary/5 via-card to-card">
+          {/* Cover Banner */}
+          <div className="h-40 bg-gradient-to-r from-primary/20 via-accent/15 to-primary/20 relative overflow-hidden">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
+            <div className="absolute top-4 right-4 flex gap-2">
+              <Button 
+                onClick={handleShareProfile} 
+                size="sm"
+                variant="secondary"
+                className="bg-card/80 backdrop-blur-sm"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Share
+              </Button>
             </div>
-            
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex flex-col items-center gap-2 flex-shrink-0 opacity-50">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-dashed border-border"></div>
-                <span className="text-xs text-muted-foreground">Upcoming</span>
-              </div>
-            ))}
           </div>
-        )}
-
-        {/* Profile Header Card */}
-        <Card className="shadow-nature overflow-hidden border-0">
-          <CardContent className="p-6">
-            {/* Profile Info */}
+          
+          <CardContent className="p-6 -mt-16">
+            {/* Profile Avatar & Info */}
             <div className="flex items-start gap-4 mb-6">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full animate-pulse"></div>
-                <Avatar className="w-24 h-24 border-4 border-card shadow-lg relative z-10 cursor-pointer hover-scale">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/30 rounded-full blur-md"></div>
+                <Avatar className="w-28 h-28 border-4 border-card shadow-xl relative z-10 cursor-pointer hover-scale">
                   {profile?.avatar_url ? (
                     <AvatarImage src={profile.avatar_url} />
                   ) : (
-                    <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-primary text-2xl">
+                    <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-primary text-3xl">
                       {profile?.username?.charAt(0).toUpperCase() || <UserIcon />}
                     </AvatarFallback>
                   )}
                 </Avatar>
                 {isPrivate && (
-                  <div className="absolute bottom-0 right-0 w-7 h-7 bg-card rounded-full flex items-center justify-center border-2 border-border">
+                  <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-card rounded-full flex items-center justify-center border-2 border-border shadow-md">
                     <Lock className="w-4 h-4 text-muted-foreground" />
                   </div>
                 )}
               </div>
               
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+              <div className="flex-1 pt-14 min-w-0">
+                <div className="flex items-center gap-2 mb-2">
                   <h2 className="text-2xl font-bold truncate">
                     {profile?.username || "Unknown User"}
                   </h2>
-                  <Badge variant="secondary" className="flex-shrink-0">
-                    <Zap className="w-3 h-3 mr-1" />
-                    Pro
+                  <Badge variant="secondary" className="flex-shrink-0 bg-primary/10 text-primary border-primary/20">
+                    <Camera className="w-3 h-3 mr-1" />
+                    Photographer
                   </Badge>
                 </div>
                 {profile?.bio ? (
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{profile.bio}</p>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{profile.bio}</p>
                 ) : (
-                  <p className="text-sm text-muted-foreground/60 italic mb-3">No bio yet</p>
+                  <p className="text-sm text-muted-foreground/60 italic">Nature enthusiast</p>
                 )}
-                
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={() => navigate("/profile/settings")} 
-                    variant="outline" 
-                    size="sm"
-                    className="flex-1"
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    Edit Profile
-                  </Button>
-                  <Button 
-                    onClick={handleShareProfile} 
-                    variant="outline" 
-                    size="sm"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </Button>
-                </div>
               </div>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-4 gap-4 text-center mb-4">
-              <button className="hover-scale cursor-pointer">
+            {/* Stats Row */}
+            <div className="grid grid-cols-4 gap-3 mb-6">
+              <div className="text-center p-3 rounded-lg bg-gradient-to-br from-primary/5 to-transparent hover-scale cursor-pointer transition-all">
+                <Camera className="w-5 h-5 text-primary mx-auto mb-1" />
                 <p className="text-xl font-bold">{stats.photoCount}</p>
-                <p className="text-xs text-muted-foreground">Posts</p>
-              </button>
-              <button className="hover-scale cursor-pointer">
+                <p className="text-xs text-muted-foreground">Captures</p>
+              </div>
+              <div className="text-center p-3 rounded-lg bg-gradient-to-br from-accent/5 to-transparent hover-scale cursor-pointer transition-all">
+                <Users className="w-5 h-5 text-accent mx-auto mb-1" />
                 <p className="text-xl font-bold">{stats.followers}</p>
-                <p className="text-xs text-muted-foreground">Followers</p>
-              </button>
-              <button className="hover-scale cursor-pointer">
+                <p className="text-xs text-muted-foreground">Admirers</p>
+              </div>
+              <div className="text-center p-3 rounded-lg bg-gradient-to-br from-primary/5 to-transparent hover-scale cursor-pointer transition-all">
+                <Eye className="w-5 h-5 text-primary mx-auto mb-1" />
                 <p className="text-xl font-bold">{stats.following}</p>
                 <p className="text-xs text-muted-foreground">Following</p>
-              </button>
-              <button className="hover-scale cursor-pointer">
+              </div>
+              <div className="text-center p-3 rounded-lg bg-gradient-to-br from-accent/5 to-transparent hover-scale cursor-pointer transition-all">
+                <Heart className="w-5 h-5 text-accent mx-auto mb-1" />
                 <p className="text-xl font-bold">{stats.totalLikes}</p>
                 <p className="text-xs text-muted-foreground">Likes</p>
-              </button>
+              </div>
             </div>
 
-            <Separator />
+            {/* Action Buttons */}
+            <div className="flex gap-3 mb-4">
+              <Button 
+                onClick={() => navigate("/profile/settings")} 
+                variant="outline" 
+                className="flex-1"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+              <Button 
+                onClick={() => navigate("/camera")} 
+                className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90"
+              >
+                <Camera className="w-4 h-4 mr-2" />
+                New Photo
+              </Button>
+            </div>
 
-            {/* Quick Privacy Toggle */}
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
+            <Separator className="mb-4" />
+
+            {/* Privacy Toggle */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+              <div className="flex items-center gap-3">
                 {isPrivate ? (
                   <>
-                    <Lock className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Private Account</span>
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                      <Lock className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Private Account</p>
+                      <p className="text-xs text-muted-foreground">Only approved viewers</p>
+                    </div>
                   </>
                 ) : (
                   <>
-                    <Globe className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-medium">Public Account</span>
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Globe className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Public Account</p>
+                      <p className="text-xs text-muted-foreground">Visible to everyone</p>
+                    </div>
                   </>
                 )}
               </div>
@@ -288,116 +292,94 @@ export default function Profile() {
           </CardContent>
         </Card>
 
-        {/* Quick Stats Cards */}
-        <div className="grid grid-cols-2 gap-3">
-          <Card className="shadow-nature border-0 hover-scale cursor-pointer">
-            <CardContent className="p-4">
+        {/* Achievements Banner */}
+        <Card className="shadow-nature border-0 bg-gradient-to-r from-accent/10 via-primary/10 to-accent/10 animate-fade-in">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-primary/10">
-                  <UserCheck className="w-5 h-5 text-primary" />
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                  <Award className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Close Friends</p>
-                  <p className="text-xl font-bold">0</p>
+                  <p className="font-semibold">Photography Achievements</p>
+                  <p className="text-xs text-muted-foreground">1 of 12 unlocked</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-nature border-0 hover-scale cursor-pointer">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-accent/10">
-                  <BookmarkIcon className="w-5 h-5 text-accent" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Saved</p>
-                  <p className="text-xl font-bold">0</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              <Button variant="ghost" size="sm">
+                View All
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Gallery Tabs */}
-        <Tabs defaultValue="grid" className="w-full animate-fade-in">
-          <TabsList className="grid w-full grid-cols-3 bg-card/50 backdrop-blur-sm">
-            <TabsTrigger value="grid" className="data-[state=active]:bg-primary/10">
-              <Grid className="w-4 h-4" />
+        {/* Photo Collection Tabs */}
+        <Tabs defaultValue="captures" className="w-full animate-fade-in">
+          <TabsList className="grid w-full grid-cols-2 bg-card/50 backdrop-blur-sm">
+            <TabsTrigger value="captures" className="data-[state=active]:bg-primary/10">
+              <Camera className="w-4 h-4 mr-2" />
+              My Captures
             </TabsTrigger>
-            <TabsTrigger value="saved" className="data-[state=active]:bg-accent/10">
-              <BookmarkIcon className="w-4 h-4" />
-            </TabsTrigger>
-            <TabsTrigger value="tagged" className="data-[state=active]:bg-primary/10">
-              <Users className="w-4 h-4" />
+            <TabsTrigger value="favorites" className="data-[state=active]:bg-accent/10">
+              <Star className="w-4 h-4 mr-2" />
+              Favorites
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="grid" className="mt-4">
+          <TabsContent value="captures" className="mt-4">
             {photos.length > 0 ? (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 {photos.map((photo, index) => (
-                  <div 
-                    key={photo.id} 
-                    className="aspect-square bg-muted rounded-lg overflow-hidden group relative animate-fade-in"
+                  <Card
+                    key={photo.id}
+                    className="overflow-hidden border-0 shadow-nature group cursor-pointer hover-scale animate-fade-in"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <img
-                      src={photo.image_url}
-                      alt={photo.caption || "Photo"}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2">
-                      <div className="text-white text-xs flex items-center gap-2">
-                        <Heart className="w-3 h-3" />
-                        <span>View</span>
+                    <div className="aspect-square relative">
+                      <img
+                        src={photo.image_url}
+                        alt={photo.caption || "Nature photo"}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Heart className="w-4 h-4" />
+                            <Eye className="w-4 h-4" />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Card>
                 ))}
               </div>
             ) : (
               <Card className="shadow-nature border-0">
                 <CardContent className="p-16 text-center">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                    <Camera className="w-10 h-10 text-muted-foreground" />
+                  <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
+                    <Camera className="w-12 h-12 text-primary" />
                   </div>
-                  <h3 className="font-semibold text-lg mb-2">Share Photos</h3>
-                  <p className="text-muted-foreground mb-6 max-w-xs mx-auto text-sm">
-                    When you share photos, they'll appear on your profile
+                  <h3 className="font-semibold text-xl mb-2">Start Your Collection</h3>
+                  <p className="text-muted-foreground mb-6 max-w-xs mx-auto">
+                    Capture and share stunning nature photography with the world
                   </p>
-                  <Button onClick={() => navigate("/camera")} className="bg-gradient-to-r from-primary to-accent">
-                    <Camera className="w-4 h-4 mr-2" />
-                    Share Your First Photo
+                  <Button onClick={() => navigate("/camera")} className="bg-gradient-to-r from-primary to-accent hover:opacity-90" size="lg">
+                    <Camera className="w-5 h-5 mr-2" />
+                    Take Your First Photo
                   </Button>
                 </CardContent>
               </Card>
             )}
           </TabsContent>
           
-          <TabsContent value="saved" className="mt-4">
+          <TabsContent value="favorites" className="mt-4">
             <Card className="shadow-nature border-0">
               <CardContent className="p-16 text-center">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                  <BookmarkIcon className="w-10 h-10 text-muted-foreground" />
+                <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-accent/10 to-primary/10 flex items-center justify-center">
+                  <Star className="w-12 h-12 text-accent" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Save Posts You Love</h3>
+                <h3 className="font-semibold text-xl mb-2">Your Favorite Shots</h3>
                 <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-                  Bookmark your favorite posts to view them later
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="tagged" className="mt-4">
-            <Card className="shadow-nature border-0">
-              <CardContent className="p-16 text-center">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                  <Users className="w-10 h-10 text-muted-foreground" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">Photos of You</h3>
-                <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-                  When people tag you in photos, they'll appear here
+                  Mark your favorite nature captures to showcase your best work
                 </p>
               </CardContent>
             </Card>
