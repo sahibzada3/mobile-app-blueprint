@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Image as ImageIcon, Smile, Edit2, Trash2, MoreVertical } from "lucide-react";
+import { Send, Image as ImageIcon, Smile, Edit2, Trash2, MoreVertical, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -21,6 +21,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import VoiceRecorder from "@/components/chat/VoiceRecorder";
+import AudioPlayer from "@/components/chat/AudioPlayer";
 
 interface TypingPresence {
   user_id: string;
@@ -42,6 +44,8 @@ interface Message {
   recipient_id: string;
   content: string | null;
   image_url: string | null;
+  audio_url: string | null;
+  audio_duration: number | null;
   chain_id: string | null;
   read: boolean;
   created_at: string;
@@ -69,6 +73,7 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [editedContent, setEditedContent] = useState("");
   const [showReactions, setShowReactions] = useState<string | null>(null);
+  const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -380,6 +385,43 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
     return grouped;
   };
 
+  const handleVoiceSend = async (audioBlob: Blob, duration: number) => {
+    try {
+      const fileExt = 'webm';
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${currentUserId}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("voice-messages")
+        .upload(filePath, audioBlob);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("voice-messages")
+        .getPublicUrl(filePath);
+
+      const { error: messageError } = await supabase
+        .from("messages")
+        .insert({
+          sender_id: currentUserId,
+          recipient_id: friendId,
+          audio_url: publicUrl,
+          audio_duration: duration
+        });
+
+      if (messageError) throw messageError;
+
+      fetchMessages();
+      setIsRecordingVoice(false);
+      toast.success("Voice message sent!");
+    } catch (error) {
+      console.error("Error sending voice message:", error);
+      toast.error("Failed to send voice message");
+      setIsRecordingVoice(false);
+    }
+  };
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="border-b">
@@ -451,6 +493,12 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
                             src={message.image_url}
                             alt="Shared image"
                             className="rounded-lg mb-2 max-w-full"
+                          />
+                        )}
+                        {message.audio_url && (
+                          <AudioPlayer
+                            audioUrl={message.audio_url}
+                            duration={message.audio_duration || undefined}
                           />
                         )}
                         {message.content && <p className="text-sm">{message.content}</p>}
@@ -547,34 +595,50 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
             )}
           </AnimatePresence>
         </ScrollArea>
-        <div className="border-t p-4 flex gap-2">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleImageUpload}
-            accept="image/*"
-            className="hidden"
-          />
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploadingImage}
-          >
-            <ImageIcon className="w-4 h-4" />
-          </Button>
-          <Input
-            placeholder="Type a message..."
-            value={newMessage}
-            onChange={(e) => {
-              setNewMessage(e.target.value);
-              handleTyping();
-            }}
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-          />
-          <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
-            <Send className="w-4 h-4" />
-          </Button>
+        <div className="border-t p-4">
+          {isRecordingVoice ? (
+            <VoiceRecorder
+              onSend={handleVoiceSend}
+              onCancel={() => setIsRecordingVoice(false)}
+            />
+          ) : (
+            <div className="flex gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+              >
+                <ImageIcon className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setIsRecordingVoice(true)}
+              >
+                <Mic className="w-4 h-4" />
+              </Button>
+              <Input
+                placeholder="Type a message..."
+                value={newMessage}
+                onChange={(e) => {
+                  setNewMessage(e.target.value);
+                  handleTyping();
+                }}
+                onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+              />
+              <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </CardContent>
 

@@ -124,6 +124,8 @@ export type Database = {
       }
       chain_messages: {
         Row: {
+          audio_duration: number | null
+          audio_url: string | null
           chain_id: string
           content: string | null
           created_at: string | null
@@ -133,6 +135,8 @@ export type Database = {
           sender_id: string
         }
         Insert: {
+          audio_duration?: number | null
+          audio_url?: string | null
           chain_id: string
           content?: string | null
           created_at?: string | null
@@ -142,6 +146,8 @@ export type Database = {
           sender_id: string
         }
         Update: {
+          audio_duration?: number | null
+          audio_url?: string | null
           chain_id?: string
           content?: string | null
           created_at?: string | null
@@ -385,6 +391,8 @@ export type Database = {
       }
       messages: {
         Row: {
+          audio_duration: number | null
+          audio_url: string | null
           chain_id: string | null
           content: string | null
           created_at: string | null
@@ -396,6 +404,8 @@ export type Database = {
           sender_id: string
         }
         Insert: {
+          audio_duration?: number | null
+          audio_url?: string | null
           chain_id?: string | null
           content?: string | null
           created_at?: string | null
@@ -407,6 +417,8 @@ export type Database = {
           sender_id: string
         }
         Update: {
+          audio_duration?: number | null
+          audio_url?: string | null
           chain_id?: string | null
           content?: string | null
           created_at?: string | null
