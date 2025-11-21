@@ -52,7 +52,15 @@ export default {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
         display: ['Montserrat', 'sans-serif'],
-        serif: ['Playfair Display', 'serif']
+        serif: ['Playfair Display', 'serif'],
+        merriweather: ['Merriweather', 'serif'],
+        lora: ['Lora', 'serif'],
+        raleway: ['Raleway', 'sans-serif'],
+        crimson: ['Crimson Text', 'serif'],
+        dancing: ['Dancing Script', 'cursive'],
+        pacifico: ['Pacifico', 'cursive'],
+        bebas: ['Bebas Neue', 'cursive'],
+        abril: ['Abril Fatface', 'display']
       },
       backgroundImage: {
         'gradient-nature': 'var(--gradient-nature)',

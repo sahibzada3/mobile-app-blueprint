@@ -2,15 +2,18 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Heart, MessageCircle, User, Music } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { musicTracks } from "@/data/musicTracks";
 
 interface PhotoCardProps {
   photo: {
     id: string;
     image_url: string;
     caption: string | null;
+    music_track: string | null;
     created_at: string;
     user_id: string;
     profiles?: {
@@ -24,6 +27,8 @@ interface PhotoCardProps {
 export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  
+  const musicTrack = photo.music_track ? musicTracks.find(t => t.id === photo.music_track) : null;
 
   useEffect(() => {
     loadLikes();
@@ -115,6 +120,18 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
         </div>
 
         <div className="p-4 space-y-3">
+          {musicTrack && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
+              <Music className="w-3.5 h-3.5 text-primary" />
+              <span className="font-medium">{musicTrack.name}</span>
+              <span>•</span>
+              <span>{musicTrack.artist}</span>
+              <Badge variant="outline" className="ml-auto text-xs">
+                {musicTrack.mood}
+              </Badge>
+            </div>
+          )}
+
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
