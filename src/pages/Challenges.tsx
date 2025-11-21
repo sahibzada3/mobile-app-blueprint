@@ -9,6 +9,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useToast } from "@/hooks/use-toast";
 import ChallengeCard from "@/components/challenges/ChallengeCard";
 import { Badge } from "@/components/ui/badge";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 export default function Challenges() {
   const navigate = useNavigate();
@@ -102,9 +103,12 @@ export default function Challenges() {
               <Trophy className="w-6 h-6 text-secondary" />
               <h1 className="text-2xl font-display font-bold text-primary">Challenges</h1>
             </div>
-            <Button variant="ghost" size="icon" onClick={toggleTheme}>
-              {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-            </Button>
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+              <Button variant="ghost" size="icon" onClick={toggleTheme}>
+                {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              </Button>
+            </div>
           </div>
 
           {/* Stats */}
