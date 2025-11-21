@@ -358,10 +358,27 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
   };
 
   const getFilteredParticipants = () => {
-    return participants.filter(p => 
-      p.user_id !== currentUserId &&
-      p.profiles.username.toLowerCase().includes(mentionSearch)
-    );
+    // Get recent activity timestamps for each participant
+    const participantActivity = participants.map(p => {
+      // Find the most recent message from this participant
+      const recentMessage = messages
+        .filter(m => m.sender_id === p.user_id)
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+      
+      return {
+        participant: p,
+        lastActivity: recentMessage ? new Date(recentMessage.created_at).getTime() : 0
+      };
+    });
+
+    // Filter and sort by recent activity
+    return participantActivity
+      .filter(({ participant }) => 
+        participant.user_id !== currentUserId &&
+        participant.profiles.username.toLowerCase().includes(mentionSearch)
+      )
+      .sort((a, b) => b.lastActivity - a.lastActivity) // Most recent first
+      .map(({ participant }) => participant);
   };
 
   const renderMessageContent = (content: string) => {
@@ -792,28 +809,55 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute bottom-full left-0 right-0 mb-2 bg-background border rounded-lg shadow-lg max-h-48 overflow-y-auto"
+                    className="absolute bottom-full left-0 right-0 mb-2 bg-background border rounded-lg shadow-lg max-h-48 overflow-y-auto z-50"
                   >
-                    {getFilteredParticipants().map((participant) => (
-                      <button
-                        key={participant.id}
-                        onClick={() => handleMentionSelect(participant.profiles.username)}
-                        className="w-full flex items-center gap-3 p-3 hover:bg-muted transition-colors text-left"
-                      >
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={participant.profiles.avatar_url || undefined} />
-                          <AvatarFallback className="text-xs">
-                            {participant.profiles.username[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-medium">{participant.profiles.username}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Tap to mention
-                          </p>
-                        </div>
-                      </button>
-                    ))}
+                    <div className="p-2 border-b bg-muted/50">
+                      <p className="text-xs text-muted-foreground font-medium">
+                        {mentionSearch ? 'Matching participants' : 'Recently active'}
+                      </p>
+                    </div>
+                    {getFilteredParticipants().map((participant, index) => {
+                      // Check if this participant has recent activity
+                      const recentMessage = messages
+                        .filter(m => m.sender_id === participant.user_id)
+                        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+                      
+                      const hasRecentActivity = recentMessage && 
+                        (Date.now() - new Date(recentMessage.created_at).getTime()) < 3600000; // Within last hour
+                      
+                      return (
+                        <button
+                          key={participant.id}
+                          onClick={() => handleMentionSelect(participant.profiles.username)}
+                          className="w-full flex items-center gap-3 p-3 hover:bg-muted transition-colors text-left border-b last:border-b-0"
+                        >
+                          <div className="relative">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={participant.profiles.avatar_url || undefined} />
+                              <AvatarFallback className="text-xs">
+                                {participant.profiles.username[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            {hasRecentActivity && (
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {participant.profiles.username}
+                              {index === 0 && !mentionSearch && (
+                                <span className="ml-2 text-xs text-muted-foreground font-normal">
+                                  Most recent
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {hasRecentActivity ? 'Active recently' : 'Tap to mention'}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </motion.div>
                 )}
               </AnimatePresence>
