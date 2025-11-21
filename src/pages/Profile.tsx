@@ -7,7 +7,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, User as UserIcon, Camera, Heart, Image, Moon, Sun, Settings, Award, TrendingUp, Zap } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { LogOut, User as UserIcon, Camera, Heart, Image, Moon, Sun, Settings, Award, TrendingUp, Zap, Users, UserPlus, Share2, Lock, Globe, Eye, Grid, BookmarkIcon, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
 import NotificationBell from "@/components/notifications/NotificationBell";
@@ -17,8 +19,10 @@ export default function Profile() {
   const { theme, toggleTheme } = useTheme();
   const [profile, setProfile] = useState<any>(null);
   const [photos, setPhotos] = useState<any[]>([]);
-  const [stats, setStats] = useState({ photoCount: 0, totalLikes: 0 });
+  const [stats, setStats] = useState({ photoCount: 0, totalLikes: 0, followers: 0, following: 0 });
   const [loading, setLoading] = useState(true);
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [showStories, setShowStories] = useState(true);
 
   useEffect(() => {
     loadProfile();
@@ -41,6 +45,12 @@ export default function Profile() {
 
       if (profileError) throw profileError;
       setProfile(profileData);
+      
+      // Load privacy settings
+      if (profileData.privacy_settings && typeof profileData.privacy_settings === 'object') {
+        const settings = profileData.privacy_settings as any;
+        setIsPrivate(settings.profile_visibility === 'private');
+      }
 
       // Load user's photos
       const { data: photosData, error: photosError } = await supabase
@@ -59,9 +69,18 @@ export default function Profile() {
         .eq("vote_type", "like")
         .in("photo_id", (photosData || []).map(p => p.id));
 
+      // Load followers/following count (mock data for now)
+      const { data: friendsData } = await supabase
+        .from("friendships")
+        .select("id, status")
+        .or(`user_id.eq.${session.user.id},friend_id.eq.${session.user.id}`)
+        .eq("status", "accepted");
+
       setStats({
         photoCount: photosData?.length || 0,
         totalLikes: votesData?.length || 0,
+        followers: Math.floor((friendsData?.length || 0) / 2),
+        following: Math.ceil((friendsData?.length || 0) / 2),
       });
     } catch (error: any) {
       console.error("Profile error:", error);
@@ -74,6 +93,40 @@ export default function Profile() {
     await supabase.auth.signOut();
     toast.success("Logged out successfully");
     navigate("/login");
+  };
+
+  const handleShareProfile = () => {
+    const profileUrl = `${window.location.origin}/profile/${profile?.id}`;
+    navigator.clipboard.writeText(profileUrl);
+    toast.success("Profile link copied!");
+  };
+
+  const togglePrivacy = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const newVisibility = !isPrivate ? 'private' : 'everyone';
+      const currentSettings = profile?.privacy_settings || {};
+      
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          privacy_settings: {
+            ...currentSettings,
+            profile_visibility: newVisibility
+          }
+        })
+        .eq("id", session.user.id);
+
+      if (error) throw error;
+
+      setIsPrivate(!isPrivate);
+      toast.success(`Profile is now ${!isPrivate ? 'private' : 'public'}`);
+    } catch (error) {
+      console.error("Error updating privacy:", error);
+      toast.error("Failed to update privacy");
+    }
   };
 
   if (loading) {
@@ -107,132 +160,180 @@ export default function Profile() {
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
-        {/* Hero Profile Card */}
-        <Card className="shadow-nature overflow-hidden border-0 bg-gradient-to-br from-primary/5 via-card to-card">
-          <div className="h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-accent/20 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
+      <main className="max-w-lg mx-auto px-4 pt-4 pb-6 space-y-4">
+        {/* Stories Section */}
+        {showStories && (
+          <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+            <div className="flex flex-col items-center gap-2 flex-shrink-0">
+              <div className="relative">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border-2 border-border cursor-pointer hover-scale">
+                  <Camera className="w-8 h-8 text-primary" />
+                </div>
+                <div className="absolute bottom-0 right-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center border-2 border-card">
+                  <span className="text-xs text-primary-foreground font-bold">+</span>
+                </div>
+              </div>
+              <span className="text-xs text-muted-foreground">Your Story</span>
+            </div>
+            
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex flex-col items-center gap-2 flex-shrink-0 opacity-50">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-dashed border-border"></div>
+                <span className="text-xs text-muted-foreground">Upcoming</span>
+              </div>
+            ))}
           </div>
-          <CardContent className="p-6 -mt-12">
-            <div className="text-center mb-6">
-              <div className="relative w-28 h-28 mx-auto mb-4">
+        )}
+
+        {/* Profile Header Card */}
+        <Card className="shadow-nature overflow-hidden border-0">
+          <CardContent className="p-6">
+            {/* Profile Info */}
+            <div className="flex items-start gap-4 mb-6">
+              <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full animate-pulse"></div>
-                <Avatar className="w-28 h-28 border-4 border-card shadow-lg relative z-10 hover-scale">
+                <Avatar className="w-24 h-24 border-4 border-card shadow-lg relative z-10 cursor-pointer hover-scale">
                   {profile?.avatar_url ? (
                     <AvatarImage src={profile.avatar_url} />
                   ) : (
-                    <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-primary text-3xl">
+                    <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-primary text-2xl">
                       {profile?.username?.charAt(0).toUpperCase() || <UserIcon />}
                     </AvatarFallback>
                   )}
                 </Avatar>
+                {isPrivate && (
+                  <div className="absolute bottom-0 right-0 w-7 h-7 bg-card rounded-full flex items-center justify-center border-2 border-border">
+                    <Lock className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                )}
               </div>
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <h2 className="text-3xl font-display font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  {profile?.username || "Unknown User"}
-                </h2>
-                <Badge variant="secondary" className="animate-fade-in">
-                  <Zap className="w-3 h-3 mr-1" />
-                  Active
-                </Badge>
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-2xl font-bold truncate">
+                    {profile?.username || "Unknown User"}
+                  </h2>
+                  <Badge variant="secondary" className="flex-shrink-0">
+                    <Zap className="w-3 h-3 mr-1" />
+                    Pro
+                  </Badge>
+                </div>
+                {profile?.bio ? (
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{profile.bio}</p>
+                ) : (
+                  <p className="text-sm text-muted-foreground/60 italic mb-3">No bio yet</p>
+                )}
+                
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => navigate("/profile/settings")} 
+                    variant="outline" 
+                    size="sm"
+                    className="flex-1"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </Button>
+                  <Button 
+                    onClick={handleShareProfile} 
+                    variant="outline" 
+                    size="sm"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-              {profile?.bio ? (
-                <p className="text-muted-foreground max-w-xs mx-auto">{profile.bio}</p>
-              ) : (
-                <p className="text-muted-foreground/60 italic text-sm">No bio yet</p>
-              )}
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-3 pt-6 border-t border-border/50">
-              <Card className="border-0 bg-gradient-to-br from-primary/5 to-transparent hover-scale cursor-pointer transition-all">
-                <CardContent className="p-4 text-center">
-                  <div className="flex items-center justify-center mb-2">
-                    <div className="p-2 rounded-full bg-primary/10">
-                      <Camera className="w-5 h-5 text-primary" />
-                    </div>
-                  </div>
-                  <p className="text-2xl font-bold mb-1">{stats.photoCount}</p>
-                  <p className="text-xs text-muted-foreground font-medium">Photos</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-0 bg-gradient-to-br from-accent/5 to-transparent hover-scale cursor-pointer transition-all">
-                <CardContent className="p-4 text-center">
-                  <div className="flex items-center justify-center mb-2">
-                    <div className="p-2 rounded-full bg-accent/10">
-                      <Heart className="w-5 h-5 text-accent" />
-                    </div>
-                  </div>
-                  <p className="text-2xl font-bold mb-1">{stats.totalLikes}</p>
-                  <p className="text-xs text-muted-foreground font-medium">Likes</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-0 bg-gradient-to-br from-primary/5 to-transparent hover-scale cursor-pointer transition-all">
-                <CardContent className="p-4 text-center">
-                  <div className="flex items-center justify-center mb-2">
-                    <div className="p-2 rounded-full bg-primary/10">
-                      <TrendingUp className="w-5 h-5 text-primary" />
-                    </div>
-                  </div>
-                  <p className="text-2xl font-bold mb-1">0</p>
-                  <p className="text-xs text-muted-foreground font-medium">Rank</p>
-                </CardContent>
-              </Card>
+            {/* Stats */}
+            <div className="grid grid-cols-4 gap-4 text-center mb-4">
+              <button className="hover-scale cursor-pointer">
+                <p className="text-xl font-bold">{stats.photoCount}</p>
+                <p className="text-xs text-muted-foreground">Posts</p>
+              </button>
+              <button className="hover-scale cursor-pointer">
+                <p className="text-xl font-bold">{stats.followers}</p>
+                <p className="text-xs text-muted-foreground">Followers</p>
+              </button>
+              <button className="hover-scale cursor-pointer">
+                <p className="text-xl font-bold">{stats.following}</p>
+                <p className="text-xs text-muted-foreground">Following</p>
+              </button>
+              <button className="hover-scale cursor-pointer">
+                <p className="text-xl font-bold">{stats.totalLikes}</p>
+                <p className="text-xs text-muted-foreground">Likes</p>
+              </button>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Achievements Preview */}
-        <Card className="shadow-nature border-0 bg-gradient-to-br from-accent/5 to-card animate-fade-in">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
+            <Separator />
+
+            {/* Quick Privacy Toggle */}
+            <div className="flex items-center justify-between py-2">
               <div className="flex items-center gap-2">
-                <Award className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold">Achievements</h3>
+                {isPrivate ? (
+                  <>
+                    <Lock className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Private Account</span>
+                  </>
+                ) : (
+                  <>
+                    <Globe className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium">Public Account</span>
+                  </>
+                )}
               </div>
-              <Button variant="ghost" size="sm" className="text-xs">
-                View All
-              </Button>
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              <div className="flex-shrink-0">
-                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center hover-scale cursor-pointer">
-                  <Camera className="w-8 h-8 text-primary" />
-                </div>
-                <p className="text-xs text-center mt-1 text-muted-foreground">First Shot</p>
-              </div>
-              <div className="flex-shrink-0 opacity-50">
-                <div className="w-16 h-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center">
-                  <Award className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <p className="text-xs text-center mt-1 text-muted-foreground">Locked</p>
-              </div>
-              <div className="flex-shrink-0 opacity-50">
-                <div className="w-16 h-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center">
-                  <Award className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <p className="text-xs text-center mt-1 text-muted-foreground">Locked</p>
-              </div>
+              <Switch checked={isPrivate} onCheckedChange={togglePrivacy} />
             </div>
           </CardContent>
         </Card>
 
-        {/* Photo Gallery Tabs */}
-        <Tabs defaultValue="photos" className="w-full animate-fade-in">
-          <TabsList className="grid w-full grid-cols-2 bg-card/50 backdrop-blur-sm">
-            <TabsTrigger value="photos" className="data-[state=active]:bg-primary/10">
-              <Camera className="w-4 h-4 mr-2" />
-              Photos
+        {/* Quick Stats Cards */}
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="shadow-nature border-0 hover-scale cursor-pointer">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-primary/10">
+                  <UserCheck className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Close Friends</p>
+                  <p className="text-xl font-bold">0</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-nature border-0 hover-scale cursor-pointer">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-accent/10">
+                  <BookmarkIcon className="w-5 h-5 text-accent" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Saved</p>
+                  <p className="text-xl font-bold">0</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Gallery Tabs */}
+        <Tabs defaultValue="grid" className="w-full animate-fade-in">
+          <TabsList className="grid w-full grid-cols-3 bg-card/50 backdrop-blur-sm">
+            <TabsTrigger value="grid" className="data-[state=active]:bg-primary/10">
+              <Grid className="w-4 h-4" />
             </TabsTrigger>
-            <TabsTrigger value="liked" className="data-[state=active]:bg-accent/10">
-              <Heart className="w-4 h-4 mr-2" />
-              Liked
+            <TabsTrigger value="saved" className="data-[state=active]:bg-accent/10">
+              <BookmarkIcon className="w-4 h-4" />
+            </TabsTrigger>
+            <TabsTrigger value="tagged" className="data-[state=active]:bg-primary/10">
+              <Users className="w-4 h-4" />
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="photos" className="mt-4">
+          <TabsContent value="grid" className="mt-4">
             {photos.length > 0 ? (
               <div className="grid grid-cols-3 gap-2">
                 {photos.map((photo, index) => (
@@ -256,33 +357,47 @@ export default function Profile() {
                 ))}
               </div>
             ) : (
-              <Card className="shadow-nature border-0 bg-gradient-to-br from-primary/5 to-card">
-                <CardContent className="p-12 text-center">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                    <Camera className="w-10 h-10 text-primary" />
+              <Card className="shadow-nature border-0">
+                <CardContent className="p-16 text-center">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                    <Camera className="w-10 h-10 text-muted-foreground" />
                   </div>
-                  <h3 className="font-semibold text-lg mb-2">Start Your Journey</h3>
+                  <h3 className="font-semibold text-lg mb-2">Share Photos</h3>
                   <p className="text-muted-foreground mb-6 max-w-xs mx-auto text-sm">
-                    Capture stunning nature moments and share them with the world
+                    When you share photos, they'll appear on your profile
                   </p>
-                  <Button onClick={() => navigate("/camera")} className="bg-gradient-to-r from-primary to-accent hover:opacity-90">
+                  <Button onClick={() => navigate("/camera")} className="bg-gradient-to-r from-primary to-accent">
                     <Camera className="w-4 h-4 mr-2" />
-                    Take Your First Photo
+                    Share Your First Photo
                   </Button>
                 </CardContent>
               </Card>
             )}
           </TabsContent>
           
-          <TabsContent value="liked" className="mt-4">
-            <Card className="shadow-nature border-0 bg-gradient-to-br from-accent/5 to-card">
-              <CardContent className="p-12 text-center">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-accent/10 to-primary/10 flex items-center justify-center">
-                  <Heart className="w-10 h-10 text-accent" />
+          <TabsContent value="saved" className="mt-4">
+            <Card className="shadow-nature border-0">
+              <CardContent className="p-16 text-center">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                  <BookmarkIcon className="w-10 h-10 text-muted-foreground" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">No Favorites Yet</h3>
+                <h3 className="font-semibold text-lg mb-2">Save Posts You Love</h3>
                 <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-                  Start exploring and like photos you love
+                  Bookmark your favorite posts to view them later
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="tagged" className="mt-4">
+            <Card className="shadow-nature border-0">
+              <CardContent className="p-16 text-center">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                  <Users className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Photos of You</h3>
+                <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+                  When people tag you in photos, they'll appear here
                 </p>
               </CardContent>
             </Card>
