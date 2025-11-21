@@ -155,6 +155,13 @@ export type Database = {
             referencedRelation: "photos"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "challenge_submissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       challenges: {
