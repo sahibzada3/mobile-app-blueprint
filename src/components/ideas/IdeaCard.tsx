@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bookmark, ChevronDown, ChevronUp, Camera, Clock, Cloud, Zap, MapPin, Palette, Sun } from "lucide-react";
+import { Bookmark, ChevronDown, ChevronUp, Camera, Clock, Cloud, Zap, MapPin, Palette, Sun, CheckCircle2 } from "lucide-react";
 import { 
   PhotographyIdea, 
   getDifficultyColor, 
@@ -108,10 +108,33 @@ export default function IdeaCard({ idea, isBookmarked, onBookmark }: IdeaCardPro
 
         {isExpanded && (
           <div className="mt-4 pt-4 border-t space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            {/* Tutorial */}
+            {idea.tutorial && idea.tutorial.length > 0 && (
+              <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-lg p-4 border border-primary/10">
+                <h4 className="text-sm font-semibold mb-4 flex items-center gap-2 text-primary">
+                  <Camera className="w-4 h-4" />
+                  Step-by-Step Tutorial
+                </h4>
+                <div className="space-y-3">
+                  {idea.tutorial.map((tutorialStep) => (
+                    <div key={tutorialStep.step} className="flex gap-3 group">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
+                        <span className="text-xs font-bold text-primary">{tutorialStep.step}</span>
+                      </div>
+                      <div className="flex-1 pt-0.5">
+                        <h5 className="text-sm font-semibold text-foreground mb-1">{tutorialStep.title}</h5>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{tutorialStep.instruction}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Tips */}
             <div>
               <h4 className="text-sm font-semibold mb-3 flex items-center gap-2 text-primary">
-                <Camera className="w-4 h-4" />
+                <CheckCircle2 className="w-4 h-4" />
                 Pro Tips
               </h4>
               <ul className="space-y-2">
