@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bookmark, ChevronDown, ChevronUp, Camera, Clock, Cloud, Zap, MapPin, Palette, Sun, CheckCircle2 } from "lucide-react";
+import { Bookmark, ChevronDown, ChevronUp, Camera, Clock, Cloud, Zap, MapPin, Palette, Sun, CheckCircle2, Play } from "lucide-react";
 import { 
   PhotographyIdea, 
   getDifficultyColor, 
@@ -100,20 +100,39 @@ export default function IdeaCard({ idea, isBookmarked, onBookmark }: IdeaCardPro
           className="w-full justify-between"
         >
           <span className="text-sm font-medium flex items-center gap-2">
-            <Camera className="w-4 h-4" />
-            {isExpanded ? "Hide Details" : "View Tips & Techniques"}
+            {idea.videoUrl ? <Play className="w-4 h-4" /> : <Camera className="w-4 h-4" />}
+            {isExpanded ? "Hide Details" : idea.videoUrl ? "Watch Tutorial & View Tips" : "View Tips & Techniques"}
           </span>
           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </Button>
 
         {isExpanded && (
           <div className="mt-4 pt-4 border-t space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-            {/* Tutorial */}
-            {idea.tutorial && idea.tutorial.length > 0 && (
+            {/* Video Tutorial */}
+            {idea.videoUrl && (
               <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-lg p-4 border border-primary/10">
+                <h4 className="text-sm font-semibold mb-3 flex items-center gap-2 text-primary">
+                  <Play className="w-4 h-4" />
+                  Video Tutorial
+                </h4>
+                <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+                  <iframe
+                    className="absolute top-0 left-0 w-full h-full rounded-lg"
+                    src={idea.videoUrl}
+                    title={`${idea.title} Tutorial`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Step-by-Step Tutorial */}
+            {idea.tutorial && idea.tutorial.length > 0 && (
+              <div className="bg-gradient-to-br from-secondary/5 to-accent/5 rounded-lg p-4 border border-secondary/10">
                 <h4 className="text-sm font-semibold mb-4 flex items-center gap-2 text-primary">
                   <Camera className="w-4 h-4" />
-                  Step-by-Step Tutorial
+                  Step-by-Step Guide
                 </h4>
                 <div className="space-y-3">
                   {idea.tutorial.map((tutorialStep) => (
@@ -131,7 +150,7 @@ export default function IdeaCard({ idea, isBookmarked, onBookmark }: IdeaCardPro
               </div>
             )}
 
-            {/* Tips */}
+            {/* Pro Tips */}
             <div>
               <h4 className="text-sm font-semibold mb-3 flex items-center gap-2 text-primary">
                 <CheckCircle2 className="w-4 h-4" />
