@@ -528,6 +528,7 @@ export type Database = {
           bio: string | null
           created_at: string | null
           id: string
+          privacy_settings: Json | null
           updated_at: string | null
           username: string
         }
@@ -536,6 +537,7 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           id: string
+          privacy_settings?: Json | null
           updated_at?: string | null
           username: string
         }
@@ -544,6 +546,7 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           id?: string
+          privacy_settings?: Json | null
           updated_at?: string | null
           username?: string
         }
