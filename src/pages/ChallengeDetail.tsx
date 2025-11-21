@@ -11,6 +11,7 @@ import { toast as sonnerToast } from "sonner";
 import BadgeDisplay from "@/components/challenges/BadgeDisplay";
 import SubmitDialog from "@/components/challenges/SubmitDialog";
 import SubmissionModal from "@/components/challenges/SubmissionModal";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ChallengeDetail() {
   const { challengeId } = useParams();
@@ -531,34 +532,64 @@ export default function ChallengeDetail() {
               </Card>
             ) : (
               <div className="space-y-3">
-                {submissions.map((submission, index) => (
-                  <Card key={submission.id} className="p-4 hover:shadow-lg transition-shadow">
-                    <div className="flex items-center gap-4">
-                      <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
-                        index === 0 ? "bg-amber-500 text-white" :
-                        index === 1 ? "bg-gray-400 text-white" :
-                        index === 2 ? "bg-amber-700 text-white" :
-                        "bg-muted text-muted-foreground"
-                      }`}>
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold truncate">{submission.profile?.username || "Anonymous"}</p>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span>{submission.score} points</span>
-                          <span>•</span>
-                          <span>{new Date(submission.submitted_at).toLocaleDateString()}</span>
-                          {submission.is_winner && (
-                            <>
+                <AnimatePresence mode="popLayout">
+                  {submissions.map((submission, index) => (
+                    <motion.div
+                      key={submission.id}
+                      layout
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{
+                        layout: {
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 30
+                        },
+                        opacity: { duration: 0.3 },
+                        y: { duration: 0.3 }
+                      }}
+                    >
+                      <Card className="p-4 hover:shadow-lg transition-shadow">
+                        <div className="flex items-center gap-4">
+                          <motion.div 
+                            layout
+                            className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
+                              index === 0 ? "bg-amber-500 text-white" :
+                              index === 1 ? "bg-gray-400 text-white" :
+                              index === 2 ? "bg-amber-700 text-white" :
+                              "bg-muted text-muted-foreground"
+                            }`}
+                            transition={{ layout: { duration: 0.3 } }}
+                          >
+                            {index + 1}
+                          </motion.div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold truncate">{submission.profile?.username || "Anonymous"}</p>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <motion.span
+                                key={`score-${submission.id}-${submission.score}`}
+                                initial={{ scale: 1.3, color: "hsl(var(--secondary))" }}
+                                animate={{ scale: 1, color: "hsl(var(--muted-foreground))" }}
+                                transition={{ duration: 0.5 }}
+                              >
+                                {submission.score} points
+                              </motion.span>
                               <span>•</span>
-                              <Trophy className="w-3 h-3 text-secondary" />
-                            </>
-                          )}
+                              <span>{new Date(submission.submitted_at).toLocaleDateString()}</span>
+                              {submission.is_winner && (
+                                <>
+                                  <span>•</span>
+                                  <Trophy className="w-3 h-3 text-secondary" />
+                                </>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
+                      </Card>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
             )}
           </TabsContent>
