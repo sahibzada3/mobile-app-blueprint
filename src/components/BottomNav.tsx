@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Camera, Trophy, User } from "lucide-react";
+import { Home, Camera, Trophy, User, Link2 } from "lucide-react";
 
 export default function BottomNav() {
   const location = useLocation();
   
   const navItems = [
     { icon: Home, label: "Feed", path: "/feed" },
+    { icon: Link2, label: "Spotlight", path: "/spotlight" },
     { icon: Camera, label: "Camera", path: "/camera" },
     { icon: Trophy, label: "Challenges", path: "/challenges" },
     { icon: User, label: "Profile", path: "/profile" },
@@ -13,7 +14,7 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
-      <div className="flex justify-around items-center h-16 max-w-lg mx-auto">
+      <div className="flex justify-around items-center h-16 max-w-2xl mx-auto">
         {navItems.map(({ icon: Icon, label, path }) => {
           const isActive = location.pathname === path;
           return (

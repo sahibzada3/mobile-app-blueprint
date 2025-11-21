@@ -12,6 +12,8 @@ import Camera from "./pages/Camera";
 import Editor from "./pages/Editor";
 import Challenges from "./pages/Challenges";
 import Profile from "./pages/Profile";
+import Spotlight from "./pages/Spotlight";
+import SpotlightChain from "./pages/SpotlightChain";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +33,8 @@ const App = () => (
             <Route path="/camera" element={<Camera />} />
             <Route path="/editor" element={<Editor />} />
             <Route path="/challenges" element={<Challenges />} />
+            <Route path="/spotlight" element={<Spotlight />} />
+            <Route path="/spotlight/:chainId" element={<SpotlightChain />} />
             <Route path="/profile" element={<Profile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
