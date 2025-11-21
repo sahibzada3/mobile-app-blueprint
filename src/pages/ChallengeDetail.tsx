@@ -12,13 +12,16 @@ import BadgeDisplay from "@/components/challenges/BadgeDisplay";
 import SubmitDialog from "@/components/challenges/SubmitDialog";
 import SubmissionModal from "@/components/challenges/SubmissionModal";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSound } from "@/hooks/useSound";
 
 export default function ChallengeDetail() {
   const { challengeId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { playSound } = useSound();
   const [challenge, setChallenge] = useState<any>(null);
   const [submissions, setSubmissions] = useState<any[]>([]);
+  const [previousSubmissions, setPreviousSubmissions] = useState<any[]>([]);
   const [badges, setBadges] = useState<any[]>([]);
   const [userSubmission, setUserSubmission] = useState<any>(null);
   const [userVotes, setUserVotes] = useState<Record<string, string>>({});
@@ -127,7 +130,34 @@ export default function ChallengeDetail() {
         .order("submitted_at", { ascending: true });
 
       if (submissionsError) throw submissionsError;
-      setSubmissions(submissionsData || []);
+      
+      const newSubmissions = submissionsData || [];
+
+      // Detect changes and play sounds
+      if (previousSubmissions.length > 0) {
+        // Check for new submissions
+        if (newSubmissions.length > previousSubmissions.length) {
+          playSound('newSubmission');
+          sonnerToast.success('New submission!', {
+            description: 'A new entry has been added to the challenge'
+          });
+        }
+
+        // Check for position changes
+        newSubmissions.forEach((submission, newIndex) => {
+          const oldIndex = previousSubmissions.findIndex(s => s.id === submission.id);
+          if (oldIndex !== -1 && oldIndex !== newIndex) {
+            if (newIndex < oldIndex) {
+              playSound('positionUp');
+            } else {
+              playSound('positionDown');
+            }
+          }
+        });
+      }
+
+      setPreviousSubmissions(newSubmissions);
+      setSubmissions(newSubmissions);
 
       // Check if current user has submitted
       const { data: { session } } = await supabase.auth.getSession();
