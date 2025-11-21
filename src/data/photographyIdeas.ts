@@ -10,6 +10,18 @@ import fogMystery from "@/assets/ideas/fog-mystery.jpg";
 import coastalWaves from "@/assets/ideas/coastal-waves.jpg";
 import nightStars from "@/assets/ideas/night-stars.jpg";
 import rainReflections from "@/assets/ideas/rain-reflections.jpg";
+import ruleOfThirds from "@/assets/ideas/rule-of-thirds.jpg";
+import leadingLines from "@/assets/ideas/leading-lines.jpg";
+import goldenTriangle from "@/assets/ideas/golden-triangle.jpg";
+import blueHour from "@/assets/ideas/blue-hour.jpg";
+import backlightSilhouettes from "@/assets/ideas/backlight-silhouettes.jpg";
+import stormDrama from "@/assets/ideas/storm-drama.jpg";
+import snowScenes from "@/assets/ideas/snow-scenes.jpg";
+import urbanGeometry from "@/assets/ideas/urban-geometry.jpg";
+import panorama from "@/assets/ideas/panorama.jpg";
+import macroNature from "@/assets/ideas/macro-nature.jpg";
+import sunsetClouds from "@/assets/ideas/sunset-clouds.jpg";
+import foregroundFraming from "@/assets/ideas/foreground-framing.jpg";
 
 export interface PhotographyIdea {
   id: string;
@@ -39,6 +51,7 @@ export const photographyIdeas: PhotographyIdea[] = [
       "Use grid overlay on your camera for accuracy"
     ],
     bestTime: "Any time of day",
+    imageUrl: ruleOfThirds,
   },
   {
     id: "leading-lines",
@@ -53,6 +66,7 @@ export const photographyIdeas: PhotographyIdea[] = [
       "Converging lines add depth and perspective"
     ],
     bestTime: "Any time, especially golden hour for shadows",
+    imageUrl: leadingLines,
   },
   {
     id: "golden-triangle",
@@ -67,6 +81,7 @@ export const photographyIdeas: PhotographyIdea[] = [
       "Creates more dynamic feel than rule of thirds"
     ],
     bestTime: "Any time of day",
+    imageUrl: goldenTriangle,
   },
   
   // Lighting Techniques
@@ -101,6 +116,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     bestTime: "20-40 minutes after sunset or before sunrise",
     weatherConditions: ["Clear", "Partly Cloudy"],
     equipment: ["Tripod", "Remote shutter"],
+    imageUrl: blueHour,
   },
   {
     id: "backlight-silhouettes",
@@ -116,6 +132,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     ],
     bestTime: "Sunrise or sunset",
     weatherConditions: ["Clear"],
+    imageUrl: backlightSilhouettes,
   },
   
   // Weather-Based
@@ -167,6 +184,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     bestTime: "Before, during, or after storms",
     weatherConditions: ["Stormy", "Thunderstorm"],
     equipment: ["Tripod", "Remote shutter", "Rain protection"],
+    imageUrl: stormDrama,
   },
   {
     id: "snow-scenes",
@@ -183,6 +201,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     bestTime: "Early morning for fresh snow",
     weatherConditions: ["Snow", "Cloudy"],
     equipment: ["Lens hood", "Battery extras"],
+    imageUrl: snowScenes,
   },
   
   // Location-Based
@@ -267,6 +286,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     ],
     bestTime: "Blue hour for city lights",
     weatherConditions: ["Any"],
+    imageUrl: urbanGeometry,
   },
   
   // Advanced Techniques
@@ -302,6 +322,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     bestTime: "Any time of day",
     weatherConditions: ["Any"],
     equipment: ["Tripod", "Panoramic head (optional)"],
+    imageUrl: panorama,
   },
   {
     id: "foreground-framing",
@@ -316,6 +337,7 @@ export const photographyIdeas: PhotographyIdea[] = [
       "Create depth by including multiple layers"
     ],
     bestTime: "Any time of day",
+    imageUrl: foregroundFraming,
   },
   {
     id: "macro-nature",
@@ -332,6 +354,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     bestTime: "Morning for dew, afternoon for insects",
     weatherConditions: ["Cloudy", "Shade"],
     equipment: ["Macro lens", "Tripod", "Reflector"],
+    imageUrl: macroNature,
   },
   {
     id: "sunset-clouds",
@@ -348,6 +371,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     bestTime: "30 minutes before until 30 minutes after sunset",
     weatherConditions: ["Partly Cloudy", "Scattered Clouds"],
     equipment: ["Graduated ND filter (optional)"],
+    imageUrl: sunsetClouds,
   },
 ];
 
@@ -362,12 +386,12 @@ export const getDifficultyColor = (difficulty: DifficultyLevel): string => {
 
 export const getCategoryIcon = (category: IdeaCategory): string => {
   const icons: Record<IdeaCategory, string> = {
-    technique: "⚡",
-    location: "📍",
-    weather: "🌤️",
-    composition: "🎨",
-    lighting: "💡",
-    equipment: "📷",
+    technique: "Zap",
+    location: "MapPin",
+    weather: "Cloud",
+    composition: "Palette",
+    lighting: "Sun",
+    equipment: "Camera",
   };
   return icons[category];
 };

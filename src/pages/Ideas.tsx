@@ -164,21 +164,21 @@ export default function Ideas() {
                   className="cursor-pointer px-3 py-2 hover:scale-105 transition-all"
                   onClick={() => setSelectedDifficulty("beginner")}
                 >
-                  🌱 Beginner
+                  Beginner
                 </Badge>
                 <Badge
                   variant={selectedDifficulty === "intermediate" ? "default" : "outline"}
                   className="cursor-pointer px-3 py-2 hover:scale-105 transition-all"
                   onClick={() => setSelectedDifficulty("intermediate")}
                 >
-                  ⚡ Intermediate
+                  Intermediate
                 </Badge>
                 <Badge
                   variant={selectedDifficulty === "advanced" ? "default" : "outline"}
                   className="cursor-pointer px-3 py-2 hover:scale-105 transition-all"
                   onClick={() => setSelectedDifficulty("advanced")}
                 >
-                  🏆 Advanced
+                  Advanced
                 </Badge>
               </div>
             </div>
