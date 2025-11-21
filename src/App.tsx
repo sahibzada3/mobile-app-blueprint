@@ -11,6 +11,7 @@ import Feed from "./pages/Feed";
 import Camera from "./pages/Camera";
 import Editor from "./pages/Editor";
 import Challenges from "./pages/Challenges";
+import ChallengeDetail from "./pages/ChallengeDetail";
 import Profile from "./pages/Profile";
 import Spotlight from "./pages/Spotlight";
 import SpotlightChain from "./pages/SpotlightChain";
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/camera" element={<Camera />} />
             <Route path="/editor" element={<Editor />} />
             <Route path="/challenges" element={<Challenges />} />
+            <Route path="/challenges/:challengeId" element={<ChallengeDetail />} />
             <Route path="/spotlight" element={<Spotlight />} />
             <Route path="/spotlight/:chainId" element={<SpotlightChain />} />
             <Route path="/ideas" element={<Ideas />} />
