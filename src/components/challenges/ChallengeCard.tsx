@@ -66,6 +66,11 @@ export default function ChallengeCard({ challenge, submissionCount = 0 }: Challe
     >
       {challenge.image_url && (
         <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
+          <img 
+            src={challenge.image_url} 
+            alt={challenge.title}
+            className="w-full h-full object-cover"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div className="absolute bottom-3 left-3 right-3">
             <h3 className="text-xl font-bold text-white mb-2">{challenge.title}</h3>
