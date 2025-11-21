@@ -35,6 +35,7 @@ export default function Spotlight() {
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [friendIds, setFriendIds] = useState<string[]>([]);
   const [selectedFriend, setSelectedFriend] = useState<{
     id: string;
     name: string;
@@ -44,12 +45,14 @@ export default function Spotlight() {
   useEffect(() => {
     checkAuth();
     loadChains();
+    loadFriends();
 
     const channel = supabase
       .channel('spotlight-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'spotlight_chains' }, loadChains)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'chain_participants' }, loadChains)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'chain_contributions' }, loadChains)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'friendships' }, loadFriends)
       .subscribe();
 
     return () => {
@@ -64,6 +67,25 @@ export default function Spotlight() {
       return;
     }
     setUser(session.user);
+  };
+
+  const loadFriends = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data, error } = await supabase
+        .from("friendships")
+        .select("friend_id")
+        .eq("user_id", session.user.id)
+        .eq("status", "accepted");
+
+      if (error) throw error;
+
+      setFriendIds(data?.map(f => f.friend_id) || []);
+    } catch (error: any) {
+      console.error("Failed to load friends:", error);
+    }
   };
 
   const loadChains = async () => {
@@ -104,6 +126,7 @@ export default function Spotlight() {
 
   const getTrendingChains = () => {
     return [...chains]
+      .filter(chain => friendIds.includes(chain.creator_id) || chain.creator_id === user?.id)
       .sort((a, b) => (b.contribution_count || 0) - (a.contribution_count || 0))
       .slice(0, 10);
   };
