@@ -4,9 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, User as UserIcon, Camera, Heart, Image, Moon, Sun } from "lucide-react";
+import { LogOut, User as UserIcon, Camera, Heart, Image, Moon, Sun, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
 import NotificationBell from "@/components/notifications/NotificationBell";
@@ -93,6 +93,9 @@ export default function Profile() {
           <h1 className="text-xl font-display font-bold text-primary">Profile</h1>
           <div className="flex items-center gap-2">
             <NotificationBell />
+            <Button variant="ghost" size="icon" onClick={() => navigate("/profile/settings")}>
+              <Settings className="w-5 h-5" />
+            </Button>
             <Button variant="ghost" size="icon" onClick={toggleTheme}>
               {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </Button>
@@ -107,11 +110,17 @@ export default function Profile() {
         <Card className="shadow-nature">
           <CardContent className="p-6">
             <div className="text-center mb-6">
-              <Avatar className="w-24 h-24 mx-auto mb-4">
-                <AvatarFallback className="bg-primary/10 text-primary text-2xl">
-                  {profile?.username?.charAt(0).toUpperCase() || <UserIcon />}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative w-24 h-24 mx-auto mb-4">
+                <Avatar className="w-24 h-24">
+                  {profile?.avatar_url ? (
+                    <AvatarImage src={profile.avatar_url} />
+                  ) : (
+                    <AvatarFallback className="bg-primary/10 text-primary text-2xl">
+                      {profile?.username?.charAt(0).toUpperCase() || <UserIcon />}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              </div>
               <h2 className="text-2xl font-display font-bold mb-1">
                 {profile?.username || "Unknown User"}
               </h2>
