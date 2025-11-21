@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Camera, Trophy, Users, Calendar, Clock, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Camera, Trophy, Users, Calendar, Clock, CheckCircle2, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import BadgeDisplay from "@/components/challenges/BadgeDisplay";
 import SubmitDialog from "@/components/challenges/SubmitDialog";
 
@@ -18,6 +19,7 @@ export default function ChallengeDetail() {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [badges, setBadges] = useState<any[]>([]);
   const [userSubmission, setUserSubmission] = useState<any>(null);
+  const [userVotes, setUserVotes] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
 
@@ -79,6 +81,24 @@ export default function ChallengeDetail() {
         .limit(3);
       
       setBadges(badgesData || []);
+
+      // Fetch user's votes for these submissions
+      if (session && submissionsData) {
+        const photoIds = submissionsData.map(s => s.photo_id);
+        const { data: votesData } = await supabase
+          .from("votes")
+          .select("photo_id, vote_type")
+          .eq("user_id", session.user.id)
+          .in("photo_id", photoIds);
+        
+        if (votesData) {
+          const votesMap: Record<string, string> = {};
+          votesData.forEach(vote => {
+            votesMap[vote.photo_id] = vote.vote_type;
+          });
+          setUserVotes(votesMap);
+        }
+      }
     } catch (error: any) {
       console.error("Error fetching challenge:", error);
       toast({
@@ -122,6 +142,85 @@ export default function ChallengeDetail() {
         return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
       default:
         return "bg-primary/10 text-primary";
+    }
+  };
+
+  const handleVote = async (photoId: string, voteType: "upvote" | "downvote") => {
+    if (!user) {
+      sonnerToast.error("Please sign in to vote");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const existingVote = userVotes[photoId];
+
+      // If clicking the same vote type, remove the vote
+      if (existingVote === voteType) {
+        const { error } = await supabase
+          .from("votes")
+          .delete()
+          .eq("photo_id", photoId)
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+
+        // Update local state
+        const newVotes = { ...userVotes };
+        delete newVotes[photoId];
+        setUserVotes(newVotes);
+
+        // Update submission score
+        setSubmissions(prev => prev.map(sub => {
+          if (sub.photo_id === photoId) {
+            const scoreChange = voteType === "upvote" ? -1 : 1;
+            return { ...sub, score: sub.score + scoreChange };
+          }
+          return sub;
+        }));
+      } else {
+        // Insert or update vote
+        const { error } = await supabase
+          .from("votes")
+          .upsert({
+            photo_id: photoId,
+            user_id: user.id,
+            vote_type: voteType,
+          }, {
+            onConflict: "user_id,photo_id"
+          });
+
+        if (error) throw error;
+
+        // Update local state
+        setUserVotes(prev => ({ ...prev, [photoId]: voteType }));
+
+        // Update submission score
+        setSubmissions(prev => prev.map(sub => {
+          if (sub.photo_id === photoId) {
+            let scoreChange = voteType === "upvote" ? 1 : -1;
+            if (existingVote) {
+              scoreChange = voteType === "upvote" ? 2 : -2;
+            }
+            return { ...sub, score: sub.score + scoreChange };
+          }
+          return sub;
+        }));
+
+        // Update challenge_submission score
+        const submission = submissions.find(s => s.photo_id === photoId);
+        if (submission) {
+          await supabase
+            .from("challenge_submissions")
+            .update({ score: submission.score + (voteType === "upvote" ? 1 : -1) })
+            .eq("id", submission.id);
+        }
+      }
+
+      sonnerToast.success(voteType === "upvote" ? "Upvoted!" : "Downvoted!");
+    } catch (error: any) {
+      console.error("Vote error:", error);
+      sonnerToast.error("Failed to vote");
     }
   };
 
@@ -306,11 +405,39 @@ export default function ChallengeDetail() {
                           <Trophy className="w-4 h-4" />
                         </div>
                       )}
+                      
+                      {/* Voting Buttons - Only show if not user's own submission */}
+                      {user && submission.user_id !== user.id && (
+                        <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            size="icon"
+                            variant={userVotes[submission.photo_id] === "upvote" ? "default" : "secondary"}
+                            className="h-8 w-8 shadow-lg"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleVote(submission.photo_id, "upvote");
+                            }}
+                          >
+                            <ThumbsUp className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant={userVotes[submission.photo_id] === "downvote" ? "default" : "secondary"}
+                            className="h-8 w-8 shadow-lg"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleVote(submission.photo_id, "downvote");
+                            }}
+                          >
+                            <ThumbsDown className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                     <div className="p-3 space-y-1">
                       <p className="font-semibold text-sm truncate">{submission.profile?.username || "Anonymous"}</p>
                       <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>{submission.score} pts</span>
+                        <span className="font-semibold text-primary">{submission.score} pts</span>
                         <span>{new Date(submission.submitted_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                       </div>
                       {submission.photo?.caption && (
