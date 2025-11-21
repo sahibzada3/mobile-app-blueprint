@@ -81,8 +81,12 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
   const [editedContent, setEditedContent] = useState("");
   const [showReactions, setShowReactions] = useState<string | null>(null);
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionSearch, setMentionSearch] = useState("");
+  const [cursorPosition, setCursorPosition] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const presenceChannelRef = useRef<any>(null);
 
@@ -268,6 +272,13 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
     }
     updateTypingStatus(false);
 
+    // Extract mentions from message
+    const mentionRegex = /@(\w+)/g;
+    const mentions = [...newMessage.matchAll(mentionRegex)].map(match => match[1]);
+    const mentionedUserIds = participants
+      .filter(p => mentions.includes(p.profiles.username))
+      .map(p => p.user_id);
+
     const { error } = await supabase
       .from("chain_messages")
       .insert({
@@ -282,7 +293,96 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
       return;
     }
 
+    // Create notifications for mentioned users
+    if (mentionedUserIds.length > 0) {
+      const currentUser = participants.find(p => p.user_id === currentUserId);
+      await Promise.all(
+        mentionedUserIds.map(userId =>
+          supabase.from("notifications").insert({
+            user_id: userId,
+            type: "mention",
+            title: "You were mentioned",
+            message: `${currentUser?.profiles.username || 'Someone'} mentioned you in ${chainTitle}`,
+            related_type: "chain",
+            related_id: chainId
+          })
+        )
+      );
+    }
+
     setNewMessage("");
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const cursorPos = e.target.selectionStart || 0;
+    
+    setNewMessage(value);
+    setCursorPosition(cursorPos);
+    handleTyping();
+
+    // Check if user is typing @ for mentions
+    const textBeforeCursor = value.slice(0, cursorPos);
+    const lastAtSymbol = textBeforeCursor.lastIndexOf('@');
+    
+    if (lastAtSymbol !== -1) {
+      const textAfterAt = textBeforeCursor.slice(lastAtSymbol + 1);
+      if (!textAfterAt.includes(' ') && textAfterAt.length >= 0) {
+        setMentionSearch(textAfterAt.toLowerCase());
+        setShowMentions(true);
+      } else {
+        setShowMentions(false);
+      }
+    } else {
+      setShowMentions(false);
+    }
+  };
+
+  const handleMentionSelect = (username: string) => {
+    const textBeforeCursor = newMessage.slice(0, cursorPosition);
+    const lastAtSymbol = textBeforeCursor.lastIndexOf('@');
+    
+    const beforeMention = newMessage.slice(0, lastAtSymbol);
+    const afterCursor = newMessage.slice(cursorPosition);
+    
+    const newText = `${beforeMention}@${username} ${afterCursor}`;
+    setNewMessage(newText);
+    setShowMentions(false);
+    
+    // Focus input after mention
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+  };
+
+  const getFilteredParticipants = () => {
+    return participants.filter(p => 
+      p.user_id !== currentUserId &&
+      p.profiles.username.toLowerCase().includes(mentionSearch)
+    );
+  };
+
+  const renderMessageContent = (content: string) => {
+    const mentionRegex = /@(\w+)/g;
+    const parts = content.split(mentionRegex);
+    
+    return parts.map((part, index) => {
+      // Check if this part is a username (odd indices after split)
+      if (index % 2 === 1) {
+        const isValidMention = participants.some(p => p.profiles.username === part);
+        if (isValidMention) {
+          return (
+            <span
+              key={index}
+              className="bg-primary/20 text-primary font-semibold px-1 rounded"
+            >
+              @{part}
+            </span>
+          );
+        }
+      }
+      return <span key={index}>{part}</span>;
+    });
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -555,7 +655,11 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
                           duration={message.audio_duration || undefined}
                         />
                       )}
-                      {message.content && <p className="text-sm">{message.content}</p>}
+                      {message.content && (
+                        <p className="text-sm">
+                          {renderMessageContent(message.content)}
+                        </p>
+                      )}
                           <p className="text-xs opacity-70 mt-1">
                             {new Date(message.created_at).toLocaleTimeString([], {
                               hour: "2-digit",
@@ -674,41 +778,78 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
               onCancel={() => setIsRecordingVoice(false)}
             />
           ) : (
-            <div className="flex gap-2">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImageUpload}
-                accept="image/*"
-                className="hidden"
-              />
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingImage}
-              >
-                <ImageIcon className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setIsRecordingVoice(true)}
-              >
-                <Mic className="w-4 h-4" />
-              </Button>
-              <Input
-                placeholder="Type a message..."
-                value={newMessage}
-                onChange={(e) => {
-                  setNewMessage(e.target.value);
-                  handleTyping();
-                }}
-                onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-              />
-              <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
-                <Send className="w-4 h-4" />
-              </Button>
+            <div className="relative">
+              {/* Mention dropdown */}
+              <AnimatePresence>
+                {showMentions && getFilteredParticipants().length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute bottom-full left-0 right-0 mb-2 bg-background border rounded-lg shadow-lg max-h-48 overflow-y-auto"
+                  >
+                    {getFilteredParticipants().map((participant) => (
+                      <button
+                        key={participant.id}
+                        onClick={() => handleMentionSelect(participant.profiles.username)}
+                        className="w-full flex items-center gap-3 p-3 hover:bg-muted transition-colors text-left"
+                      >
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={participant.profiles.avatar_url || undefined} />
+                          <AvatarFallback className="text-xs">
+                            {participant.profiles.username[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">{participant.profiles.username}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Tap to mention
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingImage}
+                >
+                  <ImageIcon className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setIsRecordingVoice(true)}
+                >
+                  <Mic className="w-4 h-4" />
+                </Button>
+                <Input
+                  ref={inputRef}
+                  placeholder="Type @ to mention someone..."
+                  value={newMessage}
+                  onChange={handleInputChange}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" && !showMentions) {
+                      handleSendMessage();
+                    }
+                  }}
+                />
+                <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           )}
         </div>
