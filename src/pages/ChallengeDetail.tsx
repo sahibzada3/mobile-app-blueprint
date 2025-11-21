@@ -253,17 +253,77 @@ export default function ChallengeDetail() {
         </Card>
 
         {/* Tabs Section */}
-        <Tabs defaultValue="leaderboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="gallery" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="gallery">
+              <Camera className="w-4 h-4 mr-2" />
+              Gallery ({submissions.length})
+            </TabsTrigger>
             <TabsTrigger value="leaderboard">
               <Trophy className="w-4 h-4 mr-2" />
-              Leaderboard ({submissions.length})
+              Leaderboard
             </TabsTrigger>
             <TabsTrigger value="badges">
               <Trophy className="w-4 h-4 mr-2" />
-              Badges ({badges.length})
+              Badges
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="gallery" className="space-y-4">
+            {submissions.length === 0 ? (
+              <Card className="p-12 text-center">
+                <Camera className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <p className="text-lg font-medium text-muted-foreground mb-2">No submissions yet</p>
+                <p className="text-sm text-muted-foreground">Be the first to take on this challenge!</p>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {submissions.map((submission, index) => (
+                  <Card key={submission.id} className="overflow-hidden group hover:shadow-xl transition-all duration-300">
+                    <div className="relative aspect-square bg-muted">
+                      {submission.photo?.image_url ? (
+                        <img
+                          src={submission.photo.image_url}
+                          alt={`Submission by ${submission.profile?.username || "Anonymous"}`}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Camera className="w-12 h-12 text-muted-foreground opacity-20" />
+                        </div>
+                      )}
+                      {index < 3 && (
+                        <div className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                          index === 0 ? "bg-amber-500 text-white" :
+                          index === 1 ? "bg-gray-400 text-white" :
+                          "bg-amber-700 text-white"
+                        }`}>
+                          {index + 1}
+                        </div>
+                      )}
+                      {submission.is_winner && (
+                        <div className="absolute top-2 left-2 bg-secondary text-secondary-foreground rounded-full p-2">
+                          <Trophy className="w-4 h-4" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3 space-y-1">
+                      <p className="font-semibold text-sm truncate">{submission.profile?.username || "Anonymous"}</p>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>{submission.score} pts</span>
+                        <span>{new Date(submission.submitted_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                      </div>
+                      {submission.photo?.caption && (
+                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                          {submission.photo.caption}
+                        </p>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
           <TabsContent value="leaderboard" className="space-y-4">
             {submissions.length === 0 ? (
