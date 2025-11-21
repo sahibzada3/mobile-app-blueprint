@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Camera, Loader2, Trash2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { ArrowLeft, Camera, Loader2, Trash2, Shield } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -35,6 +36,12 @@ export default function ProfileSettings() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  
+  const [privacySettings, setPrivacySettings] = useState({
+    profile_visibility: "everyone",
+    photo_visibility: "everyone",
+    activity_visibility: "everyone"
+  });
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,6 +70,15 @@ export default function ProfileSettings() {
       setProfile(profileData);
       setUsername(profileData.username || "");
       setBio(profileData.bio || "");
+      
+      if (profileData.privacy_settings && typeof profileData.privacy_settings === 'object') {
+        const settings = profileData.privacy_settings as any;
+        setPrivacySettings({
+          profile_visibility: settings.profile_visibility || "everyone",
+          photo_visibility: settings.photo_visibility || "everyone",
+          activity_visibility: settings.activity_visibility || "everyone"
+        });
+      }
     } catch (error) {
       console.error("Error loading profile:", error);
       toast.error("Failed to load profile");
@@ -179,6 +195,29 @@ export default function ProfileSettings() {
     } catch (error: any) {
       console.error("Error changing password:", error);
       toast.error(error.message || "Failed to change password");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSavePrivacySettings = async () => {
+    setSaving(true);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({ privacy_settings: privacySettings })
+        .eq("id", session.user.id);
+
+      if (error) throw error;
+
+      toast.success("Privacy settings updated!");
+    } catch (error: any) {
+      console.error("Error updating privacy settings:", error);
+      toast.error("Failed to update privacy settings");
     } finally {
       setSaving(false);
     }
@@ -375,6 +414,184 @@ export default function ProfileSettings() {
             >
               {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Change Password
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Privacy Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              Privacy Settings
+            </CardTitle>
+            <CardDescription>Control who can see your content and activity</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Profile Visibility */}
+            <div className="space-y-4">
+              <div>
+                <Label className="text-base font-semibold">Profile Visibility</Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Who can view your profile information
+                </p>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="profile-everyone">Everyone</Label>
+                    <p className="text-xs text-muted-foreground">Anyone can view your profile</p>
+                  </div>
+                  <Switch
+                    id="profile-everyone"
+                    checked={privacySettings.profile_visibility === "everyone"}
+                    onCheckedChange={(checked) => {
+                      if (checked) setPrivacySettings({ ...privacySettings, profile_visibility: "everyone" });
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="profile-friends">Friends Only</Label>
+                    <p className="text-xs text-muted-foreground">Only your friends can view</p>
+                  </div>
+                  <Switch
+                    id="profile-friends"
+                    checked={privacySettings.profile_visibility === "friends"}
+                    onCheckedChange={(checked) => {
+                      if (checked) setPrivacySettings({ ...privacySettings, profile_visibility: "friends" });
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="profile-private">Private</Label>
+                    <p className="text-xs text-muted-foreground">Only you can view</p>
+                  </div>
+                  <Switch
+                    id="profile-private"
+                    checked={privacySettings.profile_visibility === "private"}
+                    onCheckedChange={(checked) => {
+                      if (checked) setPrivacySettings({ ...privacySettings, profile_visibility: "private" });
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Photo Visibility */}
+            <div className="space-y-4">
+              <div>
+                <Label className="text-base font-semibold">Photo Visibility</Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Who can see your photos
+                </p>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="photo-everyone">Everyone</Label>
+                    <p className="text-xs text-muted-foreground">Anyone can see your photos</p>
+                  </div>
+                  <Switch
+                    id="photo-everyone"
+                    checked={privacySettings.photo_visibility === "everyone"}
+                    onCheckedChange={(checked) => {
+                      if (checked) setPrivacySettings({ ...privacySettings, photo_visibility: "everyone" });
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="photo-friends">Friends Only</Label>
+                    <p className="text-xs text-muted-foreground">Only friends can see</p>
+                  </div>
+                  <Switch
+                    id="photo-friends"
+                    checked={privacySettings.photo_visibility === "friends"}
+                    onCheckedChange={(checked) => {
+                      if (checked) setPrivacySettings({ ...privacySettings, photo_visibility: "friends" });
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="photo-private">Private</Label>
+                    <p className="text-xs text-muted-foreground">Only you can see</p>
+                  </div>
+                  <Switch
+                    id="photo-private"
+                    checked={privacySettings.photo_visibility === "private"}
+                    onCheckedChange={(checked) => {
+                      if (checked) setPrivacySettings({ ...privacySettings, photo_visibility: "private" });
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Activity Visibility */}
+            <div className="space-y-4">
+              <div>
+                <Label className="text-base font-semibold">Activity Visibility</Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Who can see your activity (votes, comments, chains)
+                </p>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="activity-everyone">Everyone</Label>
+                    <p className="text-xs text-muted-foreground">Anyone can see your activity</p>
+                  </div>
+                  <Switch
+                    id="activity-everyone"
+                    checked={privacySettings.activity_visibility === "everyone"}
+                    onCheckedChange={(checked) => {
+                      if (checked) setPrivacySettings({ ...privacySettings, activity_visibility: "everyone" });
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="activity-friends">Friends Only</Label>
+                    <p className="text-xs text-muted-foreground">Only friends can see</p>
+                  </div>
+                  <Switch
+                    id="activity-friends"
+                    checked={privacySettings.activity_visibility === "friends"}
+                    onCheckedChange={(checked) => {
+                      if (checked) setPrivacySettings({ ...privacySettings, activity_visibility: "friends" });
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="activity-private">Private</Label>
+                    <p className="text-xs text-muted-foreground">Only you can see</p>
+                  </div>
+                  <Switch
+                    id="activity-private"
+                    checked={privacySettings.activity_visibility === "private"}
+                    onCheckedChange={(checked) => {
+                      if (checked) setPrivacySettings({ ...privacySettings, activity_visibility: "private" });
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleSavePrivacySettings}
+              disabled={saving}
+              className="w-full"
+            >
+              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Save Privacy Settings
             </Button>
           </CardContent>
         </Card>
