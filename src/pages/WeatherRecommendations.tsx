@@ -21,6 +21,17 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+// Import photography images
+import goldenHourImg from "@/assets/ideas/sunset-golden.jpg";
+import cloudTextureImg from "@/assets/ideas/sunset-clouds.jpg";
+import overcastImg from "@/assets/ideas/forest-light.jpg";
+import fogImg from "@/assets/ideas/fog-mystery.jpg";
+import rainImg from "@/assets/ideas/rain-reflections.jpg";
+import winterImg from "@/assets/ideas/snow-scenes.jpg";
+import windImg from "@/assets/ideas/storm-drama.jpg";
+import mistyImg from "@/assets/ideas/coastal-waves.jpg";
+import wildlifeImg from "@/assets/ideas/macro-nature.jpg";
+
 interface WeatherRecommendation {
   temperature: number;
   condition: string;
@@ -39,6 +50,7 @@ interface WeatherRecommendation {
     description: string;
     icon: string;
     bestTime: string;
+    image: string;
   }>;
 }
 
@@ -183,7 +195,8 @@ export default function WeatherRecommendations() {
         title: "Golden Hour Photography",
         description: "Perfect clear conditions for stunning golden hour shots. The warm light will create beautiful tones and long shadows.",
         icon: "🌅",
-        bestTime: "Sunrise & Sunset"
+        bestTime: "Sunrise & Sunset",
+        image: goldenHourImg
       });
     }
 
@@ -192,7 +205,8 @@ export default function WeatherRecommendations() {
         title: "Cloud Texture Shots",
         description: "Partially cloudy skies add drama and depth. Great for landscape photography with interesting cloud formations.",
         icon: "🌤️",
-        bestTime: "All Day"
+        bestTime: "All Day",
+        image: cloudTextureImg
       });
     }
 
@@ -201,7 +215,8 @@ export default function WeatherRecommendations() {
         title: "Even Lighting Photography",
         description: "Overcast conditions provide soft, even lighting ideal for portraits and macro photography. Colors appear more saturated.",
         icon: "☁️",
-        bestTime: "Midday"
+        bestTime: "Midday",
+        image: overcastImg
       });
     }
 
@@ -210,7 +225,8 @@ export default function WeatherRecommendations() {
         title: "Atmospheric Fog Shots",
         description: "Fog creates mysterious, moody atmospheres. Perfect for minimalist compositions and silhouettes.",
         icon: "🌫️",
-        bestTime: "Early Morning"
+        bestTime: "Early Morning",
+        image: fogImg
       });
     }
 
@@ -219,7 +235,8 @@ export default function WeatherRecommendations() {
         title: "Raindrop Macro Photography",
         description: "Capture water droplets on leaves, flowers, or surfaces. Use protective gear for your camera.",
         icon: "💧",
-        bestTime: "During/After Rain"
+        bestTime: "During/After Rain",
+        image: rainImg
       });
     }
 
@@ -228,7 +245,8 @@ export default function WeatherRecommendations() {
         title: "Winter Wonderland",
         description: "Cold conditions may bring frost or snow. Look for ice crystals, frozen textures, and winter landscapes.",
         icon: "❄️",
-        bestTime: "Morning"
+        bestTime: "Morning",
+        image: winterImg
       });
     }
 
@@ -237,7 +255,8 @@ export default function WeatherRecommendations() {
         title: "Motion Blur Effects",
         description: "Strong winds create movement. Use slower shutter speeds to capture flowing grass, trees, or clouds.",
         icon: "💨",
-        bestTime: "Afternoon"
+        bestTime: "Afternoon",
+        image: windImg
       });
     }
 
@@ -246,7 +265,8 @@ export default function WeatherRecommendations() {
         title: "Misty Landscape Photography",
         description: "High humidity can create mist and haze. Perfect for ethereal landscape shots with soft, dreamy quality.",
         icon: "🌊",
-        bestTime: "Dawn"
+        bestTime: "Dawn",
+        image: mistyImg
       });
     }
 
@@ -255,7 +275,8 @@ export default function WeatherRecommendations() {
       title: "Wildlife Activity",
       description: "Animals are most active during golden hours. Look for birds, insects, and other wildlife in natural settings.",
       icon: "🦋",
-      bestTime: "Dawn & Dusk"
+      bestTime: "Dawn & Dusk",
+      image: wildlifeImg
     });
 
     return recommendations.slice(0, 4); // Return top 4 recommendations
@@ -438,21 +459,25 @@ export default function WeatherRecommendations() {
             Photography Recommendations
           </h2>
           {weatherData.recommendations.map((rec, index) => (
-            <Card key={index} className="shadow-nature border-0 hover-scale cursor-pointer transition-all">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-4">
+            <Card key={index} className="shadow-nature border-0 hover-scale cursor-pointer transition-all overflow-hidden">
+              <div className="relative h-48 overflow-hidden">
+                <img 
+                  src={rec.image} 
+                  alt={rec.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
                   <div className="text-4xl">{rec.icon}</div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold">{rec.title}</h3>
-                      <Badge variant="outline" className="text-xs">
-                        <Clock className="w-3 h-3 mr-1" />
-                        {rec.bestTime}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{rec.description}</p>
-                  </div>
+                  <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm">
+                    <Clock className="w-3 h-3 mr-1" />
+                    {rec.bestTime}
+                  </Badge>
                 </div>
+              </div>
+              <CardContent className="p-4">
+                <h3 className="font-semibold mb-2">{rec.title}</h3>
+                <p className="text-sm text-muted-foreground">{rec.description}</p>
               </CardContent>
             </Card>
           ))}
