@@ -293,20 +293,20 @@ export default function Profile() {
         </Card>
 
         {/* Achievements Banner */}
-        <Card className="shadow-nature border-0 bg-gradient-to-r from-accent/10 via-primary/10 to-accent/10 animate-fade-in">
+        <Card className="shadow-nature border-0 bg-gradient-to-r from-accent/10 via-primary/10 to-accent/10 animate-fade-in hover-scale cursor-pointer" onClick={() => navigate("/weather")}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                  <Award className="w-6 h-6 text-primary" />
+                  <Wind className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="font-semibold">Photography Achievements</p>
-                  <p className="text-xs text-muted-foreground">1 of 12 unlocked</p>
+                  <p className="font-semibold">Weather Forecast</p>
+                  <p className="text-xs text-muted-foreground">Best shooting times & conditions</p>
                 </div>
               </div>
               <Button variant="ghost" size="sm">
-                View All
+                View →
               </Button>
             </div>
           </CardContent>
