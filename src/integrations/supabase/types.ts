@@ -159,6 +159,7 @@ export type Database = {
       }
       challenges: {
         Row: {
+          badges_awarded: boolean | null
           category: string
           created_at: string | null
           description: string
@@ -175,6 +176,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          badges_awarded?: boolean | null
           category: string
           created_at?: string | null
           description: string
@@ -191,6 +193,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          badges_awarded?: boolean | null
           category?: string
           created_at?: string | null
           description?: string
@@ -205,6 +208,42 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          read: boolean | null
+          related_id: string | null
+          related_type: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          related_id?: string | null
+          related_type?: string | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          related_id?: string | null
+          related_type?: string | null
+          title?: string
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }
