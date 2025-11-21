@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Camera, Trophy, Users, Calendar, Clock, CheckCircle2, Upload } from "lucide-react";
+import { ArrowLeft, Camera, Trophy, Users, Calendar, Clock, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BadgeDisplay from "@/components/challenges/BadgeDisplay";
+import SubmitDialog from "@/components/challenges/SubmitDialog";
 
 export default function ChallengeDetail() {
   const { challengeId } = useParams();
@@ -234,14 +235,12 @@ export default function ChallengeDetail() {
 
             {/* Action Button */}
             {!userSubmission ? (
-              <Button
-                size="lg"
-                className="w-full shadow-glow"
-                onClick={() => navigate("/camera", { state: { challengeId: challenge.id } })}
-              >
-                <Camera className="w-5 h-5 mr-2" />
-                Start Challenge
-              </Button>
+              <SubmitDialog challengeId={challenge.id} onSuccess={fetchChallengeData}>
+                <Button size="lg" className="w-full shadow-glow">
+                  <Camera className="w-5 h-5 mr-2" />
+                  Submit Entry
+                </Button>
+              </SubmitDialog>
             ) : (
               <div className="flex items-center justify-center gap-2 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                 <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
