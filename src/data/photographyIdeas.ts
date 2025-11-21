@@ -1,6 +1,16 @@
 export type DifficultyLevel = "beginner" | "intermediate" | "advanced";
 export type IdeaCategory = "technique" | "location" | "weather" | "composition" | "lighting" | "equipment";
 
+// Import images
+import mountainLandscape from "@/assets/ideas/mountain-landscape.jpg";
+import forestLight from "@/assets/ideas/forest-light.jpg";
+import sunsetGolden from "@/assets/ideas/sunset-golden.jpg";
+import waterfall from "@/assets/ideas/waterfall.jpg";
+import fogMystery from "@/assets/ideas/fog-mystery.jpg";
+import coastalWaves from "@/assets/ideas/coastal-waves.jpg";
+import nightStars from "@/assets/ideas/night-stars.jpg";
+import rainReflections from "@/assets/ideas/rain-reflections.jpg";
+
 export interface PhotographyIdea {
   id: string;
   title: string;
@@ -11,7 +21,7 @@ export interface PhotographyIdea {
   bestTime?: string;
   weatherConditions?: string[];
   equipment?: string[];
-  imagePrompt?: string;
+  imageUrl?: string;
 }
 
 export const photographyIdeas: PhotographyIdea[] = [
@@ -74,6 +84,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     ],
     bestTime: "First hour after sunrise, last hour before sunset",
     weatherConditions: ["Clear", "Partly Cloudy"],
+    imageUrl: sunsetGolden,
   },
   {
     id: "blue-hour",
@@ -122,6 +133,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     ],
     bestTime: "Early morning",
     weatherConditions: ["Fog", "Mist"],
+    imageUrl: fogMystery,
   },
   {
     id: "rain-reflections",
@@ -138,6 +150,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     bestTime: "During or just after rain",
     weatherConditions: ["Rain", "Drizzle"],
     equipment: ["Rain protection", "Lens cloth"],
+    imageUrl: rainReflections,
   },
   {
     id: "storm-drama",
@@ -187,6 +200,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     ],
     bestTime: "Early morning, especially misty days",
     weatherConditions: ["Fog", "Mist", "Partly Cloudy"],
+    imageUrl: forestLight,
   },
   {
     id: "waterfall-smooth",
@@ -203,6 +217,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     bestTime: "Overcast days or shade",
     weatherConditions: ["Cloudy", "Any"],
     equipment: ["Tripod", "ND filter", "Remote shutter"],
+    imageUrl: waterfall,
   },
   {
     id: "mountain-layers",
@@ -219,6 +234,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     bestTime: "Golden hour or blue hour",
     weatherConditions: ["Clear", "Hazy", "Partly Cloudy"],
     equipment: ["Telephoto lens"],
+    imageUrl: mountainLandscape,
   },
   {
     id: "coastal-long-exposure",
@@ -235,6 +251,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     bestTime: "Blue hour or overcast days",
     weatherConditions: ["Any", "Cloudy"],
     equipment: ["Strong ND filter", "Tripod", "Lens cloth"],
+    imageUrl: coastalWaves,
   },
   {
     id: "urban-geometry",
@@ -268,6 +285,7 @@ export const photographyIdeas: PhotographyIdea[] = [
     bestTime: "Clear nights, new moon phase",
     weatherConditions: ["Clear"],
     equipment: ["Tripod", "Wide lens", "Intervalometer"],
+    imageUrl: nightStars,
   },
   {
     id: "panorama-stitching",
