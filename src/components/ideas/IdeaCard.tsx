@@ -2,13 +2,22 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bookmark, ChevronDown, ChevronUp, Camera, Clock, Cloud } from "lucide-react";
+import { Bookmark, ChevronDown, ChevronUp, Camera, Clock, Cloud, Zap, MapPin, Palette, Sun } from "lucide-react";
 import { 
   PhotographyIdea, 
   getDifficultyColor, 
   getCategoryIcon, 
   getCategoryColor 
 } from "@/data/photographyIdeas";
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Zap,
+  MapPin,
+  Cloud,
+  Palette,
+  Sun,
+  Camera,
+};
 
 interface IdeaCardProps {
   idea: PhotographyIdea;
@@ -18,6 +27,7 @@ interface IdeaCardProps {
 
 export default function IdeaCard({ idea, isBookmarked, onBookmark }: IdeaCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const CategoryIcon = iconMap[getCategoryIcon(idea.category)] || Camera;
 
   return (
     <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
@@ -37,7 +47,7 @@ export default function IdeaCard({ idea, isBookmarked, onBookmark }: IdeaCardPro
               {idea.difficulty}
             </Badge>
             <Badge className={getCategoryColor(idea.category)} variant="outline">
-              <span className="mr-1">{getCategoryIcon(idea.category)}</span>
+              <CategoryIcon className="w-3.5 h-3.5 mr-1.5" />
               {idea.category}
             </Badge>
           </div>
@@ -121,7 +131,8 @@ export default function IdeaCard({ idea, isBookmarked, onBookmark }: IdeaCardPro
                 <div className="flex flex-wrap gap-2">
                   {idea.equipment.map((item, index) => (
                     <Badge key={index} variant="secondary" className="text-xs">
-                      📷 {item}
+                      <Camera className="w-3 h-3 mr-1" />
+                      {item}
                     </Badge>
                   ))}
                 </div>
@@ -135,7 +146,8 @@ export default function IdeaCard({ idea, isBookmarked, onBookmark }: IdeaCardPro
                 <div className="flex flex-wrap gap-2">
                   {idea.weatherConditions.map((condition, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
-                      ☁️ {condition}
+                      <Cloud className="w-3 h-3 mr-1" />
+                      {condition}
                     </Badge>
                   ))}
                 </div>
