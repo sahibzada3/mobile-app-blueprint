@@ -12,7 +12,8 @@ export type FilterType =
   | "beach-desert"
   | "sky-clouds"
   | "rain"
-  | "indoor-golden";
+  | "indoor-golden"
+  | "old-architecture";
 
 export const filterPresets: Record<FilterType, Partial<AdvancedSettings>> = {
   "golden-hour": {
@@ -121,6 +122,16 @@ export const filterPresets: Record<FilterType, Partial<AdvancedSettings>> = {
     shadows: 15,
     tint: 5,
     vignette: -5,
+  },
+  "old-architecture": {
+    brightness: 98,
+    contrast: 115,
+    saturation: 95,
+    temperature: 8,
+    texture: 20,
+    clarity: 10,
+    vignette: 15,
+    tint: -3,
   },
 };
 

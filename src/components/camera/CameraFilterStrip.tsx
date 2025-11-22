@@ -12,6 +12,7 @@ import beachDesertImg from "@/assets/filters/beach-desert.jpg";
 import skyCloudsImg from "@/assets/filters/sky-clouds.jpg";
 import rainImg from "@/assets/filters/rain.jpg";
 import indoorGoldenImg from "@/assets/filters/indoor-golden.jpg";
+import oldArchitectureImg from "@/assets/filters/old-architecture.jpg";
 
 interface CameraFilterStripProps {
   selectedFilter: FilterType | null;
@@ -25,6 +26,7 @@ const filters: { id: FilterType; label: string; image: string }[] = [
   { id: "fog-mist", label: "Fog & Mist", image: fogMistImg },
   { id: "silhouette", label: "Silhouette", image: silhouetteImg },
   { id: "urban", label: "Urban", image: urbanImg },
+  { id: "old-architecture", label: "Old Buildings", image: oldArchitectureImg },
   { id: "water", label: "Water", image: waterImg },
   { id: "forest", label: "Forest", image: forestImg },
   { id: "beach-desert", label: "Beach/Desert", image: beachDesertImg },
