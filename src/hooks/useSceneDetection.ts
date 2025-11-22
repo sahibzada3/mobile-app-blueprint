@@ -12,7 +12,7 @@ export function useSceneDetection(videoRef: React.RefObject<HTMLVideoElement>, e
   const [suggestion, setSuggestion] = useState<SceneSuggestion | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const lastAnalysisTime = useRef<number>(0);
-  const analysisInterval = 5000; // Analyze every 5 seconds
+  const analysisInterval = 15000; // Analyze every 15 seconds to avoid rate limits
 
   useEffect(() => {
     if (!enabled || !videoRef.current) return;
@@ -51,6 +51,13 @@ export function useSceneDetection(videoRef: React.RefObject<HTMLVideoElement>, e
 
         if (error) {
           console.error("Scene detection error:", error);
+          // Don't show error to user, just silently fail
+          return;
+        }
+
+        // Handle rate limit errors
+        if (data?.error === "Rate limit exceeded") {
+          console.log("Rate limit reached, will retry later");
           return;
         }
 
@@ -69,8 +76,8 @@ export function useSceneDetection(videoRef: React.RefObject<HTMLVideoElement>, e
     // Start periodic analysis
     const interval = setInterval(analyzeFrame, analysisInterval);
     
-    // Initial analysis after a short delay
-    const initialTimeout = setTimeout(analyzeFrame, 2000);
+    // Initial analysis after a longer delay to avoid immediate rate limiting
+    const initialTimeout = setTimeout(analyzeFrame, 5000);
 
     return () => {
       clearInterval(interval);
