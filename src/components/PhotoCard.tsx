@@ -3,7 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, MessageCircle, User, Music } from "lucide-react";
+import { Heart, MessageCircle, User, Music, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { musicTracks } from "@/data/musicTracks";
@@ -95,71 +96,111 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   };
 
   return (
-    <Card className="shadow-nature overflow-hidden">
+    <Card className="shadow-2xl overflow-hidden border-primary/20 bg-gradient-to-br from-card to-card/80 hover:shadow-3xl transition-all duration-300 group">
       <CardContent className="p-0">
-        <div className="flex items-center gap-3 p-4">
-          <Avatar className="w-10 h-10">
-            <AvatarFallback className="bg-primary/10 text-primary">
+        <motion.div 
+          className="flex items-center gap-3 p-4"
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <Avatar className="w-12 h-12 ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
+            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-primary font-semibold">
               {photo.profiles?.username?.charAt(0).toUpperCase() || <User className="w-5 h-5" />}
             </AvatarFallback>
           </Avatar>
-          <div>
-            <p className="font-medium">{photo.profiles?.username || "Unknown"}</p>
+          <div className="flex-1">
+            <p className="font-semibold text-foreground">{photo.profiles?.username || "Unknown"}</p>
             <p className="text-xs text-muted-foreground">
               {new Date(photo.created_at).toLocaleDateString()}
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="aspect-square bg-muted">
+        <motion.div 
+          className="relative aspect-square bg-gradient-to-br from-muted to-muted/50 overflow-hidden"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
           <img
             src={photo.image_url}
             alt={photo.caption || "Photo"}
             className="w-full h-full object-cover"
           />
-        </div>
+        </motion.div>
 
-        <div className="p-4 space-y-3">
+        <div className="p-4 space-y-4 bg-gradient-to-b from-card to-card/50">
           {musicTrack && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
-              <Music className="w-3.5 h-3.5 text-primary" />
-              <span className="font-medium">{musicTrack.name}</span>
-              <span>•</span>
-              <span>{musicTrack.artist}</span>
-              <Badge variant="outline" className="ml-auto text-xs">
+            <motion.div 
+              className="flex items-center gap-2 text-xs bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-xl px-4 py-2.5 border border-primary/20 shadow-sm"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
+                <Music className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground truncate">{musicTrack.name}</p>
+                <p className="text-muted-foreground truncate">{musicTrack.artist}</p>
+              </div>
+              <Badge variant="outline" className="ml-auto text-xs border-primary/30 bg-primary/5">
                 {musicTrack.mood}
               </Badge>
-            </div>
+            </motion.div>
           )}
 
-          <div className="flex items-center gap-4">
+          <motion.div 
+            className="flex items-center gap-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
             <Button
               variant="ghost"
               size="sm"
-              className="gap-2 p-0 h-auto hover:bg-transparent"
+              className="gap-2 p-0 h-auto hover:bg-transparent group/like"
               onClick={handleLike}
             >
-              <Heart
-                className={`w-6 h-6 transition-all ${
-                  liked ? "fill-primary text-primary" : "text-muted-foreground"
-                }`}
-              />
-              {likeCount > 0 && <span className="text-sm">{likeCount}</span>}
+              <motion.div
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Heart
+                  className={`w-7 h-7 transition-all ${
+                    liked 
+                      ? "fill-primary text-primary drop-shadow-lg" 
+                      : "text-muted-foreground group-hover/like:text-primary"
+                  }`}
+                />
+              </motion.div>
+              {likeCount > 0 && (
+                <span className={`text-sm font-semibold ${liked ? "text-primary" : "text-foreground"}`}>
+                  {likeCount}
+                </span>
+              )}
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              className="gap-2 p-0 h-auto hover:bg-transparent"
+              className="gap-2 p-0 h-auto hover:bg-transparent group/comment"
             >
-              <MessageCircle className="w-6 h-6 text-muted-foreground" />
+              <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
+                <MessageCircle className="w-7 h-7 text-muted-foreground group-hover/comment:text-primary transition-colors" />
+              </motion.div>
             </Button>
-          </div>
+          </motion.div>
 
           {photo.caption && (
-            <p className="text-sm">
-              <span className="font-medium mr-2">{photo.profiles?.username}</span>
-              {photo.caption}
-            </p>
+            <motion.p 
+              className="text-sm leading-relaxed"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <span className="font-semibold text-primary mr-2">{photo.profiles?.username}</span>
+              <span className="text-foreground/90">{photo.caption}</span>
+            </motion.p>
           )}
         </div>
       </CardContent>
