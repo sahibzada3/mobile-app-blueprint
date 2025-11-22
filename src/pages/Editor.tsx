@@ -215,7 +215,7 @@ export default function Editor() {
             
             // Position author slightly down and to the left
             const authorY = currentY + (lineHeight * 0.3); // Move down
-            const authorXOffset = xOffset - (canvas.width * 0.05); // Move slightly to left
+            const authorXOffset = xOffset - (canvas.width * 0.15); // Move more to left
             
             // Draw stroke first if enabled
             if (textStrokeWidth > 0 && line.trim()) {
