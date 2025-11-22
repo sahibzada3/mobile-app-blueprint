@@ -231,7 +231,7 @@ export default function Camera() {
 
         {/* Side Advanced Controls Panel */}
         {showAdvancedControls && (
-          <div className="absolute right-2 top-20 bottom-40 w-44 z-20 overflow-hidden pointer-events-none">
+          <div className="absolute right-2 top-20 bottom-52 w-44 z-20 overflow-hidden pointer-events-none">
             <div className="h-full flex flex-col pointer-events-auto">
               <div className="flex items-center justify-between mb-2 px-1">
                 <h3 className="text-white font-bold text-xs drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Controls</h3>
@@ -246,13 +246,37 @@ export default function Camera() {
               </div>
               <div className="space-y-2.5 pr-1">
                 {[
-                  { key: "brightness", label: "Brightness", min: 50, max: 150, step: 1, recommended: 100, desc: "Light" },
-                  { key: "contrast", label: "Contrast", min: 50, max: 150, step: 1, recommended: 100, desc: "Drama" },
-                  { key: "saturation", label: "Saturation", min: 0, max: 200, step: 1, recommended: 100, desc: "Color" },
-                  { key: "shadows", label: "Shadows", min: -50, max: 50, step: 1, recommended: 0, desc: "Details" },
-                  { key: "highlights", label: "Highlights", min: -50, max: 50, step: 1, recommended: 0, desc: "Mood" },
+                  { key: "brightness", label: "Brightness", min: 50, max: 150, step: 1, desc: "Adjust light balance" },
+                  { key: "contrast", label: "Contrast", min: 50, max: 150, step: 1, desc: "Add drama and depth" },
+                  { key: "saturation", label: "Saturation", min: 0, max: 200, step: 1, desc: "Boost color intensity" },
+                  { key: "shadows", label: "Shadows", min: -50, max: 50, step: 1, desc: "Recover dark details" },
+                  { key: "highlights", label: "Highlights", min: -50, max: 50, step: 1, desc: "Control bright areas" },
                 ].map((control) => {
-                  const recommendedPercent = ((control.recommended - control.min) / (control.max - control.min)) * 100;
+                  // Filter-specific recommended values
+                  const getRecommendedValue = () => {
+                    if (!selectedFilter) return { brightness: 100, contrast: 100, saturation: 100, shadows: 0, highlights: 0 }[control.key as keyof typeof advancedSettings] || 100;
+                    
+                    const filterRecommendations: Record<string, Record<string, number>> = {
+                      'golden-hour': { brightness: 110, contrast: 115, saturation: 120, shadows: 10, highlights: -5 },
+                      'forest': { brightness: 95, contrast: 110, saturation: 115, shadows: 15, highlights: -10 },
+                      'urban': { brightness: 100, contrast: 125, saturation: 95, shadows: 5, highlights: -15 },
+                      'water': { brightness: 105, contrast: 105, saturation: 110, shadows: 0, highlights: -5 },
+                      'silhouette': { brightness: 90, contrast: 140, saturation: 90, shadows: -30, highlights: -20 },
+                      'fog-mist': { brightness: 110, contrast: 90, saturation: 85, shadows: 5, highlights: 10 },
+                      'night': { brightness: 85, contrast: 120, saturation: 95, shadows: 20, highlights: 0 },
+                      'beach-desert': { brightness: 115, contrast: 110, saturation: 110, shadows: -10, highlights: -10 },
+                      'rain': { brightness: 95, contrast: 115, saturation: 105, shadows: 10, highlights: -5 },
+                      'sky-clouds': { brightness: 105, contrast: 110, saturation: 115, shadows: 0, highlights: -10 },
+                      'indoor-golden': { brightness: 105, contrast: 105, saturation: 110, shadows: 15, highlights: 0 },
+                      'old-architecture': { brightness: 100, contrast: 120, saturation: 100, shadows: 10, highlights: -10 },
+                      'midday-sun': { brightness: 110, contrast: 115, saturation: 105, shadows: -5, highlights: -15 },
+                    };
+                    
+                    return filterRecommendations[selectedFilter]?.[control.key] ?? 100;
+                  };
+                  
+                  const recommended = getRecommendedValue();
+                  const recommendedPercent = ((recommended - control.min) / (control.max - control.min)) * 100;
                   
                   return (
                     <div key={control.key} className="space-y-0.5">
