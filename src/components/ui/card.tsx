@@ -5,11 +5,7 @@ import { cn } from "@/lib/utils";
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
   <div 
     ref={ref} 
-    className={cn("rounded-2xl border border-border/50 text-card-foreground relative overflow-hidden", className)} 
-    style={{ 
-      background: 'linear-gradient(135deg, hsl(0 0% 12%) 0%, hsl(0 0% 16%) 100%)',
-      boxShadow: '0 8px 32px -8px hsl(0 0% 0% / 0.4), 0 0 0 1px hsl(207 90% 54% / 0.1)'
-    }}
+    className={cn("rounded-2xl border bg-card text-card-foreground relative overflow-hidden shadow-card", className)} 
     {...props} 
   />
 ));
