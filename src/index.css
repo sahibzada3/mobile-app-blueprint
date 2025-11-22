@@ -32,7 +32,7 @@
     --ring: 205 100% 64%;
     
     --success: 142 69% 58%; /* Success #4ADE80 */
-    --success-foreground: 202 100% 98%;
+    --success-foreground: 214 65% 11%;
     
     --warning: 48 96% 53%; /* Warning #FACC15 */
     --warning-foreground: 214 65% 11%;
@@ -83,7 +83,7 @@
     --ring: 205 100% 64%;
     
     --success: 142 69% 58%;
-    --success-foreground: 202 100% 98%;
+    --success-foreground: 214 65% 11%;
     
     --warning: 48 96% 53%;
     --warning-foreground: 214 65% 11%;
@@ -124,7 +124,7 @@ All colors MUST be HSL.
     --popover-foreground: 202 100% 98%;
 
     --primary: 205 100% 64%;
-    --primary-foreground: 202 100% 98%;
+    --primary-foreground: 214 65% 11%;
 
     --secondary: 191 100% 75%;
     --secondary-foreground: 214 65% 11%;
@@ -147,7 +147,7 @@ All colors MUST be HSL.
     --sidebar-background: 210 24% 16%;
     --sidebar-foreground: 202 100% 98%;
     --sidebar-primary: 205 100% 64%;
-    --sidebar-primary-foreground: 202 100% 98%;
+    --sidebar-primary-foreground: 214 65% 11%;
     --sidebar-accent: 220 9% 20%;
     --sidebar-accent-foreground: 214 22% 74%;
     --sidebar-border: 210 24% 24%;
@@ -165,7 +165,7 @@ All colors MUST be HSL.
     --popover-foreground: 202 100% 98%;
 
     --primary: 205 100% 64%;
-    --primary-foreground: 202 100% 98%;
+    --primary-foreground: 214 65% 11%;
 
     --secondary: 191 100% 75%;
     --secondary-foreground: 214 65% 11%;
@@ -186,7 +186,7 @@ All colors MUST be HSL.
     --sidebar-background: 210 24% 14%;
     --sidebar-foreground: 202 100% 98%;
     --sidebar-primary: 205 100% 64%;
-    --sidebar-primary-foreground: 202 100% 98%;
+    --sidebar-primary-foreground: 214 65% 11%;
     --sidebar-accent: 220 9% 20%;
     --sidebar-accent-foreground: 214 22% 74%;
     --sidebar-border: 210 24% 24%;
