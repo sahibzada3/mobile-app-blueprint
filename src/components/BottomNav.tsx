@@ -14,7 +14,7 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border/50 z-50 safe-area-inset-bottom">
-      <div className="flex justify-around items-center h-20 max-w-2xl mx-auto px-2">
+      <div className="flex justify-around items-center h-14 max-w-2xl mx-auto px-2">
         {navItems.map(({ icon: Icon, label, path }) => {
           const isActive = location.pathname === path;
           return (
@@ -27,19 +27,19 @@ export default function BottomNav() {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <div className={`p-2.5 rounded-xl transition-all duration-200 ${
+              <div className={`p-1.5 rounded-lg transition-all duration-200 ${
                 isActive ? "bg-primary/10" : "group-hover:bg-primary/5"
               }`}>
                 <Icon 
-                  className="w-5 h-5" 
+                  className="w-4 h-4" 
                   strokeWidth={isActive ? 2.5 : 2}
                 />
               </div>
-              <span className={`text-xs mt-1.5 font-medium ${isActive ? "font-semibold" : ""}`}>
+              <span className={`text-[10px] mt-0.5 font-medium ${isActive ? "font-semibold" : ""}`}>
                 {label}
               </span>
               {isActive && (
-                <div className="absolute -bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-t-full" />
+                <div className="absolute -bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-t-full" />
               )}
             </Link>
           );
