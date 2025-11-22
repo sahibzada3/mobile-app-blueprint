@@ -231,7 +231,7 @@ export default function Camera() {
 
         {/* Side Advanced Controls Panel */}
         {showAdvancedControls && (
-          <div className="absolute right-2 top-20 bottom-52 w-44 z-20 overflow-hidden pointer-events-none">
+          <div className="absolute right-2 top-20 bottom-64 w-44 z-20 overflow-hidden pointer-events-none">
             <div className="h-full flex flex-col pointer-events-auto">
               <div className="flex items-center justify-between mb-2 px-1">
                 <h3 className="text-white font-bold text-xs drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Controls</h3>
