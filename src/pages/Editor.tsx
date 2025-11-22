@@ -105,7 +105,7 @@ export default function Editor() {
         
         // Auto-adjust font size and wrap text intelligently
         let adjustedFontSize = fontSize;
-        const maxWidth = canvas.width; // Use 100% of canvas width for full spread
+        const maxWidth = canvas.width * 1.1; // Use 110% of canvas width for dramatic overflow
         const minFontSize = 20;
         
         // Split text and author if present (format: "text\n— author")
