@@ -207,9 +207,9 @@ export default function Camera() {
         </div>
 
         {/* Bottom Controls */}
-        <div className="absolute bottom-0 left-0 right-0 z-10 pb-20">
+        <div className="absolute bottom-20 left-0 right-0 z-10">
           {/* Filter Strip */}
-          <div className="bg-gradient-to-t from-black/90 via-black/70 to-transparent pt-6 pb-3">
+          <div className="bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-3 pb-2">
             <CameraFilterStrip 
               selectedFilter={selectedFilter}
               onFilterChange={setSelectedFilter}
@@ -217,14 +217,14 @@ export default function Camera() {
           </div>
 
           {/* Capture Button */}
-          <div className="flex items-center justify-center px-6 pb-4 pt-2 bg-gradient-to-t from-black/90 to-transparent">
+          <div className="flex items-center justify-center px-6 py-3 bg-black/90">
             <Button
               onClick={capturePhoto}
               disabled={!stream}
               size="icon"
-              className="w-20 h-20 rounded-full bg-white hover:bg-white/95 shadow-2xl transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-16 h-16 rounded-full bg-white hover:bg-white/95 shadow-2xl transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <div className="w-16 h-16 rounded-full border-4 border-black/20" />
+              <div className="w-12 h-12 rounded-full border-4 border-black/20" />
             </Button>
           </div>
         </div>
