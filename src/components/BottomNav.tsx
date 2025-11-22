@@ -1,8 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
 import { Camera, Trophy, User, Search, Link2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function BottomNav() {
   const location = useLocation();
+  const isOnCamera = location.pathname === "/camera";
+  
+  const handleCapture = () => {
+    window.dispatchEvent(new Event('camera-capture'));
+  };
   
   const navItems = [
     { icon: Search, label: "Search", path: "/search" },
@@ -17,6 +23,22 @@ export default function BottomNav() {
       <div className="flex justify-around items-center h-14 max-w-2xl mx-auto px-2">
         {navItems.map(({ icon: Icon, label, path }) => {
           const isActive = location.pathname === path;
+          const isCameraItem = path === "/camera";
+          
+          // Show capture button instead of camera icon when on camera page
+          if (isCameraItem && isOnCamera) {
+            return (
+              <Button
+                key={path}
+                onClick={handleCapture}
+                size="icon"
+                className="w-12 h-12 rounded-full bg-white hover:bg-white/95 shadow-lg transition-transform active:scale-90 -mt-6"
+              >
+                <div className="w-10 h-10 rounded-full border-[2.5px] border-black/20" />
+              </Button>
+            );
+          }
+          
           return (
             <Link
               key={path}
