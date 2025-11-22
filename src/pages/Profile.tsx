@@ -13,6 +13,7 @@ import { LogOut, User as UserIcon, Camera, Heart, Moon, Sun, Settings, Award, Tr
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import RankBadgeDisplay from "@/components/profile/RankBadgeDisplay";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -319,6 +320,9 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Rank and Badges Display */}
+        {profile?.id && <RankBadgeDisplay userId={profile.id} />}
 
         {/* Photo Collection Tabs */}
         <Tabs defaultValue="captures" className="w-full animate-fade-in">
