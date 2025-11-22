@@ -158,10 +158,7 @@ export default function Feed() {
 
   return (
     <div 
-      className="min-h-screen pb-24 relative"
-      style={{
-        background: `linear-gradient(180deg, hsl(var(--background)) 0%, hsl(210 60% 15%) 50%, hsl(var(--background-gradient-end)) 100%)`
-      }}
+      className="min-h-screen pb-24 bg-background relative"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -201,13 +198,13 @@ export default function Feed() {
           )}
         </div>
       </motion.div>
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-card/90 border-b border-border/30">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-card/95 border-b border-border/30">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center" style={{ boxShadow: '0 0 24px hsl(207 90% 54% / 0.3)' }}>
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Camera className="w-5 h-5 text-primary" strokeWidth={2.5} />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight" style={{ textShadow: '0 0 20px hsl(207 90% 54% / 0.4)' }}>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Frame
             </h1>
           </div>
@@ -268,7 +265,7 @@ export default function Feed() {
         >
           <Card>
             <CardContent className="text-center p-8">
-              <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4" style={{ boxShadow: '0 0 32px hsl(207 90% 54% / 0.3)' }}>
+              <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <Camera className="w-10 h-10 text-primary" strokeWidth={2.5} />
               </div>
               <h2 className="text-3xl font-bold mb-3">Welcome to Frame</h2>
