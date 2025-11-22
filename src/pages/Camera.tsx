@@ -163,14 +163,23 @@ export default function Camera() {
 
 
         {/* Top Controls */}
-        <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/60 to-transparent p-4">
-          <div className="flex items-center justify-end">
+        <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/80 via-black/40 to-transparent p-4 pb-8">
+          <div className="flex items-center justify-between">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate("/feed")}
+              className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md hover:bg-black/70 border border-white/30"
+            >
+              <Image className="w-5 h-5 text-white" />
+            </Button>
+
             <div className="flex items-center gap-2">
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={toggleCamera}
-                className="bg-black/40 backdrop-blur-sm hover:bg-black/60 border border-white/20"
+                className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md hover:bg-black/70 border border-white/30"
               >
                 <FlipHorizontal className="w-5 h-5 text-white" />
               </Button>
@@ -179,7 +188,7 @@ export default function Camera() {
                   <Button 
                     variant="ghost" 
                     size="icon"
-                    className="bg-black/40 backdrop-blur-sm hover:bg-black/60 border border-white/20"
+                    className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md hover:bg-black/70 border border-white/30"
                   >
                     <SlidersHorizontal className="w-5 h-5 text-white" />
                   </Button>
@@ -204,36 +213,25 @@ export default function Camera() {
         </div>
 
         {/* Bottom Controls */}
-        <div className="absolute bottom-0 left-0 right-0 z-10 pb-24 flex flex-col gap-4">
+        <div className="absolute bottom-0 left-0 right-0 z-10 pb-20 flex flex-col gap-3">
           {/* Filter Strip */}
-          <CameraFilterStrip 
-            selectedFilter={selectedFilter}
-            onFilterChange={setSelectedFilter}
-          />
+          <div className="bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-6 pb-3">
+            <CameraFilterStrip 
+              selectedFilter={selectedFilter}
+              onFilterChange={setSelectedFilter}
+            />
+          </div>
           
-          {/* Capture Controls */}
-          <div className="bg-gradient-to-t from-black/80 to-transparent p-6">
-            <div className="flex items-center justify-center gap-8">
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => navigate("/feed")}
-                className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 border border-white/20"
-              >
-                <Image className="w-6 h-6 text-white" />
-              </Button>
-              
-              <Button
-                onClick={capturePhoto}
-                disabled={!stream}
-                size="icon"
-                className="w-20 h-20 rounded-full bg-white hover:bg-white/90 shadow-lg"
-              >
-                <div className="w-16 h-16 rounded-full border-4 border-black/20" />
-              </Button>
-
-              <div className="w-12 h-12" /> {/* Spacer for symmetry */}
-            </div>
+          {/* Capture Button */}
+          <div className="flex items-center justify-center px-6 pb-4">
+            <Button
+              onClick={capturePhoto}
+              disabled={!stream}
+              size="icon"
+              className="w-20 h-20 rounded-full bg-white hover:bg-white/95 shadow-2xl transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="w-16 h-16 rounded-full border-4 border-black/20" />
+            </Button>
           </div>
         </div>
       </div>
