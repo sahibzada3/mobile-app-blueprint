@@ -231,69 +231,69 @@ export default function Camera() {
 
         {/* Side Advanced Controls Panel */}
         {showAdvancedControls && (
-          <div className="absolute right-2 top-20 bottom-40 w-48 z-20 overflow-hidden pointer-events-none">
-            <div className="h-full flex flex-col pointer-events-auto">
-              <div className="flex items-center justify-between mb-2 px-1">
-                <h3 className="text-white font-bold text-xs drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Controls</h3>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => setShowAdvancedControls(false)}
-                  className="w-6 h-6 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm"
-                >
-                  <X className="w-3 h-3 text-white" />
-                </Button>
-              </div>
-              <ScrollArea className="flex-1 pointer-events-auto">
-                <div className="space-y-2.5 pr-1">
-                  {[
-                    { key: "brightness", label: "Brightness", min: 50, max: 150, step: 1, recommended: 100, desc: "Light balance" },
-                    { key: "contrast", label: "Contrast", min: 50, max: 150, step: 1, recommended: 100, desc: "Add drama" },
-                    { key: "saturation", label: "Saturation", min: 0, max: 200, step: 1, recommended: 100, desc: "Color intensity" },
-                    { key: "shadows", label: "Shadows", min: -50, max: 50, step: 1, recommended: 0, desc: "Recover details" },
-                    { key: "highlights", label: "Highlights", min: -50, max: 50, step: 1, recommended: 0, desc: "Control mood" },
-                    { key: "temperature", label: "Temperature", min: -50, max: 50, step: 1, recommended: 0, desc: "Warm/cool" },
-                    { key: "dehaze", label: "Dehaze", min: -50, max: 50, step: 1, recommended: 0, desc: "Remove fog" },
-                  ].map((control) => {
-                    const recommendedPercent = ((control.recommended - control.min) / (control.max - control.min)) * 100;
+          <div className="absolute right-2 top-20 bottom-40 z-20 overflow-hidden pointer-events-none">
+            <div className="h-full flex items-end gap-3 pointer-events-auto px-2">
+              {[
+                { key: "brightness", label: "Bright", min: 50, max: 150, step: 1, recommended: 100, desc: "Light" },
+                { key: "contrast", label: "Contrast", min: 50, max: 150, step: 1, recommended: 100, desc: "Drama" },
+                { key: "saturation", label: "Saturation", min: 0, max: 200, step: 1, recommended: 100, desc: "Color" },
+                { key: "shadows", label: "Shadows", min: -50, max: 50, step: 1, recommended: 0, desc: "Details" },
+                { key: "highlights", label: "Lights", min: -50, max: 50, step: 1, recommended: 0, desc: "Mood" },
+                { key: "temperature", label: "Temp", min: -50, max: 50, step: 1, recommended: 0, desc: "Tone" },
+                { key: "dehaze", label: "Dehaze", min: -50, max: 50, step: 1, recommended: 0, desc: "Fog" },
+              ].map((control) => {
+                const recommendedPercent = ((control.recommended - control.min) / (control.max - control.min)) * 100;
+                
+                return (
+                  <div key={control.key} className="flex flex-col items-center gap-2">
+                    {/* Value Display */}
+                    <div className="text-[10px] text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] text-center min-w-[32px]">
+                      {advancedSettings[control.key as keyof AdvancedSettings]}
+                    </div>
                     
-                    return (
-                      <div key={control.key} className="space-y-0.5">
-                        <div className="flex items-center justify-between px-1">
-                          <div>
-                            <label className="text-[11px] font-semibold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-                              {control.label}
-                            </label>
-                            <p className="text-[9px] text-white/80 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] leading-tight">
-                              {control.desc}
-                            </p>
-                          </div>
-                          <span className="text-[11px] text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] min-w-[28px] text-right">
-                            {advancedSettings[control.key as keyof AdvancedSettings]}
-                          </span>
-                        </div>
-                        <div className="relative pt-1">
-                          {/* Recommended level marker */}
-                          <div 
-                            className="absolute top-0 h-4 w-0.5 bg-blue-400 z-10 pointer-events-none drop-shadow-md"
-                            style={{ left: `${recommendedPercent}%`, transform: 'translateX(-50%)' }}
-                          >
-                            <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-blue-400" />
-                          </div>
-                          <Slider
-                            value={[advancedSettings[control.key as keyof AdvancedSettings]]}
-                            onValueChange={([value]) => setAdvancedSettings({ ...advancedSettings, [control.key]: value })}
-                            min={control.min}
-                            max={control.max}
-                            step={control.step}
-                            className="w-full"
-                          />
-                        </div>
+                    {/* Vertical Slider Container */}
+                    <div className="relative h-32 flex items-center">
+                      {/* Recommended level marker */}
+                      <div 
+                        className="absolute left-1/2 -translate-x-1/2 w-4 h-0.5 bg-blue-400 z-10 pointer-events-none drop-shadow-md"
+                        style={{ bottom: `${recommendedPercent}%` }}
+                      >
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-blue-400" />
                       </div>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
+                      
+                      <Slider
+                        value={[advancedSettings[control.key as keyof AdvancedSettings]]}
+                        onValueChange={([value]) => setAdvancedSettings({ ...advancedSettings, [control.key]: value })}
+                        min={control.min}
+                        max={control.max}
+                        step={control.step}
+                        orientation="vertical"
+                        className="h-32"
+                      />
+                    </div>
+                    
+                    {/* Label */}
+                    <div className="text-center">
+                      <div className="text-[10px] font-semibold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] leading-tight">
+                        {control.label}
+                      </div>
+                      <div className="text-[8px] text-white/80 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                        {control.desc}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              
+              {/* Close Button */}
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setShowAdvancedControls(false)}
+                className="w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm mb-20"
+              >
+                <X className="w-4 h-4 text-white" />
+              </Button>
             </div>
           </div>
         )}
