@@ -5,12 +5,11 @@ import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Camera as CameraIcon, FlipHorizontal, Image, SlidersHorizontal, Sparkles } from "lucide-react";
+import { Camera as CameraIcon, FlipHorizontal, Image, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { CameraModeSelector } from "@/components/camera/CameraModeSelector";
 import { CameraFilterStrip } from "@/components/camera/CameraFilterStrip";
 import { CameraAdvancedControls } from "@/components/camera/CameraAdvancedControls";
-import { SceneDetector } from "@/components/camera/SceneDetector";
 import { applyFilter, type FilterType } from "@/utils/cameraFilters";
 import { type CameraMode, type AdvancedSettings } from "@/types/camera";
 
@@ -26,7 +25,6 @@ export default function Camera() {
   const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
   const [mode, setMode] = useState<CameraMode>("auto");
   const [selectedFilter, setSelectedFilter] = useState<FilterType | null>(null);
-  const [detectedScene, setDetectedScene] = useState<string | null>(null);
   const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
     brightness: 100,
     contrast: 100,
@@ -118,8 +116,7 @@ export default function Camera() {
         sessionStorage.setItem("photoFilters", JSON.stringify({ 
           mode, 
           filter: selectedFilter, 
-          settings: advancedSettings,
-          scene: detectedScene 
+          settings: advancedSettings
         }));
         
         toast.success("Photo captured with AI enhancements!");
@@ -164,26 +161,10 @@ export default function Camera() {
           </div>
         )}
 
-        {/* Scene Detection Badge */}
-        <SceneDetector 
-          videoRef={videoRef} 
-          onSceneDetected={setDetectedScene}
-          mode={mode}
-        />
 
         {/* Top Controls */}
         <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/60 to-transparent p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {detectedScene && (
-                <div className="bg-primary/20 backdrop-blur-sm border border-primary/30 px-3 py-1.5 rounded-full">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                    <span className="text-xs font-medium text-white">{detectedScene}</span>
-                  </div>
-                </div>
-              )}
-            </div>
+          <div className="flex items-center justify-end">
             <div className="flex items-center gap-2">
               <Button 
                 variant="ghost" 
@@ -222,36 +203,37 @@ export default function Camera() {
           <CameraModeSelector selectedMode={mode} onModeChange={setMode} />
         </div>
 
-        {/* Filter Strip */}
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+        {/* Bottom Controls */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 pb-24 flex flex-col gap-4">
+          {/* Filter Strip */}
           <CameraFilterStrip 
             selectedFilter={selectedFilter}
             onFilterChange={setSelectedFilter}
           />
-        </div>
+          
+          {/* Capture Controls */}
+          <div className="bg-gradient-to-t from-black/80 to-transparent p-6">
+            <div className="flex items-center justify-center gap-8">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => navigate("/feed")}
+                className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 border border-white/20"
+              >
+                <Image className="w-6 h-6 text-white" />
+              </Button>
+              
+              <Button
+                onClick={capturePhoto}
+                disabled={!stream}
+                size="icon"
+                className="w-20 h-20 rounded-full bg-white hover:bg-white/90 shadow-lg"
+              >
+                <div className="w-16 h-16 rounded-full border-4 border-black/20" />
+              </Button>
 
-        {/* Bottom Controls */}
-        <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/80 to-transparent p-6 pb-24">
-          <div className="flex items-center justify-center gap-8">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => navigate("/feed")}
-              className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 border border-white/20"
-            >
-              <Image className="w-6 h-6 text-white" />
-            </Button>
-            
-            <Button
-              onClick={capturePhoto}
-              disabled={!stream}
-              size="icon"
-              className="w-20 h-20 rounded-full bg-white hover:bg-white/90 shadow-lg"
-            >
-              <div className="w-16 h-16 rounded-full border-4 border-black/20" />
-            </Button>
-
-            <div className="w-12 h-12" /> {/* Spacer for symmetry */}
+              <div className="w-12 h-12" /> {/* Spacer for symmetry */}
+            </div>
           </div>
         </div>
       </div>
