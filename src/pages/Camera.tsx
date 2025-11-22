@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Camera as CameraIcon, FlipHorizontal, Image, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
-import { CameraModeSelector } from "@/components/camera/CameraModeSelector";
 import { CameraFilterStrip } from "@/components/camera/CameraFilterStrip";
 import { CameraAdvancedControls } from "@/components/camera/CameraAdvancedControls";
 import { applyFilter, type FilterType } from "@/utils/cameraFilters";
@@ -207,23 +206,10 @@ export default function Camera() {
           </div>
         </div>
 
-        {/* Mode Selector */}
-        <div className="absolute top-20 left-0 right-0 z-10 px-4">
-          <CameraModeSelector selectedMode={mode} onModeChange={setMode} />
-        </div>
-
         {/* Bottom Controls */}
-        <div className="absolute bottom-0 left-0 right-0 z-10 pb-20 flex flex-col gap-3">
-          {/* Filter Strip */}
-          <div className="bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-6 pb-3">
-            <CameraFilterStrip 
-              selectedFilter={selectedFilter}
-              onFilterChange={setSelectedFilter}
-            />
-          </div>
-          
+        <div className="absolute bottom-0 left-0 right-0 z-10 pb-20">
           {/* Capture Button */}
-          <div className="flex items-center justify-center px-6 pb-4">
+          <div className="flex items-center justify-center px-6 pb-6">
             <Button
               onClick={capturePhoto}
               disabled={!stream}
@@ -232,6 +218,14 @@ export default function Camera() {
             >
               <div className="w-16 h-16 rounded-full border-4 border-black/20" />
             </Button>
+          </div>
+
+          {/* Filter Strip */}
+          <div className="bg-gradient-to-t from-black/90 via-black/70 to-transparent pt-6 pb-4">
+            <CameraFilterStrip 
+              selectedFilter={selectedFilter}
+              onFilterChange={setSelectedFilter}
+            />
           </div>
         </div>
       </div>
