@@ -54,6 +54,8 @@
     --gradient-sunset: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--primary)));
     --gradient-soft: linear-gradient(180deg, hsl(var(--card)), hsl(var(--background)));
     --gradient-aqua: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary-light)));
+    --gradient-card-depth: linear-gradient(135deg, hsl(0 0% 10%), hsl(0 0% 14%));
+    --gradient-card-subtle: linear-gradient(180deg, hsl(0 0% 12%), hsl(0 0% 10%));
 
     /* Shadows */
     --shadow-nature: 0 10px 30px -10px hsl(var(--primary) / 0.3);
