@@ -115,10 +115,11 @@ Make them profound, scene-specific, and beautifully formatted for photography ov
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '[]';
     
-    // Extract JSON from the response - handle control characters
+    console.log('Raw AI response:', content);
+    
+    // Extract and clean JSON - handle control characters properly
     let quotes: Array<{text: string, author: string | null}> = [];
     try {
-      // Clean the content first - remove markdown code blocks and extra whitespace
       let cleanContent = content.trim();
       
       // Remove markdown code blocks if present
@@ -133,6 +134,22 @@ Make them profound, scene-specific, and beautifully formatted for photography ov
         cleanContent = arrayMatch[0];
       }
       
+      // CRITICAL: Escape unescaped control characters in strings
+      // This regex finds text between quotes and escapes newlines, tabs, etc.
+      cleanContent = cleanContent.replace(
+        /"text"\s*:\s*"((?:[^"\\]|\\.)*)"/g,
+        (match, textContent) => {
+          // Escape any unescaped newlines, tabs, carriage returns
+          const escaped = textContent
+            .replace(/\n/g, '\\n')
+            .replace(/\r/g, '\\r')
+            .replace(/\t/g, '\\t');
+          return `"text":"${escaped}"`;
+        }
+      );
+      
+      console.log('Cleaned content:', cleanContent);
+      
       // Parse the JSON
       quotes = JSON.parse(cleanContent);
       
@@ -143,19 +160,20 @@ Make them profound, scene-specific, and beautifully formatted for photography ov
     } catch (parseError) {
       console.error('JSON parse error:', parseError, 'Content:', content);
       
-      // Fallback: try to extract text manually if JSON parsing fails
-      const fallbackQuotes: string[] = [];
-      const lines = content.split('\n').filter(line => line.trim());
-      for (const line of lines) {
-        if (line.includes('"text"') || line.includes("'text'")) {
-          // Try to extract text between quotes
-          const textMatch = line.match(/["']text["']\s*:\s*["'](.*?)["']/);
-          if (textMatch) fallbackQuotes.push(textMatch[1]);
-        }
+      // Fallback: Use simpler extraction with proper unescaping
+      const fallbackQuotes: Array<{text: string, author: string | null}> = [];
+      
+      // Try to match text and author pairs
+      const quoteMatches = content.matchAll(/"text"\s*:\s*"([^"]+)"\s*,\s*"author"\s*:\s*(?:"([^"]+)"|null)/g);
+      for (const match of quoteMatches) {
+        fallbackQuotes.push({
+          text: match[1].replace(/\\n/g, '\n').replace(/\\r/g, '\r').replace(/\\t/g, '\t'),
+          author: match[2] || null
+        });
       }
       
       if (fallbackQuotes.length > 0) {
-        quotes = fallbackQuotes.map(text => ({ text, author: null }));
+        quotes = fallbackQuotes;
       } else {
         // Last resort fallback
         quotes = [
