@@ -205,23 +205,40 @@ export default function Editor() {
         allLines.forEach((line, index) => {
           const currentY = startY + index * lineHeight;
           
+          // Check if this is the author line
+          const isAuthorLine = line.startsWith("—");
+          
           // Use smaller font for author line
-          if (line.startsWith("—")) {
+          if (isAuthorLine) {
             ctx.font = `${adjustedFontSize * 0.8}px "${fontFamily}", serif`;
             ctx.globalAlpha = (textOpacity / 100) * 0.9;
+            
+            // Position author slightly down and to the right
+            const authorY = currentY + (lineHeight * 0.3); // Move down
+            const authorXOffset = xOffset + (canvas.width * 0.15); // Move to right
+            
+            // Draw stroke first if enabled
+            if (textStrokeWidth > 0 && line.trim()) {
+              ctx.strokeText(line, authorXOffset, authorY);
+            }
+            
+            // Draw fill text
+            if (line.trim()) {
+              ctx.fillText(line, authorXOffset, authorY);
+            }
           } else {
             ctx.font = `${adjustedFontSize}px "${fontFamily}", serif`;
             ctx.globalAlpha = textOpacity / 100;
-          }
-          
-          // Draw stroke first if enabled
-          if (textStrokeWidth > 0 && line.trim()) {
-            ctx.strokeText(line, xOffset, currentY);
-          }
-          
-          // Draw fill text
-          if (line.trim()) {
-            ctx.fillText(line, xOffset, currentY);
+            
+            // Draw stroke first if enabled
+            if (textStrokeWidth > 0 && line.trim()) {
+              ctx.strokeText(line, xOffset, currentY);
+            }
+            
+            // Draw fill text
+            if (line.trim()) {
+              ctx.fillText(line, xOffset, currentY);
+            }
           }
         });
         
