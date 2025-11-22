@@ -8,14 +8,18 @@ interface CameraFilterStripProps {
 }
 
 const filters: { id: FilterType; label: string }[] = [
-  { id: "golden-hour-glow", label: "Golden Hour" },
-  { id: "moody-forest", label: "Moody Forest" },
-  { id: "cloud-pop", label: "Cloud Pop" },
-  { id: "silhouette-glow", label: "Silhouette" },
-  { id: "cinematic-teal-orange", label: "Cinematic" },
-  { id: "soft-dreamy", label: "Soft Dreamy" },
-  { id: "night-clarity", label: "Night Clarity" },
-  { id: "nature-boost", label: "Nature Boost" },
+  { id: "golden-hour", label: "Golden Hour" },
+  { id: "midday-sun", label: "Midday Sun" },
+  { id: "night", label: "Night" },
+  { id: "fog-mist", label: "Fog & Mist" },
+  { id: "silhouette", label: "Silhouette" },
+  { id: "urban", label: "Urban" },
+  { id: "water", label: "Water" },
+  { id: "forest", label: "Forest" },
+  { id: "beach-desert", label: "Beach/Desert" },
+  { id: "sky-clouds", label: "Sky & Clouds" },
+  { id: "rain", label: "Rain" },
+  { id: "indoor-golden", label: "Indoor Golden" },
 ];
 
 export function CameraFilterStrip({ selectedFilter, onFilterChange }: CameraFilterStripProps) {
