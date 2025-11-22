@@ -53,15 +53,17 @@ export default function WeatherWidget() {
       const weatherCode = data.current.weather_code;
       const sunrise = new Date(data.daily.sunrise[0]);
       const sunset = new Date(data.daily.sunset[0]);
+      const currentTime = new Date(data.current.time);
+      const isNight = currentTime < sunrise || currentTime > sunset;
 
       setWeather({
         temperature: Math.round(data.current.temperature_2m),
         condition: getWeatherCondition(weatherCode),
-        icon: getWeatherIcon(weatherCode),
+        icon: getWeatherIcon(weatherCode, isNight),
         location,
         sunrise: sunrise.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         sunset: sunset.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-        photographyTip: getPhotographyTip(weatherCode)
+        photographyTip: getPhotographyTip(weatherCode, isNight)
       });
     } catch (error) {
       console.error("Weather widget error:", error);
@@ -79,16 +81,27 @@ export default function WeatherWidget() {
     return conditions[code] || "Clear Sky";
   };
 
-  const getWeatherIcon = (code: number): string => {
-    const icons: { [key: number]: string } = {
+  const getWeatherIcon = (code: number, isNight: boolean): string => {
+    if (isNight) {
+      const nightIcons: { [key: number]: string } = {
+        0: "🌙", 1: "🌙", 2: "☁️", 3: "☁️",
+        45: "🌫️", 48: "🌫️", 51: "🌧️", 61: "🌧️",
+        71: "🌨️", 80: "🌧️", 95: "⛈️"
+      };
+      return nightIcons[code] || "🌙";
+    }
+    const dayIcons: { [key: number]: string } = {
       0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️",
       45: "🌫️", 48: "🌫️", 51: "🌦️", 61: "🌧️",
       71: "🌨️", 80: "🌦️", 95: "⛈️"
     };
-    return icons[code] || "☀️";
+    return dayIcons[code] || "☀️";
   };
 
-  const getPhotographyTip = (code: number): string => {
+  const getPhotographyTip = (code: number, isNight: boolean): string => {
+    if (isNight && (code === 0 || code === 1)) {
+      return "Perfect for night sky and star photography!";
+    }
     const tips: { [key: number]: string } = {
       0: "Perfect for golden hour shots!",
       1: "Great lighting conditions today",
