@@ -367,7 +367,7 @@ export default function Camera() {
 
         {/* Bottom Controls - Snapchat Style */}
         <div className="absolute bottom-0 left-0 right-0 z-10">
-          <div className="flex flex-col items-center gap-2 pb-16 bg-gradient-to-t from-black/95 via-black/70 to-transparent pt-4">
+          <div className="flex flex-col items-center gap-3 pb-20 bg-gradient-to-t from-black/95 via-black/70 to-transparent pt-6">
             {/* Filter Strip Above Button */}
             <div className="w-full px-4">
               <CameraFilterStrip 
@@ -375,13 +375,15 @@ export default function Camera() {
                 onFilterChange={setSelectedFilter}
               />
             </div>
-            
-            {/* Capture Button */}
+          </div>
+          
+          {/* Capture Button - Centered over nav bar */}
+          <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-50">
             <Button
               onClick={capturePhoto}
               disabled={!stream}
               size="icon"
-              className="w-16 h-16 rounded-full bg-white hover:bg-white/95 shadow-xl transition-transform active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed relative z-50 mb-2"
+              className="w-16 h-16 rounded-full bg-white hover:bg-white/95 shadow-2xl transition-transform active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="w-[52px] h-[52px] rounded-full border-[3px] border-black/20" />
             </Button>
