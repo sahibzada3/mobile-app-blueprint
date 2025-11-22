@@ -22,6 +22,9 @@ import Spotlight from "./pages/Spotlight";
 import SpotlightChain from "./pages/SpotlightChain";
 import Ideas from "./pages/Ideas";
 import NotFound from "./pages/NotFound";
+import Slices from "./pages/Slices";
+import MusicLibrary from "./pages/MusicLibrary";
+import Search from "./pages/Search";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +54,9 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/settings" element={<ProfileSettings />} />
             <Route path="/profile/:userId" element={<Profile />} />
+            <Route path="/slices" element={<Slices />} />
+            <Route path="/music" element={<MusicLibrary />} />
+            <Route path="/search" element={<Search />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

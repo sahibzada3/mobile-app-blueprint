@@ -594,6 +594,102 @@ export type Database = {
         }
         Relationships: []
       }
+      slice_views: {
+        Row: {
+          id: string
+          slice_id: string
+          viewed_at: string | null
+          viewer_id: string
+        }
+        Insert: {
+          id?: string
+          slice_id: string
+          viewed_at?: string | null
+          viewer_id: string
+        }
+        Update: {
+          id?: string
+          slice_id?: string
+          viewed_at?: string | null
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slice_views_slice_id_fkey"
+            columns: ["slice_id"]
+            isOneToOne: false
+            referencedRelation: "slices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slice_views_viewer_id_fkey"
+            columns: ["viewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      slices: {
+        Row: {
+          chain_required: boolean | null
+          created_at: string | null
+          description: string | null
+          expires_at: string
+          id: string
+          image_url: string
+          music_track: string | null
+          required_chain_id: string | null
+          title: string
+          user_id: string
+          views_count: number | null
+          visibility: string
+        }
+        Insert: {
+          chain_required?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          expires_at: string
+          id?: string
+          image_url: string
+          music_track?: string | null
+          required_chain_id?: string | null
+          title: string
+          user_id: string
+          views_count?: number | null
+          visibility?: string
+        }
+        Update: {
+          chain_required?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          expires_at?: string
+          id?: string
+          image_url?: string
+          music_track?: string | null
+          required_chain_id?: string | null
+          title?: string
+          user_id?: string
+          views_count?: number | null
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slices_required_chain_id_fkey"
+            columns: ["required_chain_id"]
+            isOneToOne: false
+            referencedRelation: "spotlight_chains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slices_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spotlight_chains: {
         Row: {
           created_at: string | null
@@ -662,6 +758,50 @@ export type Database = {
             columns: ["challenge_id"]
             isOneToOne: false
             referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_ranks: {
+        Row: {
+          chains_created: number | null
+          challenges_won: number | null
+          id: string
+          photos_count: number | null
+          rank_level: number
+          rank_name: string
+          total_points: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          chains_created?: number | null
+          challenges_won?: number | null
+          id?: string
+          photos_count?: number | null
+          rank_level?: number
+          rank_name?: string
+          total_points?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          chains_created?: number | null
+          challenges_won?: number | null
+          id?: string
+          photos_count?: number | null
+          rank_level?: number
+          rank_name?: string
+          total_points?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_ranks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
