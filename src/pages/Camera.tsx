@@ -4,8 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Camera as CameraIcon, FlipHorizontal, Image, SlidersHorizontal } from "lucide-react";
+import { Camera as CameraIcon, FlipHorizontal, Image, SlidersHorizontal, X } from "lucide-react";
 import { toast } from "sonner";
 import { CameraFilterStrip } from "@/components/camera/CameraFilterStrip";
 import { CameraAdvancedControls } from "@/components/camera/CameraAdvancedControls";
@@ -25,6 +24,7 @@ export default function Camera() {
   const [mode, setMode] = useState<CameraMode>("auto");
   const [selectedFilter, setSelectedFilter] = useState<FilterType | null>(null);
   const [focusPoint, setFocusPoint] = useState<{ x: number; y: number } | null>(null);
+  const [showAdvancedControls, setShowAdvancedControls] = useState(false);
   const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
     brightness: 100,
     contrast: 100,
@@ -229,6 +229,29 @@ export default function Camera() {
           </div>
         )}
 
+        {/* Side Advanced Controls Panel */}
+        {showAdvancedControls && (
+          <div className="absolute right-0 top-0 bottom-0 w-80 bg-black/95 backdrop-blur-xl border-l border-white/20 z-20 overflow-hidden">
+            <div className="h-full flex flex-col p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-white font-semibold text-lg">Advanced Controls</h3>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => setShowAdvancedControls(false)}
+                  className="w-8 h-8 rounded-full hover:bg-white/10"
+                >
+                  <X className="w-4 h-4 text-white" />
+                </Button>
+              </div>
+              <CameraAdvancedControls 
+                settings={advancedSettings}
+                onChange={setAdvancedSettings}
+              />
+            </div>
+          </div>
+        )}
+
         {!stream && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/90">
             <div className="text-center text-white p-6">
@@ -260,26 +283,18 @@ export default function Camera() {
               >
                 <FlipHorizontal className="w-5 h-5 text-white" />
               </Button>
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md hover:bg-black/70 border border-white/30"
-                  >
-                    <SlidersHorizontal className="w-5 h-5 text-white" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="bottom" className="h-[80vh]">
-                  <SheetHeader>
-                    <SheetTitle>Advanced Controls</SheetTitle>
-                  </SheetHeader>
-                  <CameraAdvancedControls 
-                    settings={advancedSettings}
-                    onChange={setAdvancedSettings}
-                  />
-                </SheetContent>
-              </Sheet>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setShowAdvancedControls(!showAdvancedControls)}
+                className={`w-10 h-10 rounded-full backdrop-blur-md border transition-colors ${
+                  showAdvancedControls 
+                    ? 'bg-blue-600 hover:bg-blue-700 border-blue-400' 
+                    : 'bg-black/50 hover:bg-black/70 border-white/30'
+                }`}
+              >
+                <SlidersHorizontal className="w-5 h-5 text-white" />
+              </Button>
             </div>
           </div>
         </div>
