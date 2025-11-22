@@ -105,20 +105,20 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   };
 
   return (
-    <Card className="shadow-2xl overflow-hidden border-primary/20 bg-gradient-to-br from-card to-card/80 hover:shadow-3xl transition-all duration-300 group">
+    <Card className="overflow-hidden group">
       <CardContent className="p-0">
         <motion.div 
-          className="flex items-center gap-3 p-4"
+          className="flex items-center gap-3 p-5"
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <Avatar className="w-12 h-12 ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
-            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-primary font-semibold">
-              {photo.profiles?.username?.charAt(0).toUpperCase() || <User className="w-5 h-5" />}
+          <Avatar className="w-11 h-11 ring-2 ring-primary/20">
+            <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+              {photo.profiles?.username?.charAt(0).toUpperCase() || <User className="w-5 h-5" strokeWidth={2} />}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <p className="font-semibold text-foreground">{photo.profiles?.username || "Unknown"}</p>
+            <p className="font-semibold text-foreground text-sm">{photo.profiles?.username || "Unknown"}</p>
             <p className="text-xs text-muted-foreground">
               {new Date(photo.created_at).toLocaleDateString()}
             </p>
@@ -126,12 +126,11 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
         </motion.div>
 
         <motion.div 
-          className="relative aspect-square bg-gradient-to-br from-muted to-muted/50 overflow-hidden cursor-pointer"
-          whileHover={{ scale: 1.02 }}
+          className="relative aspect-square bg-muted overflow-hidden cursor-pointer"
+          whileHover={{ scale: 1.01 }}
           transition={{ duration: 0.3 }}
           onDoubleClick={handleDoubleTap}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
           <img
             src={photo.image_url}
             alt={photo.caption || "Photo"}
@@ -151,29 +150,29 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
           )}
         </motion.div>
 
-        <div className="p-4 space-y-4 bg-gradient-to-b from-card to-card/50">
+        <div className="p-5 space-y-4">
           {musicTrack && (
             <motion.div 
-              className="flex items-center gap-2 text-xs bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-xl px-4 py-2.5 border border-primary/20 shadow-sm"
+              className="flex items-center gap-3 text-xs bg-primary/5 rounded-xl px-4 py-3 border border-primary/10"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
-                <Music className="w-4 h-4 text-primary-foreground" />
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Music className="w-4 h-4 text-primary" strokeWidth={2.5} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-foreground truncate">{musicTrack.name}</p>
+                <p className="font-semibold text-foreground truncate text-sm">{musicTrack.name}</p>
                 <p className="text-muted-foreground truncate">{musicTrack.artist}</p>
               </div>
-              <Badge variant="outline" className="ml-auto text-xs border-primary/30 bg-primary/5">
+              <Badge variant="outline" className="ml-auto text-xs border-primary/20 bg-primary/5 font-medium">
                 {musicTrack.mood}
               </Badge>
             </motion.div>
           )}
 
           <motion.div 
-            className="flex items-center gap-6"
+            className="flex items-center gap-5"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
@@ -185,15 +184,16 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
               onClick={handleLike}
             >
               <motion.div
-                whileHover={{ scale: 1.2 }}
-                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.95 }}
               >
                 <Heart
-                  className={`w-7 h-7 transition-all ${
+                  className={`w-6 h-6 transition-all ${
                     liked 
-                      ? "fill-primary text-primary drop-shadow-lg" 
+                      ? "fill-primary text-primary" 
                       : "text-muted-foreground group-hover/like:text-primary"
                   }`}
+                  strokeWidth={2}
                 />
               </motion.div>
               {likeCount > 0 && (
@@ -207,14 +207,14 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
               size="sm"
               className="gap-2 p-0 h-auto hover:bg-transparent group/comment"
             >
-              <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
-                <MessageCircle className="w-7 h-7 text-muted-foreground group-hover/comment:text-primary transition-colors" />
+              <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
+                <MessageCircle className="w-6 h-6 text-muted-foreground group-hover/comment:text-primary transition-colors" strokeWidth={2} />
               </motion.div>
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              className="gap-2 p-0 h-auto hover:bg-transparent group/share"
+              className="gap-2 p-0 h-auto hover:bg-transparent group/share ml-auto"
               onClick={() => {
                 if (navigator.share) {
                   navigator.share({
@@ -228,21 +228,21 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
                 }
               }}
             >
-              <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
-                <Share2 className="w-7 h-7 text-muted-foreground group-hover/share:text-primary transition-colors" />
+              <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
+                <Share2 className="w-6 h-6 text-muted-foreground group-hover/share:text-primary transition-colors" strokeWidth={2} />
               </motion.div>
             </Button>
           </motion.div>
 
           {photo.caption && (
             <motion.p 
-              className="text-sm leading-relaxed"
+              className="text-sm leading-relaxed pt-1"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
               <span className="font-semibold text-primary mr-2">{photo.profiles?.username}</span>
-              <span className="text-foreground/90">{photo.caption}</span>
+              <span className="text-foreground">{photo.caption}</span>
             </motion.p>
           )}
         </div>

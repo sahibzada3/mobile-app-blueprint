@@ -116,34 +116,35 @@ export default function Feed() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[hsl(var(--background))] via-[hsl(var(--card))] to-[hsl(var(--background-gradient-end))] pb-20">
-      <header className="sticky top-0 bg-gradient-to-r from-card/95 via-card/98 to-card/95 backdrop-blur-xl border-b border-primary/20 z-40 shadow-lg">
-        <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2"
-          >
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
-              <Sparkles className="w-5 h-5 text-primary-foreground" />
+    <div 
+      className="min-h-screen pb-24"
+      style={{
+        background: `linear-gradient(180deg, hsl(var(--background)) 0%, hsl(210 60% 15%) 50%, hsl(var(--background-gradient-end)) 100%)`
+      }}
+    >
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-card/90 border-b border-border/30">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center" style={{ boxShadow: '0 0 24px hsl(207 90% 54% / 0.3)' }}>
+              <Camera className="w-5 h-5 text-primary" strokeWidth={2.5} />
             </div>
-            <h1 className="text-2xl font-display font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold tracking-tight" style={{ textShadow: '0 0 20px hsl(207 90% 54% / 0.4)' }}>
               Frame
             </h1>
-          </motion.div>
+          </div>
           <div className="flex items-center gap-2">
             <NotificationBell />
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="hover:bg-primary/10">
-              {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              {theme === "light" ? <Moon className="w-5 h-5" strokeWidth={2} /> : <Sun className="w-5 h-5" strokeWidth={2} />}
             </Button>
             <Button variant="ghost" size="icon" onClick={handleLogout} className="hover:bg-destructive/10 hover:text-destructive">
-              <LogOut className="w-5 h-5" />
+              <LogOut className="w-5 h-5" strokeWidth={2} />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Weather Widget */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -158,77 +159,59 @@ export default function Feed() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card
-            className="shadow-xl cursor-pointer hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 border-primary/30 hover:border-primary/50 hover:scale-[1.02] overflow-hidden group"
+          <Card 
+            className="cursor-pointer hover:shadow-card-hover transition-all duration-300 active:scale-[0.99] group" 
             onClick={() => navigate("/ideas")}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <CardContent className="p-6 relative">
+            <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="bg-gradient-to-br from-primary to-primary/70 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <Lightbulb className="w-7 h-7 text-primary-foreground" />
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+                  <Lightbulb className="w-6 h-6 text-primary" strokeWidth={2.5} />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
-                    Photography Ideas & Tips
+                    Photography Ideas
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Discover techniques, locations, and weather-based recommendations
+                    Discover techniques and locations
                   </p>
                 </div>
-                <ChevronRight className="w-6 h-6 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" strokeWidth={2.5} />
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="relative"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 blur-3xl -z-10" />
-          <Card className="text-center py-8 backdrop-blur-sm bg-card/80 border-primary/20 shadow-2xl">
-            <CardContent className="space-y-6">
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.1, 1],
-                  rotate: [0, 5, -5, 0]
-                }}
-                transition={{ 
-                  duration: 2,
-                  repeat: Infinity,
-                  repeatType: "reverse"
-                }}
-                className="bg-gradient-to-br from-primary via-primary/80 to-accent w-24 h-24 rounded-3xl flex items-center justify-center mx-auto shadow-xl"
-              >
-                <Heart className="w-12 h-12 text-primary-foreground fill-current" />
-              </motion.div>
-              <div>
-                <h2 className="text-3xl font-display font-bold mb-3 bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
-                  Welcome to Frame
-                </h2>
-                <p className="text-muted-foreground text-lg">
-                  Start capturing cinematic nature moments
-                </p>
+          <Card>
+            <CardContent className="text-center p-8">
+              <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4" style={{ boxShadow: '0 0 32px hsl(207 90% 54% / 0.3)' }}>
+                <Camera className="w-10 h-10 text-primary" strokeWidth={2.5} />
               </div>
-              <div className="flex gap-3 justify-center flex-wrap">
-                <Button 
-                  onClick={() => navigate("/camera")} 
-                  className="shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:scale-105"
+              <h2 className="text-3xl font-bold mb-3">Welcome to Frame</h2>
+              <p className="text-base text-muted-foreground mb-6">
+                Start capturing cinematic nature moments
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  onClick={() => navigate("/camera")}
                   size="lg"
+                  className="flex-1 sm:flex-none"
                 >
-                  <Camera className="w-4 h-4 mr-2" />
+                  <Camera className="w-5 h-5" />
                   Open Camera
                 </Button>
-                <Button 
-                  onClick={() => navigate("/ideas")} 
-                  variant="outline" 
-                  className="shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-primary/30"
+                <Button
+                  onClick={() => navigate("/ideas")}
+                  variant="outline"
                   size="lg"
+                  className="flex-1 sm:flex-none"
                 >
-                  <Lightbulb className="w-4 h-4 mr-2" />
+                  <Lightbulb className="w-5 h-5" />
                   Get Ideas
                 </Button>
               </div>
@@ -237,42 +220,29 @@ export default function Feed() {
         </motion.div>
 
         {photos.length > 0 ? (
-          <div className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-center gap-2 text-sm font-semibold text-muted-foreground"
-            >
-              <TrendingUp className="w-4 h-4" />
-              <span>Latest Captures</span>
-            </motion.div>
+          <div className="space-y-8">
             {photos.map((photo, index) => (
               <motion.div
                 key={photo.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 + index * 0.1 }}
+                transition={{ delay: 0.1 * index }}
               >
                 <PhotoCard photo={photo} currentUserId={user?.id} />
               </motion.div>
             ))}
           </div>
         ) : (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Card className="shadow-xl border-dashed border-2 border-primary/20 bg-gradient-to-br from-card to-primary/5">
-              <CardContent className="p-10 text-center">
-                <div className="bg-gradient-to-br from-primary/20 to-accent/20 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                  <Camera className="w-10 h-10 text-primary" />
-                </div>
-                <p className="text-lg font-medium text-muted-foreground mb-2">No photos yet</p>
-                <p className="text-sm text-muted-foreground">Be the first to share a cinematic moment!</p>
-              </CardContent>
-            </Card>
-          </motion.div>
+          <Card>
+            <CardContent className="py-16 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Camera className="w-8 h-8 text-primary" strokeWidth={2} />
+              </div>
+              <p className="text-base text-muted-foreground font-medium">
+                No photos yet. Be the first to share!
+              </p>
+            </CardContent>
+          </Card>
         )}
       </main>
 

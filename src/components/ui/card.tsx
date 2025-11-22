@@ -5,8 +5,11 @@ import { cn } from "@/lib/utils";
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
   <div 
     ref={ref} 
-    className={cn("rounded-lg border bg-card text-card-foreground shadow-sm relative overflow-hidden", className)} 
-    style={{ background: 'linear-gradient(135deg, hsl(0 0% 10%), hsl(0 0% 14%))' }}
+    className={cn("rounded-2xl border border-border/50 text-card-foreground relative overflow-hidden", className)} 
+    style={{ 
+      background: 'linear-gradient(135deg, hsl(0 0% 12%) 0%, hsl(0 0% 16%) 100%)',
+      boxShadow: '0 8px 32px -8px hsl(0 0% 0% / 0.4), 0 0 0 1px hsl(207 90% 54% / 0.1)'
+    }}
     {...props} 
   />
 ));
@@ -14,7 +17,7 @@ Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("flex flex-col space-y-1.5 p-6", className)} {...props} />
+    <div ref={ref} className={cn("flex flex-col space-y-2 p-6", className)} {...props} />
   ),
 );
 CardHeader.displayName = "CardHeader";
