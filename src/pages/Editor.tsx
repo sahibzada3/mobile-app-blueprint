@@ -213,9 +213,9 @@ export default function Editor() {
             ctx.font = `${adjustedFontSize * 0.8}px "${fontFamily}", serif`;
             ctx.globalAlpha = (textOpacity / 100) * 0.9;
             
-            // Position author slightly down and to the right
+            // Position author slightly down and to the left
             const authorY = currentY + (lineHeight * 0.3); // Move down
-            const authorXOffset = xOffset + (canvas.width * 0.15); // Move to right
+            const authorXOffset = xOffset - (canvas.width * 0.05); // Move slightly to left
             
             // Draw stroke first if enabled
             if (textStrokeWidth > 0 && line.trim()) {
