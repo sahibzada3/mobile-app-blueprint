@@ -37,7 +37,7 @@ const filters: { id: FilterType; label: string; image: string }[] = [
 
 export function CameraFilterStrip({ selectedFilter, onFilterChange }: CameraFilterStripProps) {
   return (
-    <div className="flex items-center gap-3 px-4 overflow-x-auto overflow-y-hidden" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+    <div className="flex items-center gap-2 px-4 overflow-x-auto overflow-y-hidden" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
       <style>{`
         div::-webkit-scrollbar {
           display: none;
@@ -51,13 +51,13 @@ export function CameraFilterStrip({ selectedFilter, onFilterChange }: CameraFilt
             key={filter.id}
             onClick={() => onFilterChange(isSelected ? null : filter.id)}
             className={`
-              flex-shrink-0 flex flex-col items-center gap-1.5 transition-all
+              flex-shrink-0 flex flex-col items-center gap-1 transition-all
               ${isSelected ? 'scale-105' : 'scale-100'}
             `}
           >
             <div 
               className={`
-                w-14 h-14 rounded-xl backdrop-blur-md border-2 transition-all overflow-hidden
+                w-12 h-12 rounded-lg backdrop-blur-md border-2 transition-all overflow-hidden
                 ${isSelected 
                   ? "border-white shadow-lg shadow-white/30" 
                   : "border-white/30 hover:border-white/50"
@@ -70,7 +70,7 @@ export function CameraFilterStrip({ selectedFilter, onFilterChange }: CameraFilt
               }}
             />
             <span className={`
-              text-[10px] font-medium whitespace-nowrap
+              text-[9px] font-medium whitespace-nowrap
               ${isSelected ? 'text-white' : 'text-white/70'}
             `}>
               {filter.label}
@@ -82,9 +82,9 @@ export function CameraFilterStrip({ selectedFilter, onFilterChange }: CameraFilt
       {selectedFilter && (
         <button
           onClick={() => onFilterChange(null)}
-          className="flex-shrink-0 w-14 h-14 rounded-xl bg-black/40 backdrop-blur-md hover:bg-black/60 border-2 border-white/30 hover:border-white/50 flex items-center justify-center transition-all"
+          className="flex-shrink-0 w-12 h-12 rounded-lg bg-black/40 backdrop-blur-md hover:bg-black/60 border-2 border-white/30 hover:border-white/50 flex items-center justify-center transition-all"
         >
-          <X className="w-5 h-5 text-white" />
+          <X className="w-4 h-4 text-white" />
         </button>
       )}
     </div>
