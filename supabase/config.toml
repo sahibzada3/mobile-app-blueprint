@@ -1,1 +1,4 @@
 project_id = "oqswaavkbbvzvgqdhouj"
+
+[functions.detect-scene]
+verify_jwt = false
