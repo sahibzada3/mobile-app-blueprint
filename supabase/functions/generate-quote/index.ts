@@ -32,44 +32,52 @@ Deno.serve(async (req) => {
     };
 
     const sceneDescriptions: Record<string, string> = {
-      'golden-hour': 'warm golden sunset or sunrise scenes',
-      'forest': 'deep green forest or woodland scenes',
-      'urban': 'city streets, buildings, and urban architecture',
-      'water': 'oceans, lakes, rivers, or water scenes',
-      'silhouette': 'dramatic silhouettes against bright backgrounds',
-      'fog-mist': 'mysterious foggy or misty atmospheres',
-      'night': 'nighttime scenes with stars or city lights',
-      'beach-desert': 'sandy beaches or desert landscapes',
-      'rain': 'rainy weather with reflections and droplets',
-      'sky-clouds': 'dramatic sky with clouds and weather',
-      'indoor-golden': 'cozy indoor scenes with warm lighting',
-      'old-architecture': 'historic buildings and vintage architecture',
-      'midday-sun': 'bright daylight scenes with strong sun',
+      'golden-hour': 'golden sunset or sunrise with warm amber light painting the landscape',
+      'forest': 'mystical forest with dappled light through ancient trees and moss',
+      'urban': 'urban cityscape with geometric architecture and street life energy',
+      'water': 'serene water scenes with reflections, waves, or tranquil surfaces',
+      'silhouette': 'dramatic silhouettes against bright skies creating bold contrasts',
+      'fog-mist': 'ethereal fog and mist creating mystery and soft dream-like atmosphere',
+      'night': 'nocturnal beauty with starlit skies, moonlight, or city lights glowing',
+      'beach-desert': 'vast sandy landscapes with endless horizons and natural textures',
+      'rain': 'rainy ambiance with glistening reflections, droplets, and moody atmosphere',
+      'sky-clouds': 'celestial drama with clouds, storms, or magnificent sky formations',
+      'indoor-golden': 'intimate indoor warmth with golden light and cozy ambiance',
+      'old-architecture': 'timeless architecture with history, elegance, and aged beauty',
+      'midday-sun': 'bright daylight with strong sun, sharp shadows, and vibrant clarity',
     };
 
     const languagePrompt = languagePrompts[language] || languagePrompts.en;
     const sceneDescription = sceneDescriptions[scene] || 'beautiful nature photography';
 
-    const systemPrompt = `You are a creative content generator for nature photography overlays. ${languagePrompt} that perfectly match ${sceneDescription}. 
+    const systemPrompt = `You are a master of poetic photography overlays. ${languagePrompt} that capture the essence of ${sceneDescription}. 
 
-Generate 3 diverse items mixing these types:
-1. **Poetry lines** - Beautiful verses from classic or contemporary poets (with poet name)
-2. **Famous quotes** - Inspirational quotes from notable people about nature, life, or the scene (with person's name)
-3. **Original poetic quotes** - Your own evocative phrases
+Generate 3 diverse pieces:
 
-Each should be:
-- Short enough for photo overlay (15-20 words maximum)
-- Deeply connected to the scene and mood
-- In the specified language
-- Attributed when from a real person/poet
+1. **Poetry Verse** - A short poetic verse (2-4 lines) from a famous poet, formatted with line breaks for poetic display. Include poet's name.
+   Example: "The woods are lovely, dark and deep,\nBut I have promises to keep"
 
-Format as JSON array of objects:
+2. **Famous Quote** - An inspiring quote from a notable person specifically relevant to this scene/mood (nature, time, light, emotion). Include person's name.
+
+3. **Original Poetry** - Your own poetic creation (2-3 lines) with line breaks, capturing the scene's emotion and atmosphere.
+
+CRITICAL Requirements:
+- Use actual line breaks (\n) in poetry for multi-line display
+- Keep each piece under 25 words
+- Make content HIGHLY SPECIFIC to the scene described
+- Poetry should have poetic line breaks, not just sentences
+- For ${scene} scenes, use imagery/metaphors/quotes that relate directly to that specific atmosphere
+- Use evocative, sensory language that matches the visual scene
+- In the specified language throughout
+
+Format as JSON array:
 [
-  {"text": "The quote or poetry line", "author": "Author Name (or null for original)"},
-  ...
+  {"text": "Line one of poetry\nLine two of poetry", "author": "Poet Name"},
+  {"text": "Famous quote text", "author": "Person Name"},  
+  {"text": "Original poetic line one\nOriginal line two", "author": null}
 ]
 
-Mix at least one famous quote/poetry WITH attribution and one or two originals. Make them profound and memorable.`;
+Make them profound, scene-specific, and beautifully formatted for photography overlay.`;
 
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {

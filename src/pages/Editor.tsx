@@ -103,8 +103,58 @@ export default function Editor() {
           ctx.transform(perspectiveScale, skewRad, 0, 1, 0, 0);
         }
         
-        // Set text properties
-        ctx.font = `${fontSize}px "${fontFamily}", serif`;
+        // Auto-adjust font size and wrap text
+        let adjustedFontSize = fontSize;
+        const maxWidth = canvas.width * 0.8; // 80% of canvas width
+        const minFontSize = 20;
+        
+        // Function to wrap text and check if it fits
+        const wrapText = (text: string, maxWidth: number, currentFontSize: number): string[] => {
+          ctx.font = `${currentFontSize}px "${fontFamily}", serif`;
+          const lines = text.split("\n");
+          const wrappedLines: string[] = [];
+          
+          lines.forEach(line => {
+            if (ctx.measureText(line).width <= maxWidth) {
+              wrappedLines.push(line);
+            } else {
+              // Split long lines into multiple lines
+              const words = line.split(" ");
+              let currentLine = "";
+              
+              words.forEach((word, idx) => {
+                const testLine = currentLine ? `${currentLine} ${word}` : word;
+                const metrics = ctx.measureText(testLine);
+                
+                if (metrics.width > maxWidth && currentLine) {
+                  wrappedLines.push(currentLine);
+                  currentLine = word;
+                } else {
+                  currentLine = testLine;
+                }
+                
+                // Push the last line
+                if (idx === words.length - 1 && currentLine) {
+                  wrappedLines.push(currentLine);
+                }
+              });
+            }
+          });
+          
+          return wrappedLines;
+        };
+        
+        // Try to fit text by wrapping first, then reducing size if needed
+        let lines = wrapText(overlayText, maxWidth, adjustedFontSize);
+        const maxLines = 6; // Maximum lines before reducing font size
+        
+        while (lines.length > maxLines && adjustedFontSize > minFontSize) {
+          adjustedFontSize -= 4;
+          lines = wrapText(overlayText, maxWidth, adjustedFontSize);
+        }
+        
+        // Set final text properties
+        ctx.font = `${adjustedFontSize}px "${fontFamily}", serif`;
         ctx.fillStyle = textColor;
         ctx.globalAlpha = textOpacity / 100;
         ctx.textAlign = textAlign;
@@ -123,8 +173,7 @@ export default function Editor() {
         ctx.shadowOffsetX = 3 + (textPerspective / 10);
         ctx.shadowOffsetY = 3 + (textPerspective / 10);
 
-        const lines = overlayText.split("\n");
-        const lineHeight = fontSize * 1.3;
+        const lineHeight = adjustedFontSize * 1.4;
         const startY = -((lines.length - 1) * lineHeight) / 2;
 
         let xOffset = 0;
