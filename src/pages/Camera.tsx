@@ -247,22 +247,27 @@ export default function Camera() {
               <ScrollArea className="flex-1 pointer-events-auto">
                 <div className="space-y-2.5 pr-1">
                   {[
-                    { key: "brightness", label: "Brightness", min: 50, max: 150, step: 1, recommended: 100 },
-                    { key: "contrast", label: "Contrast", min: 50, max: 150, step: 1, recommended: 100 },
-                    { key: "saturation", label: "Saturation", min: 0, max: 200, step: 1, recommended: 100 },
-                    { key: "shadows", label: "Shadows", min: -50, max: 50, step: 1, recommended: 0 },
-                    { key: "highlights", label: "Highlights", min: -50, max: 50, step: 1, recommended: 0 },
-                    { key: "temperature", label: "Temperature", min: -50, max: 50, step: 1, recommended: 0 },
-                    { key: "dehaze", label: "Dehaze", min: -50, max: 50, step: 1, recommended: 0 },
+                    { key: "brightness", label: "Brightness", min: 50, max: 150, step: 1, recommended: 100, desc: "Light balance" },
+                    { key: "contrast", label: "Contrast", min: 50, max: 150, step: 1, recommended: 100, desc: "Add drama" },
+                    { key: "saturation", label: "Saturation", min: 0, max: 200, step: 1, recommended: 100, desc: "Color intensity" },
+                    { key: "shadows", label: "Shadows", min: -50, max: 50, step: 1, recommended: 0, desc: "Recover details" },
+                    { key: "highlights", label: "Highlights", min: -50, max: 50, step: 1, recommended: 0, desc: "Control mood" },
+                    { key: "temperature", label: "Temperature", min: -50, max: 50, step: 1, recommended: 0, desc: "Warm/cool" },
+                    { key: "dehaze", label: "Dehaze", min: -50, max: 50, step: 1, recommended: 0, desc: "Remove fog" },
                   ].map((control) => {
                     const recommendedPercent = ((control.recommended - control.min) / (control.max - control.min)) * 100;
                     
                     return (
                       <div key={control.key} className="space-y-0.5">
                         <div className="flex items-center justify-between px-1">
-                          <label className="text-[11px] font-semibold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-                            {control.label}
-                          </label>
+                          <div>
+                            <label className="text-[11px] font-semibold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                              {control.label}
+                            </label>
+                            <p className="text-[9px] text-white/80 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] leading-tight">
+                              {control.desc}
+                            </p>
+                          </div>
                           <span className="text-[11px] text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] min-w-[28px] text-right">
                             {advancedSettings[control.key as keyof AdvancedSettings]}
                           </span>
