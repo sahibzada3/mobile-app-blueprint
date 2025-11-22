@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Messages from "./pages/Messages";
+import Friends from "./pages/Friends";
 import Feed from "./pages/Feed";
 import Camera from "./pages/Camera";
 import Editor from "./pages/Editor";
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/ideas" element={<Ideas />} />
             <Route path="/weather" element={<WeatherRecommendations />} />
             <Route path="/messages" element={<Messages />} />
+            <Route path="/friends" element={<Friends />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/settings" element={<ProfileSettings />} />
             <Route path="/profile/:userId" element={<Profile />} />
