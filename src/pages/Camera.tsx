@@ -10,8 +10,6 @@ import { toast } from "sonner";
 import { CameraModeSelector } from "@/components/camera/CameraModeSelector";
 import { CameraFilterStrip } from "@/components/camera/CameraFilterStrip";
 import { CameraAdvancedControls } from "@/components/camera/CameraAdvancedControls";
-import { SceneSuggestionBubble } from "@/components/camera/SceneSuggestionBubble";
-import { useSceneDetection } from "@/hooks/useSceneDetection";
 import { applyFilter, type FilterType } from "@/utils/cameraFilters";
 import { type CameraMode, type AdvancedSettings } from "@/types/camera";
 
@@ -27,7 +25,6 @@ export default function Camera() {
   const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
   const [mode, setMode] = useState<CameraMode>("auto");
   const [selectedFilter, setSelectedFilter] = useState<FilterType | null>(null);
-  const { suggestion } = useSceneDetection(videoRef, !!stream);
   const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
     brightness: 100,
     contrast: 100,
@@ -214,12 +211,6 @@ export default function Camera() {
         <div className="absolute top-20 left-0 right-0 z-10 px-4">
           <CameraModeSelector selectedMode={mode} onModeChange={setMode} />
         </div>
-
-        {/* Scene Suggestion Bubble */}
-        <SceneSuggestionBubble 
-          suggestion={suggestion}
-          onApply={(filter) => setSelectedFilter(filter)}
-        />
 
         {/* Bottom Controls */}
         <div className="absolute bottom-0 left-0 right-0 z-10 pb-20 flex flex-col gap-3">
