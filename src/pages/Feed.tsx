@@ -116,7 +116,7 @@ export default function Feed() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-[hsl(var(--primary-light))] via-[hsl(var(--card))] to-[hsl(var(--background))] pb-20">
       <header className="sticky top-0 bg-gradient-to-r from-card/95 via-card/98 to-card/95 backdrop-blur-xl border-b border-primary/20 z-40 shadow-lg">
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
           <motion.div
