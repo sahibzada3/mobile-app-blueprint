@@ -103,12 +103,22 @@ export default function Editor() {
           ctx.transform(perspectiveScale, skewRad, 0, 1, 0, 0);
         }
         
-        // Auto-adjust font size and wrap text
+        // Auto-adjust font size and wrap text intelligently
         let adjustedFontSize = fontSize;
-        const maxWidth = canvas.width * 0.8; // 80% of canvas width
+        const maxWidth = canvas.width * 0.85; // Use 85% of canvas width for better spread
         const minFontSize = 20;
         
-        // Function to wrap text and check if it fits
+        // Split text and author if present (format: "text\n— author")
+        const authorMatch = overlayText.match(/\n—\s*(.+)$/);
+        let mainText = overlayText;
+        let authorText = "";
+        
+        if (authorMatch) {
+          authorText = `— ${authorMatch[1]}`;
+          mainText = overlayText.substring(0, overlayText.indexOf('\n—')).trim();
+        }
+        
+        // Function to wrap text intelligently
         const wrapText = (text: string, maxWidth: number, currentFontSize: number): string[] => {
           ctx.font = `${currentFontSize}px "${fontFamily}", serif`;
           const lines = text.split("\n");
@@ -118,7 +128,7 @@ export default function Editor() {
             if (ctx.measureText(line).width <= maxWidth) {
               wrappedLines.push(line);
             } else {
-              // Split long lines into multiple lines
+              // Split long lines by words
               const words = line.split(" ");
               let currentLine = "";
               
@@ -144,13 +154,21 @@ export default function Editor() {
           return wrappedLines;
         };
         
-        // Try to fit text by wrapping first, then reducing size if needed
-        let lines = wrapText(overlayText, maxWidth, adjustedFontSize);
-        const maxLines = 6; // Maximum lines before reducing font size
+        // Wrap main text
+        let mainLines = wrapText(mainText, maxWidth, adjustedFontSize);
         
-        while (lines.length > maxLines && adjustedFontSize > minFontSize) {
-          adjustedFontSize -= 4;
-          lines = wrapText(overlayText, maxWidth, adjustedFontSize);
+        // Auto-reduce font size if too many lines
+        const maxLines = 8;
+        while (mainLines.length > maxLines && adjustedFontSize > minFontSize) {
+          adjustedFontSize -= 3;
+          mainLines = wrapText(mainText, maxWidth, adjustedFontSize);
+        }
+        
+        // Combine main text and author (author always on new line)
+        const allLines = [...mainLines];
+        if (authorText) {
+          allLines.push(""); // Empty line for spacing
+          allLines.push(authorText);
         }
         
         // Set final text properties
@@ -173,8 +191,9 @@ export default function Editor() {
         ctx.shadowOffsetX = 3 + (textPerspective / 10);
         ctx.shadowOffsetY = 3 + (textPerspective / 10);
 
-        const lineHeight = adjustedFontSize * 1.4;
-        const startY = -((lines.length - 1) * lineHeight) / 2;
+        const lineHeight = adjustedFontSize * 1.5;
+        const totalHeight = allLines.length * lineHeight;
+        const startY = -(totalHeight / 2) + (lineHeight / 2);
 
         let xOffset = 0;
         if (textAlign === "left") {
@@ -183,16 +202,27 @@ export default function Editor() {
           xOffset = canvas.width * 0.4;
         }
 
-        lines.forEach((line, index) => {
+        allLines.forEach((line, index) => {
           const currentY = startY + index * lineHeight;
           
+          // Use smaller font for author line
+          if (line.startsWith("—")) {
+            ctx.font = `${adjustedFontSize * 0.8}px "${fontFamily}", serif`;
+            ctx.globalAlpha = (textOpacity / 100) * 0.9;
+          } else {
+            ctx.font = `${adjustedFontSize}px "${fontFamily}", serif`;
+            ctx.globalAlpha = textOpacity / 100;
+          }
+          
           // Draw stroke first if enabled
-          if (textStrokeWidth > 0) {
+          if (textStrokeWidth > 0 && line.trim()) {
             ctx.strokeText(line, xOffset, currentY);
           }
           
           // Draw fill text
-          ctx.fillText(line, xOffset, currentY);
+          if (line.trim()) {
+            ctx.fillText(line, xOffset, currentY);
+          }
         });
         
         ctx.restore();
