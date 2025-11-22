@@ -26,6 +26,7 @@ Deno.serve(async (req) => {
       it: 'Generate 3 poetic, inspiring quotes in Italian',
       pt: 'Generate 3 poetic, inspiring quotes in Portuguese',
       ar: 'Generate 3 poetic, inspiring quotes in Arabic',
+      ur: 'Generate 3 poetic, inspiring quotes in Urdu',
       hi: 'Generate 3 poetic, inspiring quotes in Hindi',
       zh: 'Generate 3 poetic, inspiring quotes in Chinese',
       ja: 'Generate 3 poetic, inspiring quotes in Japanese',
