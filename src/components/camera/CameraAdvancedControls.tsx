@@ -16,20 +16,15 @@ const controls: {
   max: number; 
   step: number;
   recommended: number;
+  description: string;
 }[] = [
-  { key: "brightness", label: "Brightness", min: 50, max: 150, step: 1, recommended: 100 },
-  { key: "contrast", label: "Contrast", min: 50, max: 150, step: 1, recommended: 100 },
-  { key: "saturation", label: "Saturation", min: 0, max: 200, step: 1, recommended: 100 },
-  { key: "shadows", label: "Shadows", min: -50, max: 50, step: 1, recommended: 0 },
-  { key: "highlights", label: "Highlights", min: -50, max: 50, step: 1, recommended: 0 },
-  { key: "tint", label: "Tint", min: -50, max: 50, step: 1, recommended: 0 },
-  { key: "temperature", label: "Temperature", min: -50, max: 50, step: 1, recommended: 0 },
-  { key: "clarity", label: "Clarity", min: -50, max: 50, step: 1, recommended: 10 },
-  { key: "dehaze", label: "Dehaze", min: -50, max: 50, step: 1, recommended: 0 },
-  { key: "vignette", label: "Vignette", min: 0, max: 100, step: 1, recommended: 10 },
-  { key: "noiseReduction", label: "Noise Reduction", min: 0, max: 100, step: 1, recommended: 15 },
-  { key: "greenBoost", label: "Green Boost", min: 0, max: 100, step: 1, recommended: 0 },
-  { key: "texture", label: "Texture", min: -50, max: 50, step: 1, recommended: 5 },
+  { key: "brightness", label: "Brightness", min: 50, max: 150, step: 1, recommended: 100, description: "Controls overall light/dark balance" },
+  { key: "contrast", label: "Contrast", min: 50, max: 150, step: 1, recommended: 100, description: "Adds drama by making darks darker and lights brighter" },
+  { key: "saturation", label: "Saturation", min: 0, max: 200, step: 1, recommended: 100, description: "Enhances color intensity naturally" },
+  { key: "shadows", label: "Shadows", min: -50, max: 50, step: 1, recommended: 0, description: "Recovers or deepens shadow details" },
+  { key: "highlights", label: "Highlights", min: -50, max: 50, step: 1, recommended: 0, description: "Controls bright areas for mood" },
+  { key: "temperature", label: "Temperature", min: -50, max: 50, step: 1, recommended: 0, description: "Adjusts warm/cool tones to match scene" },
+  { key: "dehaze", label: "Dehaze", min: -50, max: 50, step: 1, recommended: 0, description: "Removes fog/mist or adds atmosphere" },
 ];
 
 export function CameraAdvancedControls({ settings, onChange }: CameraAdvancedControlsProps) {
@@ -61,30 +56,26 @@ export function CameraAdvancedControls({ settings, onChange }: CameraAdvancedCon
       </div>
       
       <ScrollArea className="flex-1">
-        <div className="space-y-6 pr-4">
+        <div className="space-y-4 pr-4">
           {controls.map((control) => {
             const recommendedPercent = ((control.recommended - control.min) / (control.max - control.min)) * 100;
             
             return (
-              <div key={control.key} className="space-y-2">
+              <div key={control.key} className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">{control.label}</label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-blue-600 dark:text-blue-400">
-                      Rec: {control.recommended}
-                    </span>
-                    <span className="text-sm text-muted-foreground font-medium">
-                      {settings[control.key]}
-                    </span>
-                  </div>
+                  <label className="text-sm font-semibold text-white">{control.label}</label>
+                  <span className="text-sm text-white font-medium">
+                    {settings[control.key]}
+                  </span>
                 </div>
-                <div className="relative pt-1">
+                <p className="text-[10px] text-gray-400 leading-tight">{control.description}</p>
+                <div className="relative pt-2">
                   {/* Recommended level marker */}
                   <div 
-                    className="absolute top-0 h-6 w-0.5 bg-blue-500 z-10 pointer-events-none"
+                    className="absolute top-0 h-5 w-0.5 bg-blue-400 z-10 pointer-events-none"
                     style={{ left: `${recommendedPercent}%`, transform: 'translateX(-50%)' }}
                   >
-                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-blue-500" />
+                    <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-blue-400" />
                   </div>
                   <Slider
                     value={[settings[control.key]]}
