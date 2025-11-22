@@ -50,14 +50,27 @@ Deno.serve(async (req) => {
     const languagePrompt = languagePrompts[language] || languagePrompts.en;
     const sceneDescription = sceneDescriptions[scene] || 'beautiful nature photography';
 
-    const systemPrompt = `You are a poetic quote generator specialized in nature and photography. ${languagePrompt} that perfectly match ${sceneDescription}. Each quote should be:
-- Short (10-15 words maximum)
-- Evocative and emotional
-- Related to the visual scene
-- Suitable for overlay on photography
-- In the specified language
+    const systemPrompt = `You are a creative content generator for nature photography overlays. ${languagePrompt} that perfectly match ${sceneDescription}. 
 
-Return ONLY a JSON array of 3 quote strings, nothing else.`;
+Generate 3 diverse items mixing these types:
+1. **Poetry lines** - Beautiful verses from classic or contemporary poets (with poet name)
+2. **Famous quotes** - Inspirational quotes from notable people about nature, life, or the scene (with person's name)
+3. **Original poetic quotes** - Your own evocative phrases
+
+Each should be:
+- Short enough for photo overlay (15-20 words maximum)
+- Deeply connected to the scene and mood
+- In the specified language
+- Attributed when from a real person/poet
+
+Format as JSON array of objects:
+[
+  {"text": "The quote or poetry line", "author": "Author Name (or null for original)"},
+  ...
+]
+
+Mix at least one famous quote/poetry WITH attribution and one or two originals. Make them profound and memorable.`;
+
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -94,7 +107,7 @@ Return ONLY a JSON array of 3 quote strings, nothing else.`;
     const content = data.choices?.[0]?.message?.content || '[]';
     
     // Extract JSON from the response
-    let quotes: string[] = [];
+    let quotes: Array<{text: string, author: string | null}> = [];
     try {
       // Try to parse as direct JSON
       quotes = JSON.parse(content);
@@ -112,8 +125,16 @@ Return ONLY a JSON array of 3 quote strings, nothing else.`;
       }
     }
 
+    // Format quotes with attribution
+    const formattedQuotes = quotes.slice(0, 3).map(q => {
+      if (typeof q === 'string') {
+        return q;
+      }
+      return q.author ? `${q.text}\n— ${q.author}` : q.text;
+    });
+
     return new Response(
-      JSON.stringify({ quotes: quotes.slice(0, 3) }),
+      JSON.stringify({ quotes: formattedQuotes }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
