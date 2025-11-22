@@ -31,6 +31,13 @@ export default function Editor() {
   const [textOpacity, setTextOpacity] = useState(100);
   const [textAlign, setTextAlign] = useState<"left" | "center" | "right">("center");
   const [textPositionY, setTextPositionY] = useState(50);
+  const [textPositionX, setTextPositionX] = useState(50);
+  const [textRotation, setTextRotation] = useState(0);
+  const [textSkewX, setTextSkewX] = useState(0);
+  const [textPerspective, setTextPerspective] = useState(0);
+  const [textStrokeWidth, setTextStrokeWidth] = useState(0);
+  const [textStrokeColor, setTextStrokeColor] = useState("#000000");
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
   
   // Music state
   const [selectedMusic, setSelectedMusic] = useState<string | null>(null);
@@ -59,7 +66,7 @@ export default function Editor() {
     if (photoData && canvasRef.current) {
       drawCanvas();
     }
-  }, [photoData, overlayText, fontFamily, fontSize, textColor, textOpacity, textAlign, textPositionY]);
+  }, [photoData, overlayText, fontFamily, fontSize, textColor, textOpacity, textAlign, textPositionY, textPositionX, textRotation, textSkewX, textPerspective, textStrokeWidth, textStrokeColor]);
 
   const drawCanvas = () => {
     const canvas = canvasRef.current;
@@ -75,35 +82,71 @@ export default function Editor() {
       ctx.drawImage(img, 0, 0);
 
       if (overlayText) {
+        ctx.save();
+        
+        // Calculate position
+        const xPosition = (canvas.width * textPositionX) / 100;
+        const yPosition = (canvas.height * textPositionY) / 100;
+        
+        // Apply transformations
+        ctx.translate(xPosition, yPosition);
+        
+        // Apply rotation
+        if (textRotation !== 0) {
+          ctx.rotate((textRotation * Math.PI) / 180);
+        }
+        
+        // Apply perspective/skew effect
+        if (textSkewX !== 0 || textPerspective !== 0) {
+          const skewRad = (textSkewX * Math.PI) / 180;
+          const perspectiveScale = 1 + (textPerspective / 100);
+          ctx.transform(perspectiveScale, skewRad, 0, 1, 0, 0);
+        }
+        
+        // Set text properties
         ctx.font = `${fontSize}px "${fontFamily}", serif`;
         ctx.fillStyle = textColor;
         ctx.globalAlpha = textOpacity / 100;
         ctx.textAlign = textAlign;
         ctx.textBaseline = "middle";
         
-        // Add text shadow for better readability
+        // Add stroke if enabled
+        if (textStrokeWidth > 0) {
+          ctx.strokeStyle = textStrokeColor;
+          ctx.lineWidth = textStrokeWidth;
+          ctx.lineJoin = "round";
+        }
+        
+        // Add text shadow for depth
         ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
-        ctx.shadowBlur = 15;
-        ctx.shadowOffsetX = 3;
-        ctx.shadowOffsetY = 3;
+        ctx.shadowBlur = 15 + (textPerspective / 5);
+        ctx.shadowOffsetX = 3 + (textPerspective / 10);
+        ctx.shadowOffsetY = 3 + (textPerspective / 10);
 
         const lines = overlayText.split("\n");
         const lineHeight = fontSize * 1.3;
-        const yPosition = (canvas.height * textPositionY) / 100;
-        const startY = yPosition - ((lines.length - 1) * lineHeight) / 2;
+        const startY = -((lines.length - 1) * lineHeight) / 2;
 
-        let xPosition: number;
+        let xOffset = 0;
         if (textAlign === "left") {
-          xPosition = canvas.width * 0.1;
+          xOffset = -canvas.width * 0.4;
         } else if (textAlign === "right") {
-          xPosition = canvas.width * 0.9;
-        } else {
-          xPosition = canvas.width / 2;
+          xOffset = canvas.width * 0.4;
         }
 
         lines.forEach((line, index) => {
-          ctx.fillText(line, xPosition, startY + index * lineHeight);
+          const currentY = startY + index * lineHeight;
+          
+          // Draw stroke first if enabled
+          if (textStrokeWidth > 0) {
+            ctx.strokeText(line, xOffset, currentY);
+          }
+          
+          // Draw fill text
+          ctx.fillText(line, xOffset, currentY);
         });
+        
+        ctx.restore();
       }
     };
     img.src = photoData;
@@ -149,6 +192,13 @@ export default function Editor() {
             opacity: textOpacity,
             align: textAlign,
             positionY: textPositionY,
+            positionX: textPositionX,
+            rotation: textRotation,
+            skewX: textSkewX,
+            perspective: textPerspective,
+            strokeWidth: textStrokeWidth,
+            strokeColor: textStrokeColor,
+            language: selectedLanguage,
           } : null,
           filters,
         })
@@ -257,6 +307,14 @@ export default function Editor() {
                 textOpacity={textOpacity}
                 textAlign={textAlign}
                 textPositionY={textPositionY}
+                textPositionX={textPositionX}
+                textRotation={textRotation}
+                textSkewX={textSkewX}
+                textPerspective={textPerspective}
+                textStrokeWidth={textStrokeWidth}
+                textStrokeColor={textStrokeColor}
+                selectedLanguage={selectedLanguage}
+                photoData={photoData}
                 onTextChange={setOverlayText}
                 onFontChange={setFontFamily}
                 onSizeChange={setFontSize}
@@ -264,6 +322,13 @@ export default function Editor() {
                 onOpacityChange={setTextOpacity}
                 onAlignChange={setTextAlign}
                 onPositionYChange={setTextPositionY}
+                onPositionXChange={setTextPositionX}
+                onRotationChange={setTextRotation}
+                onSkewXChange={setTextSkewX}
+                onPerspectiveChange={setTextPerspective}
+                onStrokeWidthChange={setTextStrokeWidth}
+                onStrokeColorChange={setTextStrokeColor}
+                onLanguageChange={setSelectedLanguage}
               />
             </TabsContent>
 
