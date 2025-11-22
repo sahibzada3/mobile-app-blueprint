@@ -5,12 +5,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, MessageCircle } from "lucide-react";
+import { Search, MessageCircle, ArrowLeft } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";
-import { FriendsList } from "@/components/spotlight/FriendsList";
-import { ChatInterface } from "@/components/spotlight/ChatInterface";
+import FriendsList from "@/components/spotlight/FriendsList";
+import ChatInterface from "@/components/spotlight/ChatInterface";
 
 interface Conversation {
   friend_id: string;
@@ -21,10 +22,16 @@ interface Conversation {
   unread_count: number;
 }
 
+interface SelectedFriend {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+}
+
 export default function Messages() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
+  const [selectedFriend, setSelectedFriend] = useState<SelectedFriend | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
@@ -54,8 +61,8 @@ export default function Messages() {
       .from("messages")
       .select(`
         *,
-        sender:profiles!messages_sender_id_fkey(username, avatar_url),
-        recipient:profiles!messages_recipient_id_fkey(username, avatar_url)
+        sender:profiles!messages_sender_id_fkey(id, username, avatar_url),
+        recipient:profiles!messages_recipient_id_fkey(id, username, avatar_url)
       `)
       .or(`sender_id.eq.${currentUserId},recipient_id.eq.${currentUserId}`)
       .order("created_at", { ascending: false });
@@ -94,11 +101,22 @@ export default function Messages() {
   if (selectedFriend) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <ChatInterface
-          friendId={selectedFriend}
-          currentUserId={currentUserId!}
-          onBack={() => setSelectedFriend(null)}
-        />
+        <div className="container mx-auto px-4 py-6 max-w-4xl">
+          <Button
+            variant="ghost"
+            onClick={() => setSelectedFriend(null)}
+            className="mb-4 gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+          <ChatInterface
+            friendId={selectedFriend.id}
+            friendName={selectedFriend.username}
+            friendAvatar={selectedFriend.avatar_url || undefined}
+            currentUserId={currentUserId!}
+          />
+        </div>
       </div>
     );
   }
@@ -115,7 +133,32 @@ export default function Messages() {
           <div className="md:col-span-1">
             <FriendsList
               currentUserId={currentUserId!}
-              onSelectFriend={setSelectedFriend}
+              onSelectFriend={(friendId) => {
+                const conv = conversations.find(c => c.friend_id === friendId);
+                if (conv) {
+                  setSelectedFriend({
+                    id: friendId,
+                    username: conv.username,
+                    avatar_url: conv.avatar_url
+                  });
+                } else {
+                  // Load friend info if not in conversations
+                  supabase
+                    .from("profiles")
+                    .select("id, username, avatar_url")
+                    .eq("id", friendId)
+                    .single()
+                    .then(({ data }) => {
+                      if (data) {
+                        setSelectedFriend({
+                          id: data.id,
+                          username: data.username,
+                          avatar_url: data.avatar_url
+                        });
+                      }
+                    });
+                }
+              }}
             />
           </div>
 
@@ -143,7 +186,11 @@ export default function Messages() {
                     >
                       <Card
                         className="p-4 cursor-pointer hover:bg-accent/50 transition-colors"
-                        onClick={() => setSelectedFriend(conv.friend_id)}
+                        onClick={() => setSelectedFriend({
+                          id: conv.friend_id,
+                          username: conv.username,
+                          avatar_url: conv.avatar_url
+                        })}
                       >
                         <div className="flex items-center gap-3">
                           <Avatar className="w-12 h-12">
