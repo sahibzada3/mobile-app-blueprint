@@ -208,8 +208,16 @@ export default function Camera() {
 
         {/* Bottom Controls */}
         <div className="absolute bottom-0 left-0 right-0 z-10 pb-20">
+          {/* Filter Strip */}
+          <div className="bg-gradient-to-t from-black/90 via-black/70 to-transparent pt-6 pb-3">
+            <CameraFilterStrip 
+              selectedFilter={selectedFilter}
+              onFilterChange={setSelectedFilter}
+            />
+          </div>
+
           {/* Capture Button */}
-          <div className="flex items-center justify-center px-6 pb-6">
+          <div className="flex items-center justify-center px-6 pb-4 pt-2 bg-gradient-to-t from-black/90 to-transparent">
             <Button
               onClick={capturePhoto}
               disabled={!stream}
@@ -218,14 +226,6 @@ export default function Camera() {
             >
               <div className="w-16 h-16 rounded-full border-4 border-black/20" />
             </Button>
-          </div>
-
-          {/* Filter Strip */}
-          <div className="bg-gradient-to-t from-black/90 via-black/70 to-transparent pt-6 pb-4">
-            <CameraFilterStrip 
-              selectedFilter={selectedFilter}
-              onFilterChange={setSelectedFilter}
-            />
           </div>
         </div>
       </div>
