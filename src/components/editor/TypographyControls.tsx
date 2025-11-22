@@ -51,6 +51,7 @@ const languages = [
   { value: "it", label: "Italiano", flag: "🇮🇹" },
   { value: "pt", label: "Português", flag: "🇵🇹" },
   { value: "ar", label: "العربية", flag: "🇸🇦" },
+  { value: "ur", label: "اردو", flag: "🇵🇰" },
   { value: "hi", label: "हिन्दी", flag: "🇮🇳" },
   { value: "zh", label: "中文", flag: "🇨🇳" },
   { value: "ja", label: "日本語", flag: "🇯🇵" },
