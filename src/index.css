@@ -47,19 +47,22 @@
     --secondary-button-bg: 0 0% 10%; /* #1A1A1A */
     --secondary-button-text: 199 100% 95%; /* #E6F7FF */
     
-    --radius: 0.5rem;
+    --radius: 1rem;
 
     /* Gradients */
-    --gradient-nature: linear-gradient(135deg, hsl(var(--background)), hsl(var(--background-gradient-end)));
+    --gradient-nature: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--background-gradient-end)) 100%);
     --gradient-sunset: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--primary)));
     --gradient-soft: linear-gradient(180deg, hsl(var(--card)), hsl(var(--background)));
     --gradient-aqua: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary-light)));
-    --gradient-card-depth: linear-gradient(135deg, hsl(0 0% 10%), hsl(0 0% 14%));
-    --gradient-card-subtle: linear-gradient(180deg, hsl(0 0% 12%), hsl(0 0% 10%));
+    --gradient-card-depth: linear-gradient(135deg, hsl(0 0% 12%) 0%, hsl(0 0% 16%) 100%);
+    --gradient-card-subtle: linear-gradient(180deg, hsl(0 0% 14%), hsl(0 0% 11%));
 
     /* Shadows */
+    --shadow-card: 0 8px 32px -8px hsl(0 0% 0% / 0.4), 0 0 0 1px hsl(var(--primary) / 0.1);
+    --shadow-card-hover: 0 12px 48px -8px hsl(var(--primary) / 0.3), 0 0 0 1px hsl(var(--primary) / 0.2);
     --shadow-nature: 0 10px 30px -10px hsl(var(--primary) / 0.3);
-    --shadow-glow: 0 0 40px hsl(var(--accent) / 0.4);
+    --shadow-glow: 0 0 24px hsl(var(--primary) / 0.3);
+    --shadow-button: 0 4px 16px -4px hsl(var(--primary) / 0.4);
   }
 
   .dark {
@@ -113,10 +116,13 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
   }
 }
 
@@ -154,7 +160,7 @@ All colors MUST be HSL.
     --input: 0 0% 15%;
     --ring: 207 90% 54%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 10%;
     --sidebar-foreground: 0 0% 100%;
