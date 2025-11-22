@@ -58,17 +58,22 @@ const languages = [
 ];
 
 const fonts = [
-  { value: "Playfair Display", label: "Playfair Display (Elegant)" },
-  { value: "Merriweather", label: "Merriweather (Classic)" },
-  { value: "Lora", label: "Lora (Literary)" },
-  { value: "Montserrat", label: "Montserrat (Modern)" },
-  { value: "Raleway", label: "Raleway (Contemporary)" },
-  { value: "Crimson Text", label: "Crimson Text (Traditional)" },
-  { value: "Dancing Script", label: "Dancing Script (Handwritten)" },
-  { value: "Pacifico", label: "Pacifico (Playful)" },
-  { value: "Bebas Neue", label: "Bebas Neue (Bold)" },
-  { value: "Abril Fatface", label: "Abril Fatface (Display)" },
-  { value: "Inter", label: "Inter (Clean)" },
+  { value: "Playfair Display", label: "Playfair Display (Elegant)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Merriweather", label: "Merriweather (Classic)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Lora", label: "Lora (Literary)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Montserrat", label: "Montserrat (Modern)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Raleway", label: "Raleway (Contemporary)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Crimson Text", label: "Crimson Text (Traditional)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Amiri", label: "Amiri (Arabic/Urdu)", languages: ["ar", "ur"] },
+  { value: "Noto Nastaliq Urdu", label: "Noto Nastaliq (Urdu)", languages: ["ur"] },
+  { value: "Noto Sans Devanagari", label: "Noto Devanagari (Hindi)", languages: ["hi"] },
+  { value: "Noto Sans SC", label: "Noto Sans (Chinese)", languages: ["zh"] },
+  { value: "Noto Sans JP", label: "Noto Sans (Japanese)", languages: ["ja"] },
+  { value: "Dancing Script", label: "Dancing Script (Handwritten)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Pacifico", label: "Pacifico (Playful)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Bebas Neue", label: "Bebas Neue (Bold)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Abril Fatface", label: "Abril Fatface (Display)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Inter", label: "Inter (Clean)", languages: ["en", "es", "fr", "de", "it", "pt"] },
 ];
 
 export default function TypographyControls({
@@ -126,7 +131,29 @@ export default function TypographyControls({
       
       if (data?.quotes && Array.isArray(data.quotes)) {
         setGeneratedQuotes(data.quotes);
-        toast.success("Quotes generated successfully!");
+        
+        // Auto-select appropriate font for language
+        const languageFonts: Record<string, string> = {
+          'ar': 'Amiri',
+          'ur': 'Noto Nastaliq Urdu',
+          'hi': 'Noto Sans Devanagari',
+          'zh': 'Noto Sans SC',
+          'ja': 'Noto Sans JP',
+          'en': 'Playfair Display',
+          'es': 'Playfair Display',
+          'fr': 'Playfair Display',
+          'de': 'Playfair Display',
+          'it': 'Playfair Display',
+          'pt': 'Playfair Display',
+        };
+        
+        const recommendedFont = languageFonts[selectedLanguage];
+        if (recommendedFont && recommendedFont !== fontFamily) {
+          onFontChange(recommendedFont);
+          toast.success(`Quotes generated! Font changed to ${recommendedFont} for better ${selectedLanguage} display.`);
+        } else {
+          toast.success("Quotes generated successfully!");
+        }
       } else {
         throw new Error("Invalid response format");
       }
@@ -237,11 +264,16 @@ export default function TypographyControls({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {fonts.map((font) => (
-                    <SelectItem key={font.value} value={font.value}>
-                      <span style={{ fontFamily: font.value }}>{font.label}</span>
-                    </SelectItem>
-                  ))}
+                  {fonts
+                    .filter(font => 
+                      font.languages.includes(selectedLanguage) || 
+                      font.languages.includes("en")
+                    )
+                    .map((font) => (
+                      <SelectItem key={font.value} value={font.value}>
+                        <span style={{ fontFamily: font.value }}>{font.label}</span>
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
