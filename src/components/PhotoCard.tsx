@@ -3,11 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, MessageCircle, User, Music, Sparkles, Share2 } from "lucide-react";
+import { User, Music, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { musicTracks } from "@/data/musicTracks";
+import { VoteButtons } from "@/components/feed/VoteButtons";
+import { CommentSection } from "@/components/feed/CommentSection";
 
 interface PhotoCardProps {
   photo: {
@@ -26,80 +27,11 @@ interface PhotoCardProps {
 }
 
 export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   
   const musicTrack = photo.music_track ? musicTracks.find(t => t.id === photo.music_track) : null;
 
-  useEffect(() => {
-    loadLikes();
-  }, [photo.id, currentUserId]);
-
-  const loadLikes = async () => {
-    try {
-      // Get total likes for this photo
-      const { data: allLikes, error: countError } = await supabase
-        .from("votes")
-        .select("id")
-        .eq("photo_id", photo.id)
-        .eq("vote_type", "like");
-
-      if (countError) throw countError;
-      setLikeCount(allLikes?.length || 0);
-
-      // Check if current user has liked
-      if (currentUserId) {
-        const { data: userLike, error: userError } = await supabase
-          .from("votes")
-          .select("id")
-          .eq("photo_id", photo.id)
-          .eq("user_id", currentUserId)
-          .eq("vote_type", "like")
-          .maybeSingle();
-
-        if (userError) throw userError;
-        setLiked(!!userLike);
-      }
-    } catch (error: any) {
-      console.error("Error loading likes:", error);
-    }
-  };
-
-  const handleLike = async () => {
-    if (!currentUserId) {
-      toast.error("Please login to like photos");
-      return;
-    }
-
-    try {
-      if (liked) {
-        await supabase
-          .from("votes")
-          .delete()
-          .eq("user_id", currentUserId)
-          .eq("photo_id", photo.id)
-          .eq("vote_type", "like");
-        setLiked(false);
-        setLikeCount(prev => prev - 1);
-      } else {
-        await supabase.from("votes").insert({
-          user_id: currentUserId,
-          photo_id: photo.id,
-          vote_type: "like",
-        });
-        setLiked(true);
-        setLikeCount(prev => prev + 1);
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update like");
-    }
-  };
-
   const handleDoubleTap = () => {
-    if (!liked) {
-      handleLike();
-    }
     setShowHeartAnimation(true);
     setTimeout(() => setShowHeartAnimation(false), 1000);
   };
@@ -145,7 +77,14 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
               animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0] }}
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
-              <Heart className="w-32 h-32 fill-white text-white drop-shadow-2xl" />
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 0.4 }}
+              >
+                <svg className="w-32 h-32 fill-white text-white drop-shadow-2xl" viewBox="0 0 24 24">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+              </motion.div>
             </motion.div>
           )}
         </motion.div>
@@ -177,40 +116,7 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2 p-0 h-auto hover:bg-transparent group/like"
-              onClick={handleLike}
-            >
-              <motion.div
-                whileHover={{ scale: 1.15 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Heart
-                  className={`w-6 h-6 transition-all ${
-                    liked 
-                      ? "fill-primary text-primary" 
-                      : "text-muted-foreground group-hover/like:text-primary"
-                  }`}
-                  strokeWidth={2}
-                />
-              </motion.div>
-              {likeCount > 0 && (
-                <span className={`text-sm font-semibold ${liked ? "text-primary" : "text-foreground"}`}>
-                  {likeCount}
-                </span>
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2 p-0 h-auto hover:bg-transparent group/comment"
-            >
-              <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
-                <MessageCircle className="w-6 h-6 text-muted-foreground group-hover/comment:text-primary transition-colors" strokeWidth={2} />
-              </motion.div>
-            </Button>
+            <VoteButtons photoId={photo.id} currentUserId={currentUserId} />
             <Button
               variant="ghost"
               size="sm"
@@ -233,6 +139,8 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
               </motion.div>
             </Button>
           </motion.div>
+
+          <CommentSection photoId={photo.id} currentUserId={currentUserId} />
 
           {photo.caption && (
             <motion.p 
