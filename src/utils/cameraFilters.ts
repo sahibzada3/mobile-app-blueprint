@@ -1,27 +1,16 @@
 import { type AdvancedSettings } from "@/types/camera";
 
 export type FilterType =
-  | "cloud-pop"
   | "golden-hour-glow"
   | "moody-forest"
-  | "nature-boost"
+  | "cloud-pop"
+  | "silhouette-glow"
   | "cinematic-teal-orange"
   | "soft-dreamy"
   | "night-clarity"
-  | "beam-enhancer"
-  | "warm-silhouette"
-  | "deep-shadows"
-  | "water-blue-boost"
-  | "hdr-sky-booster";
+  | "nature-boost";
 
 export const filterPresets: Record<FilterType, Partial<AdvancedSettings>> = {
-  "cloud-pop": {
-    contrast: 115,
-    saturation: 110,
-    highlights: 15,
-    clarity: 20,
-    dehaze: 10,
-  },
   "golden-hour-glow": {
     brightness: 105,
     saturation: 120,
@@ -37,11 +26,19 @@ export const filterPresets: Record<FilterType, Partial<AdvancedSettings>> = {
     greenBoost: 25,
     vignette: 15,
   },
-  "nature-boost": {
-    saturation: 125,
-    greenBoost: 30,
-    clarity: 15,
-    texture: 10,
+  "cloud-pop": {
+    contrast: 115,
+    saturation: 110,
+    highlights: 15,
+    clarity: 20,
+    dehaze: 10,
+  },
+  "silhouette-glow": {
+    brightness: 95,
+    contrast: 125,
+    temperature: 25,
+    shadows: -30,
+    highlights: 15,
   },
   "cinematic-teal-orange": {
     contrast: 115,
@@ -64,38 +61,11 @@ export const filterPresets: Record<FilterType, Partial<AdvancedSettings>> = {
     noiseReduction: 20,
     clarity: 10,
   },
-  "beam-enhancer": {
-    contrast: 120,
-    highlights: 20,
-    clarity: 25,
-    dehaze: -10,
-  },
-  "warm-silhouette": {
-    brightness: 95,
-    contrast: 125,
-    temperature: 25,
-    shadows: -30,
-    highlights: 15,
-  },
-  "deep-shadows": {
-    contrast: 125,
-    shadows: -25,
-    highlights: 10,
-    vignette: 20,
-  },
-  "water-blue-boost": {
-    saturation: 115,
-    tint: -15,
+  "nature-boost": {
+    saturation: 125,
+    greenBoost: 30,
     clarity: 15,
-    dehaze: 10,
-  },
-  "hdr-sky-booster": {
-    contrast: 120,
-    saturation: 115,
-    highlights: 20,
-    shadows: 10,
-    clarity: 20,
-    dehaze: 15,
+    texture: 10,
   },
 };
 
