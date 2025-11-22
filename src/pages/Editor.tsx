@@ -164,10 +164,10 @@ export default function Editor() {
           mainLines = wrapText(mainText, maxWidth, adjustedFontSize);
         }
         
-        // Combine main text and author (author always on new line)
+        // Combine main text and author (author closer to main text)
         const allLines = [...mainLines];
         if (authorText) {
-          allLines.push(""); // Empty line for spacing
+          // No empty line - author directly follows main text
           allLines.push(authorText);
         }
         
