@@ -28,6 +28,7 @@ interface PhotoCardProps {
 export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   
   const musicTrack = photo.music_track ? musicTracks.find(t => t.id === photo.music_track) : null;
 
@@ -95,6 +96,14 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
     }
   };
 
+  const handleDoubleTap = () => {
+    if (!liked) {
+      handleLike();
+    }
+    setShowHeartAnimation(true);
+    setTimeout(() => setShowHeartAnimation(false), 1000);
+  };
+
   return (
     <Card className="shadow-2xl overflow-hidden border-primary/20 bg-gradient-to-br from-card to-card/80 hover:shadow-3xl transition-all duration-300 group">
       <CardContent className="p-0">
@@ -117,9 +126,10 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
         </motion.div>
 
         <motion.div 
-          className="relative aspect-square bg-gradient-to-br from-muted to-muted/50 overflow-hidden"
+          className="relative aspect-square bg-gradient-to-br from-muted to-muted/50 overflow-hidden cursor-pointer"
           whileHover={{ scale: 1.02 }}
           transition={{ duration: 0.3 }}
+          onDoubleClick={handleDoubleTap}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
           <img
@@ -127,6 +137,18 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
             alt={photo.caption || "Photo"}
             className="w-full h-full object-cover"
           />
+          
+          {/* Double-tap heart animation */}
+          {showHeartAnimation && (
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0] }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              <Heart className="w-32 h-32 fill-white text-white drop-shadow-2xl" />
+            </motion.div>
+          )}
         </motion.div>
 
         <div className="p-4 space-y-4 bg-gradient-to-b from-card to-card/50">
