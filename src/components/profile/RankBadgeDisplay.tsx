@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Star, TrendingUp, Award, DollarSign } from "lucide-react";
+import { Trophy, Star, TrendingUp, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 
@@ -13,11 +13,6 @@ interface RankData {
   photos_count: number;
   challenges_won: number;
   chains_created: number;
-}
-
-interface EarningsData {
-  total_earned: number;
-  available_balance: number;
 }
 
 interface BadgeData {
@@ -33,7 +28,6 @@ interface BadgeData {
 
 export default function RankBadgeDisplay({ userId }: { userId: string }) {
   const [rankData, setRankData] = useState<RankData | null>(null);
-  const [earnings, setEarnings] = useState<EarningsData | null>(null);
   const [badges, setBadges] = useState<BadgeData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -51,15 +45,6 @@ export default function RankBadgeDisplay({ userId }: { userId: string }) {
         .single();
 
       setRankData(rankResponse);
-
-      // Load earnings
-      const { data: earningsResponse } = await supabase
-        .from("user_earnings")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
-
-      setEarnings(earningsResponse);
 
       // Load badges
       const { data: badgesResponse } = await supabase
@@ -180,43 +165,6 @@ export default function RankBadgeDisplay({ userId }: { userId: string }) {
           </CardContent>
         </Card>
       </motion.div>
-
-      {/* Earnings Card */}
-      {earnings && earnings.total_earned > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h4 className="font-semibold">Earnings</h4>
-                  <p className="text-xs text-muted-foreground">From tips and rewards</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-3 rounded-lg bg-primary/5">
-                  <p className="text-2xl font-bold text-primary">
-                    ${earnings.available_balance.toFixed(2)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">Available</p>
-                </div>
-                <div className="text-center p-3 rounded-lg bg-muted/50">
-                  <p className="text-2xl font-bold">
-                    ${earnings.total_earned.toFixed(2)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">Total Earned</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
 
       {/* Badges Grid */}
       {badges.length > 0 && (
