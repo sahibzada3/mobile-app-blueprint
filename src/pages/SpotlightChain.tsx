@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Camera, UserPlus, Users, MessageCircle } from "lucide-react";
+import { ArrowLeft, Camera, UserPlus, Users, MessageCircle, Trophy } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 import BottomNav from "@/components/BottomNav";
 import GroupChatInterface from "@/components/spotlight/GroupChatInterface";
+import ContributionSubmitDialog from "@/components/spotlight/ContributionSubmitDialog";
+import InviteFriendsDialog from "@/components/spotlight/InviteFriendsDialog";
 
 interface Chain {
   id: string;
@@ -52,6 +55,7 @@ interface Contribution {
 
 export default function SpotlightChain() {
   const { chainId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [chain, setChain] = useState<Chain | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -59,6 +63,12 @@ export default function SpotlightChain() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [isParticipant, setIsParticipant] = useState(false);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  
+  // Check if we have a new photo to submit
+  const photoIdToSubmit = searchParams.get("photoId");
+  const photoUrlToSubmit = searchParams.get("photoUrl");
+  const [showSubmitDialog, setShowSubmitDialog] = useState(!!photoIdToSubmit);
 
   useEffect(() => {
     checkAuth();
@@ -268,10 +278,19 @@ export default function SpotlightChain() {
                 Join Chain
               </Button>
             ) : (
-              <Button onClick={handleAddContribution} className="flex-1">
-                <Camera className="w-4 h-4 mr-2" />
-                Add Photo
-              </Button>
+              <>
+                <Button onClick={handleAddContribution} className="flex-1">
+                  <Camera className="w-4 h-4 mr-2" />
+                  Add Photo
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowInviteDialog(true)}
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Invite
+                </Button>
+              </>
             )}
           </div>
         </Card>
@@ -293,37 +312,54 @@ export default function SpotlightChain() {
           <TabsContent value="contributions">
             {contributions.length === 0 ? (
               <Card className="p-8 text-center">
-                <p className="text-muted-foreground">No contributions yet. Be the first to add a photo!</p>
+                <Camera className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-20" />
+                <p className="text-muted-foreground mb-2">No contributions yet</p>
+                <p className="text-sm text-muted-foreground">Be the first to add a photo!</p>
               </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {contributions.map((contribution) => (
-                  <Card key={contribution.id} className="overflow-hidden">
-                    <img
-                      src={contribution.photos.image_url}
-                      alt="Contribution"
-                      className="w-full h-64 object-cover"
-                    />
-                    <div className="p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={contribution.profiles?.avatar_url || ""} />
-                          <AvatarFallback>
-                            {contribution.profiles?.username?.[0]?.toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-medium">{contribution.profiles?.username}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(contribution.created_at).toLocaleDateString()}
-                          </p>
+                {contributions.map((contribution, index) => (
+                  <motion.div
+                    key={contribution.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+                      {index < 3 && (
+                        <div className="absolute top-4 left-4 z-10">
+                          <Badge variant="secondary" className="gap-1">
+                            <Trophy className="w-3 h-3" />
+                            #{index + 1}
+                          </Badge>
                         </div>
-                      </div>
-                      {contribution.photos.caption && (
-                        <p className="text-sm text-muted-foreground">{contribution.photos.caption}</p>
                       )}
-                    </div>
-                  </Card>
+                      <img
+                        src={contribution.photos.image_url}
+                        alt="Contribution"
+                        className="w-full h-64 object-cover"
+                      />
+                      <div className="p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={contribution.profiles?.avatar_url || ""} />
+                            <AvatarFallback>
+                              {contribution.profiles?.username?.[0]?.toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{contribution.profiles?.username}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(contribution.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        {contribution.photos.caption && (
+                          <p className="text-sm text-muted-foreground">{contribution.photos.caption}</p>
+                        )}
+                      </div>
+                    </Card>
+                  </motion.div>
                 ))}
               </div>
             )}
@@ -350,6 +386,23 @@ export default function SpotlightChain() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {photoIdToSubmit && photoUrlToSubmit && (
+        <ContributionSubmitDialog
+          open={showSubmitDialog}
+          onOpenChange={setShowSubmitDialog}
+          chainId={chainId!}
+          photoId={photoIdToSubmit}
+          photoUrl={photoUrlToSubmit}
+        />
+      )}
+
+      <InviteFriendsDialog
+        open={showInviteDialog}
+        onOpenChange={setShowInviteDialog}
+        chainId={chainId!}
+        currentParticipants={participants.map(p => p.user_id)}
+      />
 
       <BottomNav />
     </div>

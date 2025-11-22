@@ -11,7 +11,9 @@ import { toast } from "sonner";
 export default function Camera() {
   const navigate = useNavigate();
   const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
   const challengeId = location.state?.challengeId;
+  const chainId = searchParams.get("chainId");
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -76,9 +78,11 @@ export default function Camera() {
         sessionStorage.setItem("capturedPhoto", canvas.toDataURL("image/jpeg", 0.9));
         sessionStorage.setItem("photoFilters", JSON.stringify({ brightness, saturation, darkness }));
         
-        // Pass challengeId to editor if present
+        // Pass context to editor
         if (challengeId) {
           navigate("/editor", { state: { challengeId } });
+        } else if (chainId) {
+          navigate("/editor", { state: { chainId } });
         } else {
           navigate("/editor");
         }
