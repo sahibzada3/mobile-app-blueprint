@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, MessageCircle, User, Music, Sparkles } from "lucide-react";
+import { Heart, MessageCircle, User, Music, Sparkles, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -187,6 +187,27 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
             >
               <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
                 <MessageCircle className="w-7 h-7 text-muted-foreground group-hover/comment:text-primary transition-colors" />
+              </motion.div>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 p-0 h-auto hover:bg-transparent group/share"
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: 'Check out this photo on Frame',
+                    text: photo.caption || 'Amazing photo!',
+                    url: window.location.href,
+                  }).catch(() => {});
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success('Link copied to clipboard!');
+                }
+              }}
+            >
+              <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
+                <Share2 className="w-7 h-7 text-muted-foreground group-hover/share:text-primary transition-colors" />
               </motion.div>
             </Button>
           </motion.div>
