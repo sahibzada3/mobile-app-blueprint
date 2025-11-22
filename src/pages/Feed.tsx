@@ -19,6 +19,9 @@ export default function Feed() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [photos, setPhotos] = useState<any[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [startY, setStartY] = useState(0);
 
   useEffect(() => {
     // Check current session
@@ -66,8 +69,12 @@ export default function Feed() {
     };
   }, [navigate]);
 
-  const loadPhotos = async () => {
+  const loadPhotos = async (showRefreshFeedback = false) => {
     try {
+      if (showRefreshFeedback) {
+        setIsRefreshing(true);
+      }
+
       const { data, error } = await supabase
         .from("photos")
         .select("*")
@@ -93,9 +100,43 @@ export default function Feed() {
       );
 
       setPhotos(photosWithProfiles);
+      
+      if (showRefreshFeedback) {
+        toast.success("Feed refreshed!");
+        setTimeout(() => setIsRefreshing(false), 500);
+      }
     } catch (error: any) {
       console.error("Error loading photos:", error);
+      if (showRefreshFeedback) {
+        setIsRefreshing(false);
+        toast.error("Failed to refresh feed");
+      }
     }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (window.scrollY === 0) {
+      setStartY(e.touches[0].clientY);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (window.scrollY === 0 && startY > 0) {
+      const currentY = e.touches[0].clientY;
+      const distance = currentY - startY;
+      
+      if (distance > 0 && distance < 120) {
+        setPullDistance(distance);
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (pullDistance > 80 && !isRefreshing) {
+      loadPhotos(true);
+    }
+    setPullDistance(0);
+    setStartY(0);
   };
 
   const handleLogout = async () => {
@@ -117,11 +158,49 @@ export default function Feed() {
 
   return (
     <div 
-      className="min-h-screen pb-24"
+      className="min-h-screen pb-24 relative"
       style={{
         background: `linear-gradient(180deg, hsl(var(--background)) 0%, hsl(210 60% 15%) 50%, hsl(var(--background-gradient-end)) 100%)`
       }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
+      {/* Pull to Refresh Indicator */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{
+          opacity: pullDistance > 0 || isRefreshing ? 1 : 0,
+          y: pullDistance > 0 || isRefreshing ? Math.min(pullDistance * 0.5, 60) - 50 : -50,
+        }}
+        transition={{ duration: 0.2 }}
+      >
+        <div className="bg-card/95 backdrop-blur-xl rounded-2xl px-6 py-3 shadow-card border border-primary/20 flex items-center gap-3">
+          {isRefreshing ? (
+            <>
+              <motion.div
+                className="w-5 h-5 border-3 border-primary border-t-transparent rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              />
+              <span className="text-sm font-semibold text-primary">Refreshing...</span>
+            </>
+          ) : (
+            <>
+              <motion.div
+                animate={{ rotate: pullDistance > 80 ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ChevronRight className="w-5 h-5 text-primary -rotate-90" strokeWidth={2.5} />
+              </motion.div>
+              <span className="text-sm font-semibold text-muted-foreground">
+                {pullDistance > 80 ? "Release to refresh" : "Pull to refresh"}
+              </span>
+            </>
+          )}
+        </div>
+      </motion.div>
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-card/90 border-b border-border/30">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
