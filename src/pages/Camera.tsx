@@ -24,6 +24,7 @@ export default function Camera() {
   const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
   const [mode, setMode] = useState<CameraMode>("auto");
   const [selectedFilter, setSelectedFilter] = useState<FilterType | null>(null);
+  const [focusPoint, setFocusPoint] = useState<{ x: number; y: number } | null>(null);
   const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
     brightness: 100,
     contrast: 100,
@@ -138,6 +139,60 @@ export default function Camera() {
     setFacingMode(prev => prev === "user" ? "environment" : "user");
   };
 
+  const handleTapToFocus = (e: React.MouseEvent<HTMLVideoElement> | React.TouchEvent<HTMLVideoElement>) => {
+    const video = videoRef.current;
+    if (!video || !stream) return;
+
+    // Get tap coordinates relative to video element
+    const rect = video.getBoundingClientRect();
+    let clientX: number, clientY: number;
+
+    if ('touches' in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    // Convert to percentage for positioning
+    const xPercent = (x / rect.width) * 100;
+    const yPercent = (y / rect.height) * 100;
+
+    // Set focus point for visual indicator
+    setFocusPoint({ x: xPercent, y: yPercent });
+
+    // Try to apply focus constraints if supported
+    const videoTrack = stream.getVideoTracks()[0];
+    const capabilities = videoTrack.getCapabilities?.();
+
+    if (capabilities && 'focusMode' in capabilities) {
+      videoTrack.applyConstraints({
+        advanced: [{ focusMode: 'manual' } as any]
+      }).catch(() => {
+        // Focus mode not supported, fallback to auto
+        videoTrack.applyConstraints({
+          advanced: [{ focusMode: 'continuous' } as any]
+        }).catch(console.error);
+      });
+    }
+
+    // Auto-hide focus indicator after animation
+    setTimeout(() => {
+      setFocusPoint(null);
+    }, 1500);
+
+    // Haptic feedback if supported
+    if ('vibrate' in navigator) {
+      navigator.vibrate(10);
+    }
+
+    toast.success("Focus adjusted", { duration: 1000 });
+  };
+
   return (
     <div className="min-h-screen bg-black pb-0 relative overflow-hidden">
       <div className="relative h-screen w-full">
@@ -146,11 +201,34 @@ export default function Camera() {
           autoPlay
           playsInline
           muted
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover cursor-crosshair"
           style={{ filter: getFilterStyle() }}
+          onClick={handleTapToFocus}
+          onTouchStart={handleTapToFocus}
         />
         <canvas ref={canvasRef} className="hidden" />
         
+        {/* Focus Indicator */}
+        {focusPoint && (
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              left: `${focusPoint.x}%`,
+              top: `${focusPoint.y}%`,
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            <div className="relative w-20 h-20 animate-in fade-in zoom-in duration-200">
+              <div className="absolute inset-0 border-2 border-white rounded-full animate-pulse" />
+              <div className="absolute inset-2 border-2 border-white/50 rounded-full" />
+              <div className="absolute left-1/2 top-0 w-px h-4 bg-white -translate-x-1/2" />
+              <div className="absolute left-1/2 bottom-0 w-px h-4 bg-white -translate-x-1/2" />
+              <div className="absolute top-1/2 left-0 h-px w-4 bg-white -translate-y-1/2" />
+              <div className="absolute top-1/2 right-0 h-px w-4 bg-white -translate-y-1/2" />
+            </div>
+          </div>
+        )}
+
         {!stream && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/90">
             <div className="text-center text-white p-6">
