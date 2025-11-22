@@ -95,37 +95,47 @@ export default function Camera() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <header className="sticky top-0 bg-card/80 backdrop-blur-lg border-b border-border z-40">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-display font-bold text-primary">Camera</h1>
-          <Button variant="ghost" size="icon" onClick={toggleCamera}>
-            <FlipHorizontal className="w-5 h-5" />
+      <header className="sticky top-0 bg-card/95 backdrop-blur-xl border-b border-border/30 z-40">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-bold text-foreground">Camera</h1>
+          <Button variant="ghost" size="icon" onClick={toggleCamera} className="hover:bg-primary/10">
+            <FlipHorizontal className="w-5 h-5" strokeWidth={2} />
           </Button>
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto">
-        <div className="relative aspect-[3/4] bg-black">
+      <main className="max-w-2xl mx-auto">
+        <div className="relative aspect-[3/4] bg-black overflow-hidden">
           <video
             ref={videoRef}
             autoPlay
             playsInline
+            muted
             className="w-full h-full object-cover"
             style={{
               filter: `brightness(${brightness}%) saturate(${saturation}%) contrast(${100 - darkness}%)`,
             }}
           />
           <canvas ref={canvasRef} className="hidden" />
+          
+          {!stream && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+              <div className="text-center text-white p-6">
+                <CameraIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p className="text-sm">Requesting camera access...</p>
+              </div>
+            </div>
+          )}
         </div>
 
-        <Card className="m-4 p-4 space-y-4 shadow-nature">
-          <div className="space-y-2">
+        <Card className="m-4 p-6 space-y-6">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sun className="w-4 h-4 text-secondary" />
-                <span className="text-sm font-medium">Brightness</span>
+                <Sun className="w-4 h-4 text-primary" strokeWidth={2.5} />
+                <span className="text-sm font-semibold">Brightness</span>
               </div>
-              <span className="text-sm text-muted-foreground">{brightness}%</span>
+              <span className="text-sm font-medium text-muted-foreground">{brightness}%</span>
             </div>
             <Slider
               value={[brightness]}
@@ -137,13 +147,13 @@ export default function Camera() {
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Droplets className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">Saturation</span>
+                <Droplets className="w-4 h-4 text-primary" strokeWidth={2.5} />
+                <span className="text-sm font-semibold">Saturation</span>
               </div>
-              <span className="text-sm text-muted-foreground">{saturation}%</span>
+              <span className="text-sm font-medium text-muted-foreground">{saturation}%</span>
             </div>
             <Slider
               value={[saturation]}
@@ -155,13 +165,13 @@ export default function Camera() {
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <MoonIcon className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Darkness</span>
+                <MoonIcon className="w-4 h-4 text-muted-foreground" strokeWidth={2.5} />
+                <span className="text-sm font-semibold">Darkness</span>
               </div>
-              <span className="text-sm text-muted-foreground">{darkness}%</span>
+              <span className="text-sm font-medium text-muted-foreground">{darkness}%</span>
             </div>
             <Slider
               value={[darkness]}
@@ -173,7 +183,12 @@ export default function Camera() {
             />
           </div>
 
-          <Button onClick={capturePhoto} className="w-full shadow-glow" size="lg">
+          <Button 
+            onClick={capturePhoto} 
+            disabled={!stream}
+            className="w-full mt-4" 
+            size="lg"
+          >
             <CameraIcon className="w-5 h-5 mr-2" />
             Capture Photo
           </Button>

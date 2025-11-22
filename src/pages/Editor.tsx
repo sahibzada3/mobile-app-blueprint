@@ -211,21 +211,21 @@ export default function Editor() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-soft pb-20">
-      <header className="sticky top-0 bg-card/80 backdrop-blur-lg border-b border-border z-40">
-        <div className="max-w-2xl mx-auto px-4 py-3">
-          <h1 className="text-xl font-display font-bold text-primary">Edit Photo</h1>
+    <div className="min-h-screen bg-background pb-20">
+      <header className="sticky top-0 bg-card/95 backdrop-blur-xl border-b border-border/30 z-40">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4">
+          <h1 className="text-xl font-bold text-foreground">Edit Photo</h1>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-6 space-y-4">
-        <div className="relative aspect-square bg-black rounded-lg overflow-hidden shadow-nature">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <div className="relative aspect-square bg-black rounded-2xl overflow-hidden shadow-card">
           <canvas ref={canvasRef} className="w-full h-full object-contain" />
         </div>
 
-        <Card className="p-4 shadow-nature">
+        <Card className="p-6">
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="basic">
                 <ImageIcon className="w-4 h-4 mr-2" />
                 Basic
@@ -234,20 +234,21 @@ export default function Editor() {
               <TabsTrigger value="music">Music</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="basic" className="space-y-4 mt-4">
+            <TabsContent value="basic" className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="caption">Caption</Label>
+                <Label htmlFor="caption" className="text-sm font-semibold">Caption</Label>
                 <Textarea
                   id="caption"
                   placeholder="Share your thoughts about this moment..."
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
                   rows={4}
+                  className="resize-none"
                 />
               </div>
             </TabsContent>
 
-            <TabsContent value="typography" className="space-y-4 mt-4">
+            <TabsContent value="typography" className="space-y-4">
               <TypographyControls
                 overlayText={overlayText}
                 fontFamily={fontFamily}
@@ -266,7 +267,7 @@ export default function Editor() {
               />
             </TabsContent>
 
-            <TabsContent value="music" className="space-y-4 mt-4">
+            <TabsContent value="music" className="space-y-4">
               <MusicSelector
                 selectedTrack={selectedMusic}
                 onSelectTrack={setSelectedMusic}
@@ -274,10 +275,18 @@ export default function Editor() {
             </TabsContent>
           </Tabs>
 
-          <div className="mt-6 pt-4 border-t">
-            <Button onClick={savePhoto} disabled={saving} className="w-full shadow-glow">
+          <div className="mt-6 pt-6 border-t">
+            <Button 
+              onClick={savePhoto} 
+              disabled={saving} 
+              className="w-full"
+              size="lg"
+            >
               {saving ? (
-                <>Saving...</>
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Saving...
+                </>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
