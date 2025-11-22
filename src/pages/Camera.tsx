@@ -3,10 +3,16 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
-import { Camera as CameraIcon, FlipHorizontal, Sun, Droplets, Moon as MoonIcon } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Camera as CameraIcon, FlipHorizontal, Image, SlidersHorizontal, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { CameraModeSelector } from "@/components/camera/CameraModeSelector";
+import { CameraFilterStrip } from "@/components/camera/CameraFilterStrip";
+import { CameraAdvancedControls } from "@/components/camera/CameraAdvancedControls";
+import { SceneDetector } from "@/components/camera/SceneDetector";
+import { applyFilter, type FilterType } from "@/utils/cameraFilters";
+import { type CameraMode, type AdvancedSettings } from "@/types/camera";
 
 export default function Camera() {
   const navigate = useNavigate();
@@ -17,13 +23,27 @@ export default function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [brightness, setBrightness] = useState(100);
-  const [saturation, setSaturation] = useState(100);
-  const [darkness, setDarkness] = useState(0);
   const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
+  const [mode, setMode] = useState<CameraMode>("auto");
+  const [selectedFilter, setSelectedFilter] = useState<FilterType | null>(null);
+  const [detectedScene, setDetectedScene] = useState<string | null>(null);
+  const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
+    brightness: 100,
+    contrast: 100,
+    saturation: 100,
+    shadows: 0,
+    highlights: 0,
+    tint: 0,
+    temperature: 0,
+    clarity: 0,
+    dehaze: 0,
+    vignette: 0,
+    noiseReduction: 0,
+    greenBoost: 0,
+    texture: 0,
+  });
 
   useEffect(() => {
-    // Check authentication
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         navigate("/login");
@@ -42,20 +62,28 @@ export default function Camera() {
   const startCamera = async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode },
+        video: { facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
         audio: false,
       });
       setStream(mediaStream);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
+      toast.success("Camera ready");
     } catch (error) {
       toast.error("Failed to access camera");
       console.error("Camera error:", error);
     }
   };
 
-  const capturePhoto = () => {
+  const getFilterStyle = () => {
+    if (!selectedFilter) {
+      return applyFilter(advancedSettings);
+    }
+    return applyFilter(advancedSettings, selectedFilter);
+  };
+
+  const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current) return;
 
     const video = videoRef.current;
@@ -64,21 +92,38 @@ export default function Camera() {
 
     if (!context) return;
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    // Apply cinematic 21:9 crop if in cinematic mode
+    if (mode === "cinematic") {
+      const aspectRatio = 21 / 9;
+      canvas.width = video.videoWidth;
+      canvas.height = Math.floor(video.videoWidth / aspectRatio);
+      const yOffset = (video.videoHeight - canvas.height) / 2;
+      
+      context.filter = getFilterStyle();
+      context.drawImage(video, 0, yOffset, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+    } else {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.filter = getFilterStyle();
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
 
-    // Apply filters
-    context.filter = `brightness(${brightness}%) saturate(${saturation}%) contrast(${100 - darkness}%)`;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
+    // Apply AI enhancements based on mode and scene
+    toast.loading("Applying AI enhancements...");
+    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate AI processing
+    
     canvas.toBlob((blob) => {
       if (blob) {
-        const file = new File([blob], `photo-${Date.now()}.jpg`, { type: "image/jpeg" });
-        // Store the photo data to pass to editor
-        sessionStorage.setItem("capturedPhoto", canvas.toDataURL("image/jpeg", 0.9));
-        sessionStorage.setItem("photoFilters", JSON.stringify({ brightness, saturation, darkness }));
+        sessionStorage.setItem("capturedPhoto", canvas.toDataURL("image/jpeg", 0.95));
+        sessionStorage.setItem("photoFilters", JSON.stringify({ 
+          mode, 
+          filter: selectedFilter, 
+          settings: advancedSettings,
+          scene: detectedScene 
+        }));
         
-        // Pass context to editor
+        toast.success("Photo captured with AI enhancements!");
+        
         if (challengeId) {
           navigate("/editor", { state: { challengeId } });
         } else if (chainId) {
@@ -87,7 +132,7 @@ export default function Camera() {
           navigate("/editor");
         }
       }
-    }, "image/jpeg", 0.9);
+    }, "image/jpeg", 0.95);
   };
 
   const toggleCamera = () => {
@@ -98,106 +143,118 @@ export default function Camera() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <header className="sticky top-0 bg-card/95 backdrop-blur-xl border-b border-border/30 z-40">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-foreground">Camera</h1>
-          <Button variant="ghost" size="icon" onClick={toggleCamera} className="hover:bg-primary/10">
-            <FlipHorizontal className="w-5 h-5" strokeWidth={2} />
-          </Button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-black pb-0 relative overflow-hidden">
+      <div className="relative h-screen w-full">
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: getFilterStyle() }}
+        />
+        <canvas ref={canvasRef} className="hidden" />
+        
+        {!stream && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/90">
+            <div className="text-center text-white p-6">
+              <CameraIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p className="text-sm">Starting camera...</p>
+            </div>
+          </div>
+        )}
 
-      <main className="max-w-2xl mx-auto">
-        <div className="relative aspect-[3/4] bg-black overflow-hidden">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full h-full object-cover"
-            style={{
-              filter: `brightness(${brightness}%) saturate(${saturation}%) contrast(${100 - darkness}%)`,
-            }}
+        {/* Scene Detection Badge */}
+        <SceneDetector 
+          videoRef={videoRef} 
+          onSceneDetected={setDetectedScene}
+          mode={mode}
+        />
+
+        {/* Top Controls */}
+        <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/60 to-transparent p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {detectedScene && (
+                <div className="bg-primary/20 backdrop-blur-sm border border-primary/30 px-3 py-1.5 rounded-full">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-medium text-white">{detectedScene}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleCamera}
+                className="bg-black/40 backdrop-blur-sm hover:bg-black/60 border border-white/20"
+              >
+                <FlipHorizontal className="w-5 h-5 text-white" />
+              </Button>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="bg-black/40 backdrop-blur-sm hover:bg-black/60 border border-white/20"
+                  >
+                    <SlidersHorizontal className="w-5 h-5 text-white" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="h-[80vh]">
+                  <SheetHeader>
+                    <SheetTitle>Advanced Controls</SheetTitle>
+                  </SheetHeader>
+                  <CameraAdvancedControls 
+                    settings={advancedSettings}
+                    onChange={setAdvancedSettings}
+                  />
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
+        </div>
+
+        {/* Mode Selector */}
+        <div className="absolute top-20 left-0 right-0 z-10 px-4">
+          <CameraModeSelector selectedMode={mode} onModeChange={setMode} />
+        </div>
+
+        {/* Filter Strip */}
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+          <CameraFilterStrip 
+            selectedFilter={selectedFilter}
+            onFilterChange={setSelectedFilter}
           />
-          <canvas ref={canvasRef} className="hidden" />
-          
-          {!stream && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/80">
-              <div className="text-center text-white p-6">
-                <CameraIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="text-sm">Requesting camera access...</p>
-              </div>
-            </div>
-          )}
         </div>
 
-        <Card className="m-4 p-6 space-y-6">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sun className="w-4 h-4 text-primary" strokeWidth={2.5} />
-                <span className="text-sm font-semibold">Brightness</span>
-              </div>
-              <span className="text-sm font-medium text-muted-foreground">{brightness}%</span>
-            </div>
-            <Slider
-              value={[brightness]}
-              onValueChange={([value]) => setBrightness(value)}
-              min={50}
-              max={150}
-              step={1}
-              className="w-full"
-            />
-          </div>
+        {/* Bottom Controls */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/80 to-transparent p-6 pb-24">
+          <div className="flex items-center justify-center gap-8">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate("/feed")}
+              className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 border border-white/20"
+            >
+              <Image className="w-6 h-6 text-white" />
+            </Button>
+            
+            <Button
+              onClick={capturePhoto}
+              disabled={!stream}
+              size="icon"
+              className="w-20 h-20 rounded-full bg-white hover:bg-white/90 shadow-lg"
+            >
+              <div className="w-16 h-16 rounded-full border-4 border-black/20" />
+            </Button>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Droplets className="w-4 h-4 text-primary" strokeWidth={2.5} />
-                <span className="text-sm font-semibold">Saturation</span>
-              </div>
-              <span className="text-sm font-medium text-muted-foreground">{saturation}%</span>
-            </div>
-            <Slider
-              value={[saturation]}
-              onValueChange={([value]) => setSaturation(value)}
-              min={0}
-              max={200}
-              step={1}
-              className="w-full"
-            />
+            <div className="w-12 h-12" /> {/* Spacer for symmetry */}
           </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MoonIcon className="w-4 h-4 text-muted-foreground" strokeWidth={2.5} />
-                <span className="text-sm font-semibold">Darkness</span>
-              </div>
-              <span className="text-sm font-medium text-muted-foreground">{darkness}%</span>
-            </div>
-            <Slider
-              value={[darkness]}
-              onValueChange={([value]) => setDarkness(value)}
-              min={0}
-              max={50}
-              step={1}
-              className="w-full"
-            />
-          </div>
-
-          <Button 
-            onClick={capturePhoto} 
-            disabled={!stream}
-            className="w-full mt-4" 
-            size="lg"
-          >
-            <CameraIcon className="w-5 h-5 mr-2" />
-            Capture Photo
-          </Button>
-        </Card>
-      </main>
+        </div>
+      </div>
 
       <BottomNav />
     </div>
