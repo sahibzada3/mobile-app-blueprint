@@ -1,71 +1,126 @@
 import { type AdvancedSettings } from "@/types/camera";
 
 export type FilterType =
-  | "golden-hour-glow"
-  | "moody-forest"
-  | "cloud-pop"
-  | "silhouette-glow"
-  | "cinematic-teal-orange"
-  | "soft-dreamy"
-  | "night-clarity"
-  | "nature-boost";
+  | "golden-hour"
+  | "midday-sun"
+  | "night"
+  | "fog-mist"
+  | "silhouette"
+  | "urban"
+  | "water"
+  | "forest"
+  | "beach-desert"
+  | "sky-clouds"
+  | "rain"
+  | "indoor-golden";
 
 export const filterPresets: Record<FilterType, Partial<AdvancedSettings>> = {
-  "golden-hour-glow": {
-    brightness: 105,
-    saturation: 120,
-    temperature: 20,
-    highlights: 10,
-    shadows: -10,
-  },
-  "moody-forest": {
-    brightness: 95,
-    contrast: 110,
-    saturation: 105,
-    shadows: -15,
-    greenBoost: 25,
-    vignette: 15,
-  },
-  "cloud-pop": {
-    contrast: 115,
-    saturation: 110,
-    highlights: 15,
-    clarity: 20,
-    dehaze: 10,
-  },
-  "silhouette-glow": {
-    brightness: 95,
-    contrast: 125,
-    temperature: 25,
-    shadows: -30,
-    highlights: 15,
-  },
-  "cinematic-teal-orange": {
-    contrast: 115,
-    saturation: 110,
-    temperature: 15,
-    tint: -5,
-    shadows: -10,
-  },
-  "soft-dreamy": {
+  "golden-hour": {
     brightness: 105,
     contrast: 95,
+    saturation: 110,
+    temperature: 15,
+    shadows: 10,
+    highlights: -5,
+    tint: 5,
+  },
+  "midday-sun": {
+    brightness: 110,
+    contrast: 115,
     saturation: 105,
-    highlights: 15,
-    clarity: -10,
-  },
-  "night-clarity": {
-    brightness: 115,
-    shadows: 20,
-    highlights: -10,
-    noiseReduction: 20,
-    clarity: 10,
-  },
-  "nature-boost": {
-    saturation: 125,
-    greenBoost: 30,
     clarity: 15,
+    dehaze: 10,
+    shadows: -10,
+    highlights: -15,
+  },
+  "night": {
+    brightness: 115,
+    contrast: 110,
+    saturation: 95,
+    shadows: 20,
+    clarity: 10,
+    noiseReduction: 20,
+    temperature: -5,
+  },
+  "fog-mist": {
+    brightness: 105,
+    contrast: 85,
+    saturation: 90,
+    dehaze: -15,
+    clarity: -10,
+    temperature: 5,
+    vignette: 5,
+  },
+  "silhouette": {
+    brightness: 95,
+    contrast: 130,
+    saturation: 95,
+    shadows: -30,
+    highlights: 15,
+    clarity: 15,
+  },
+  "urban": {
+    brightness: 100,
+    contrast: 115,
+    saturation: 105,
+    clarity: 20,
+    texture: 15,
+    temperature: 10,
+    tint: -5,
+  },
+  "water": {
+    brightness: 105,
+    contrast: 100,
+    saturation: 110,
+    clarity: 10,
+    temperature: -5,
+    tint: -10,
+    shadows: 5,
+  },
+  "forest": {
+    brightness: 100,
+    contrast: 105,
+    saturation: 120,
+    greenBoost: 25,
+    shadows: 10,
+    clarity: 5,
     texture: 10,
+  },
+  "beach-desert": {
+    brightness: 110,
+    contrast: 110,
+    saturation: 105,
+    clarity: 15,
+    dehaze: 15,
+    temperature: 10,
+    highlights: -10,
+  },
+  "sky-clouds": {
+    brightness: 105,
+    contrast: 120,
+    saturation: 110,
+    clarity: 20,
+    dehaze: 20,
+    highlights: -15,
+    shadows: 10,
+  },
+  "rain": {
+    brightness: 95,
+    contrast: 110,
+    saturation: 95,
+    clarity: 15,
+    temperature: -10,
+    vignette: 10,
+    shadows: 15,
+  },
+  "indoor-golden": {
+    brightness: 110,
+    contrast: 95,
+    saturation: 105,
+    temperature: 20,
+    shadows: 15,
+    tint: 5,
+    vignette: -5,
   },
 };
 
