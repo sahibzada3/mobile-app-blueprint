@@ -115,22 +115,54 @@ Make them profound, scene-specific, and beautifully formatted for photography ov
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '[]';
     
-    // Extract JSON from the response
+    // Extract JSON from the response - handle control characters
     let quotes: Array<{text: string, author: string | null}> = [];
     try {
-      // Try to parse as direct JSON
-      quotes = JSON.parse(content);
-    } catch {
-      // Try to extract JSON from markdown code blocks
-      const jsonMatch = content.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/);
-      if (jsonMatch) {
-        quotes = JSON.parse(jsonMatch[1]);
-      } else {
-        // Fallback: try to find array in the text
-        const arrayMatch = content.match(/\[[\s\S]*\]/);
-        if (arrayMatch) {
-          quotes = JSON.parse(arrayMatch[0]);
+      // Clean the content first - remove markdown code blocks and extra whitespace
+      let cleanContent = content.trim();
+      
+      // Remove markdown code blocks if present
+      const markdownMatch = cleanContent.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (markdownMatch) {
+        cleanContent = markdownMatch[1].trim();
+      }
+      
+      // Try to find JSON array
+      const arrayMatch = cleanContent.match(/\[[\s\S]*\]/);
+      if (arrayMatch) {
+        cleanContent = arrayMatch[0];
+      }
+      
+      // Parse the JSON
+      quotes = JSON.parse(cleanContent);
+      
+      // Validate the structure
+      if (!Array.isArray(quotes)) {
+        throw new Error('Response is not an array');
+      }
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError, 'Content:', content);
+      
+      // Fallback: try to extract text manually if JSON parsing fails
+      const fallbackQuotes: string[] = [];
+      const lines = content.split('\n').filter(line => line.trim());
+      for (const line of lines) {
+        if (line.includes('"text"') || line.includes("'text'")) {
+          // Try to extract text between quotes
+          const textMatch = line.match(/["']text["']\s*:\s*["'](.*?)["']/);
+          if (textMatch) fallbackQuotes.push(textMatch[1]);
         }
+      }
+      
+      if (fallbackQuotes.length > 0) {
+        quotes = fallbackQuotes.map(text => ({ text, author: null }));
+      } else {
+        // Last resort fallback
+        quotes = [
+          { text: "Beauty surrounds us", author: null },
+          { text: "Nature speaks in whispers", author: null },
+          { text: "Light and shadow dance", author: null }
+        ];
       }
     }
 
