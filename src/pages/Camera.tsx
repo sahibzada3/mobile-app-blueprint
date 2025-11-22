@@ -3,11 +3,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Camera as CameraIcon, FlipHorizontal, Image, SlidersHorizontal, X } from "lucide-react";
 import { toast } from "sonner";
 import { CameraFilterStrip } from "@/components/camera/CameraFilterStrip";
-import { CameraAdvancedControls } from "@/components/camera/CameraAdvancedControls";
 import { applyFilter, type FilterType } from "@/utils/cameraFilters";
 import { type CameraMode, type AdvancedSettings } from "@/types/camera";
 
@@ -231,23 +231,65 @@ export default function Camera() {
 
         {/* Side Advanced Controls Panel */}
         {showAdvancedControls && (
-          <div className="absolute right-0 top-0 bottom-0 w-80 bg-black/95 backdrop-blur-xl border-l border-white/20 z-20 overflow-hidden">
-            <div className="h-full flex flex-col p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-white font-semibold text-lg">Advanced Controls</h3>
+          <div className="absolute right-0 top-0 bottom-20 w-72 z-20 overflow-hidden pointer-events-none">
+            <div className="h-full flex flex-col p-3 pt-20 pointer-events-auto">
+              <div className="flex items-center justify-between mb-3 px-2">
+                <h3 className="text-white font-semibold text-sm drop-shadow-lg">Controls</h3>
                 <Button 
                   variant="ghost" 
                   size="icon"
                   onClick={() => setShowAdvancedControls(false)}
-                  className="w-8 h-8 rounded-full hover:bg-white/10"
+                  className="w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md"
                 >
-                  <X className="w-4 h-4 text-white" />
+                  <X className="w-3.5 h-3.5 text-white" />
                 </Button>
               </div>
-              <CameraAdvancedControls 
-                settings={advancedSettings}
-                onChange={setAdvancedSettings}
-              />
+              <ScrollArea className="flex-1 pointer-events-auto">
+                <div className="space-y-3 pr-2">
+                  {[
+                    { key: "brightness", label: "Brightness", min: 50, max: 150, step: 1, recommended: 100, description: "Light/dark balance" },
+                    { key: "contrast", label: "Contrast", min: 50, max: 150, step: 1, recommended: 100, description: "Drama & depth" },
+                    { key: "saturation", label: "Saturation", min: 0, max: 200, step: 1, recommended: 100, description: "Color intensity" },
+                    { key: "shadows", label: "Shadows", min: -50, max: 50, step: 1, recommended: 0, description: "Shadow details" },
+                    { key: "highlights", label: "Highlights", min: -50, max: 50, step: 1, recommended: 0, description: "Bright areas" },
+                    { key: "temperature", label: "Temperature", min: -50, max: 50, step: 1, recommended: 0, description: "Warm/cool tones" },
+                    { key: "dehaze", label: "Dehaze", min: -50, max: 50, step: 1, recommended: 0, description: "Fog/mist removal" },
+                  ].map((control) => {
+                    const recommendedPercent = ((control.recommended - control.min) / (control.max - control.min)) * 100;
+                    
+                    return (
+                      <div key={control.key} className="space-y-1 bg-black/40 backdrop-blur-md rounded-lg p-2.5 border border-white/10">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold text-white drop-shadow-md">{control.label}</label>
+                            <p className="text-[9px] text-gray-300 leading-tight">{control.description}</p>
+                          </div>
+                          <span className="text-xs text-white font-medium ml-2 min-w-[32px] text-right">
+                            {advancedSettings[control.key as keyof AdvancedSettings]}
+                          </span>
+                        </div>
+                        <div className="relative pt-1.5">
+                          {/* Recommended level marker */}
+                          <div 
+                            className="absolute top-0 h-4 w-0.5 bg-blue-400 z-10 pointer-events-none"
+                            style={{ left: `${recommendedPercent}%`, transform: 'translateX(-50%)' }}
+                          >
+                            <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-blue-400" />
+                          </div>
+                          <Slider
+                            value={[advancedSettings[control.key as keyof AdvancedSettings]]}
+                            onValueChange={([value]) => setAdvancedSettings({ ...advancedSettings, [control.key]: value })}
+                            min={control.min}
+                            max={control.max}
+                            step={control.step}
+                            className="w-full"
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
             </div>
           </div>
         )}
