@@ -3,12 +3,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, Music, Share2 } from "lucide-react";
+import { User, Music, Share2, DollarSign } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { musicTracks } from "@/data/musicTracks";
 import { VoteButtons } from "@/components/feed/VoteButtons";
 import { CommentSection } from "@/components/feed/CommentSection";
+import TipDialog from "@/components/TipDialog";
 
 interface PhotoCardProps {
   photo: {
@@ -28,8 +29,10 @@ interface PhotoCardProps {
 
 export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
+  const [showTipDialog, setShowTipDialog] = useState(false);
   
   const musicTrack = photo.music_track ? musicTracks.find(t => t.id === photo.music_track) : null;
+  const isOwnPhoto = currentUserId === photo.user_id;
 
   const handleDoubleTap = () => {
     setShowHeartAnimation(true);
@@ -117,6 +120,20 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
             transition={{ delay: 0.2 }}
           >
             <VoteButtons photoId={photo.id} currentUserId={currentUserId} />
+            
+            {!isOwnPhoto && currentUserId && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 p-0 h-auto hover:bg-transparent group/tip"
+                onClick={() => setShowTipDialog(true)}
+              >
+                <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
+                  <DollarSign className="w-6 h-6 text-muted-foreground group-hover/tip:text-primary transition-colors" strokeWidth={2} />
+                </motion.div>
+              </Button>
+            )}
+            
             <Button
               variant="ghost"
               size="sm"
@@ -155,6 +172,16 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
           )}
         </div>
       </CardContent>
+      
+      {!isOwnPhoto && photo.profiles && (
+        <TipDialog
+          open={showTipDialog}
+          onOpenChange={setShowTipDialog}
+          recipientId={photo.user_id}
+          recipientUsername={photo.profiles.username}
+          photoId={photo.id}
+        />
+      )}
     </Card>
   );
 }
