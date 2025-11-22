@@ -1,12 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Camera, Trophy, User, Link2 } from "lucide-react";
+import { Home, Camera, Trophy, User, Search } from "lucide-react";
 
 export default function BottomNav() {
   const location = useLocation();
   
   const navItems = [
-    { icon: Home, label: "Feed", path: "/feed" },
-    { icon: Link2, label: "Spotlight", path: "/spotlight" },
+    { icon: Search, label: "Search", path: "/search" },
+    { icon: Home, label: "Slices", path: "/slices" },
     { icon: Camera, label: "Camera", path: "/camera" },
     { icon: Trophy, label: "Challenges", path: "/challenges" },
     { icon: User, label: "Profile", path: "/profile" },
