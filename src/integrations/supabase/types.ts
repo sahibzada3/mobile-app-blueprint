@@ -531,6 +531,62 @@ export type Database = {
         }
         Relationships: []
       }
+      photography_spots: {
+        Row: {
+          best_time: string
+          created_at: string | null
+          created_by: string | null
+          description: string
+          id: string
+          image_url: string | null
+          latitude: number
+          longitude: number
+          name: string
+          rating: number | null
+          scene_types: string[]
+          views_count: number | null
+          weather_types: string[]
+        }
+        Insert: {
+          best_time?: string
+          created_at?: string | null
+          created_by?: string | null
+          description: string
+          id?: string
+          image_url?: string | null
+          latitude: number
+          longitude: number
+          name: string
+          rating?: number | null
+          scene_types?: string[]
+          views_count?: number | null
+          weather_types?: string[]
+        }
+        Update: {
+          best_time?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string
+          id?: string
+          image_url?: string | null
+          latitude?: number
+          longitude?: number
+          name?: string
+          rating?: number | null
+          scene_types?: string[]
+          views_count?: number | null
+          weather_types?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photography_spots_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       photos: {
         Row: {
           caption: string | null

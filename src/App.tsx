@@ -25,6 +25,7 @@ import Ideas from "./pages/Ideas";
 import NotFound from "./pages/NotFound";
 import Slices from "./pages/Slices";
 import Search from "./pages/Search";
+import NearbySpots from "./pages/NearbySpots";
 
 const App = () => {
   const [queryClient] = React.useState(() => new QueryClient());
@@ -57,6 +58,7 @@ const App = () => {
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/slices" element={<Slices />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/nearby-spots" element={<NearbySpots />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
