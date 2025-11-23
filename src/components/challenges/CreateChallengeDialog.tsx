@@ -38,6 +38,11 @@ export default function CreateChallengeDialog({ children, onSuccess }: CreateCha
       return;
     }
 
+    if (pointsReward < 100 || pointsReward > 200) {
+      toast.error("Points must be between 100 and 200");
+      return;
+    }
+
     setLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -164,12 +169,21 @@ export default function CreateChallengeDialog({ children, onSuccess }: CreateCha
             </div>
 
             <div>
-              <Label htmlFor="points">Points Reward</Label>
+              <Label htmlFor="points">Points Reward (100-200)</Label>
               <Input
                 id="points"
                 type="number"
                 value={pointsReward}
-                onChange={(e) => setPointsReward(parseInt(e.target.value))}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  if (value >= 100 && value <= 200) {
+                    setPointsReward(value);
+                  } else if (value < 100) {
+                    setPointsReward(100);
+                  } else if (value > 200) {
+                    setPointsReward(200);
+                  }
+                }}
                 min={100}
                 max={200}
               />
