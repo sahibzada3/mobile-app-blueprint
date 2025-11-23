@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { getWeatherData } from "@/services/weatherService";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { MapPin, Navigation, Clock, Cloud, Camera, Sparkles } from "lucide-react";
+import { MapPin, Navigation, Clock, Cloud, Camera, Sparkles, ThermometerSun } from "lucide-react";
 import { toast } from "sonner";
 
 interface Spot {
@@ -29,7 +30,9 @@ export default function NearbySpots() {
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [radius, setRadius] = useState(50);
-  const [currentWeather, setCurrentWeather] = useState<string>("sunny");
+  const [currentWeather, setCurrentWeather] = useState<string>("detecting...");
+  const [weatherIcon, setWeatherIcon] = useState<string>("🌤️");
+  const [temperature, setTemperature] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState<string>("anytime");
   const [locationStatus, setLocationStatus] = useState<"detecting" | "granted" | "denied" | "unavailable">("detecting");
 
@@ -123,23 +126,41 @@ export default function NearbySpots() {
     );
   };
 
-  const detectCurrentConditions = () => {
+  const detectCurrentConditions = async () => {
     const hour = new Date().getHours();
     
-    // Determine time of day
-    if ((hour >= 5 && hour <= 7) || (hour >= 17 && hour <= 19)) {
+    // Accurate time of day detection
+    if (hour >= 5 && hour <= 6) {
+      setCurrentTime("sunrise");
+    } else if (hour >= 17 && hour <= 18) {
       setCurrentTime("golden_hour");
-    } else if ((hour >= 4 && hour < 5) || (hour >= 19 && hour <= 21)) {
+    } else if ((hour >= 4 && hour < 5) || (hour >= 19 && hour <= 20)) {
       setCurrentTime("blue_hour");
     } else if (hour >= 21 || hour < 4) {
       setCurrentTime("night");
+    } else if (hour >= 7 && hour < 17) {
+      setCurrentTime("daytime");
     } else {
       setCurrentTime("anytime");
     }
 
-    // Weather would ideally come from weather API, but for now we'll use a simple detection
-    // You can integrate with your existing weather service
-    setCurrentWeather("sunny");
+    // Get real weather data
+    try {
+      const weatherData = await getWeatherData();
+      if (weatherData) {
+        setCurrentWeather(weatherData.condition);
+        setWeatherIcon(weatherData.icon);
+        setTemperature(weatherData.temperature);
+        console.log('Weather detected:', weatherData);
+      } else {
+        setCurrentWeather("clear");
+        setWeatherIcon("☀️");
+      }
+    } catch (error) {
+      console.error('Error detecting weather:', error);
+      setCurrentWeather("unknown");
+      setWeatherIcon("🌤️");
+    }
   };
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -152,6 +173,58 @@ export default function NearbySpots() {
       Math.sin(dLon/2) * Math.sin(dLon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
+  };
+
+  const getSceneImage = (bestTime: string) => {
+    const sceneMap: Record<string, string> = {
+      'night': '/scenes/night-photography.jpg',
+      'golden_hour': '/scenes/golden-hour.jpg',
+      'sunrise': '/scenes/golden-hour.jpg',
+      'blue_hour': '/scenes/blue-hour.jpg',
+      'anytime': '/scenes/architecture.jpg',
+      'daytime': '/scenes/landscape.jpg'
+    };
+    return sceneMap[bestTime] || '/scenes/landscape.jpg';
+  };
+
+  const getSpotFamousFor = (sceneTypes: string[], bestTime: string) => {
+    const timeDescriptions: Record<string, string> = {
+      'night': 'night photography & stargazing',
+      'golden_hour': 'golden hour sunsets',
+      'sunrise': 'sunrise photography',
+      'blue_hour': 'twilight & blue hour shots',
+      'anytime': 'architectural photography',
+      'daytime': 'landscape & nature shots'
+    };
+    
+    const mainScene = sceneTypes[0]?.replace(/_/g, ' ') || 'photography';
+    const timeDesc = timeDescriptions[bestTime] || 'photography';
+    
+    return `Famous for ${timeDesc} and ${mainScene}`;
+  };
+
+  const getTimeIcon = (time: string) => {
+    switch(time) {
+      case "golden_hour": return "🌅";
+      case "blue_hour": return "🌆";
+      case "night": return "🌙";
+      case "sunrise": return "🌄";
+      case "sunset": return "🌇";
+      case "daytime": return "☀️";
+      default: return "☀️";
+    }
+  };
+
+  const getTimeLabel = (time: string) => {
+    return time.replace(/_/g, ' ').split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
+  const openInMaps = (lat: number, lng: number, name: string) => {
+    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    window.open(googleMapsUrl, '_blank');
+    toast.success(`Opening directions to ${name}...`);
   };
 
   const calculateMatchScore = (spot: Spot): number => {
@@ -256,29 +329,6 @@ export default function NearbySpots() {
     }
   };
 
-  const getTimeIcon = (time: string) => {
-    switch(time) {
-      case "golden_hour": return "🌅";
-      case "blue_hour": return "🌆";
-      case "night": return "🌙";
-      case "sunrise": return "🌄";
-      case "sunset": return "🌇";
-      default: return "☀️";
-    }
-  };
-
-  const getTimeLabel = (time: string) => {
-    return time.replace(/_/g, ' ').split(' ').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  };
-
-  const openInMaps = (lat: number, lng: number, name: string) => {
-    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-    window.open(googleMapsUrl, '_blank');
-    toast.success(`Opening directions to ${name}...`);
-  };
-
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="sticky top-0 z-40 bg-card/95 backdrop-blur-xl border-b border-border/50">
@@ -324,14 +374,23 @@ export default function NearbySpots() {
           )}
           
           <div className="space-y-3">
-            <div className="flex items-center gap-4 text-sm bg-accent/30 rounded-lg px-3 py-2">
+            <div className="flex items-center gap-4 text-sm bg-accent/30 rounded-lg px-3 py-2.5">
               <Clock className="w-4 h-4 text-primary" />
-              <span className="font-medium">Current: {getTimeIcon(currentTime)} {getTimeLabel(currentTime)}</span>
+              <span className="font-medium">Now: {getTimeIcon(currentTime)} {getTimeLabel(currentTime)}</span>
             </div>
             
-            <div className="flex items-center gap-4 text-sm bg-accent/30 rounded-lg px-3 py-2">
+            <div className="flex items-center gap-4 text-sm bg-accent/30 rounded-lg px-3 py-2.5">
               <Cloud className="w-4 h-4 text-primary" />
-              <span className="font-medium capitalize">Weather: {currentWeather}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{weatherIcon}</span>
+                <span className="font-medium capitalize">{currentWeather}</span>
+                {temperature !== null && (
+                  <Badge variant="outline" className="ml-1">
+                    <ThermometerSun className="w-3 h-3 mr-1" />
+                    {temperature}°C
+                  </Badge>
+                )}
+              </div>
             </div>
             
             <div className="space-y-2">
@@ -411,6 +470,22 @@ export default function NearbySpots() {
                       </Button>
                     </div>
                   )}
+                  
+                  {/* Scene Preview Badge */}
+                  <div className="absolute top-3 left-3">
+                    <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-lg">
+                      <img 
+                        src={getSceneImage(spot.best_time)} 
+                        alt="Scene style"
+                        className="w-8 h-8 rounded object-cover"
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-xs font-semibold text-foreground">Best for</span>
+                        <span className="text-xs text-muted-foreground">{getTimeLabel(spot.best_time)}</span>
+                      </div>
+                    </div>
+                  </div>
+
                   {spot.matchScore && spot.matchScore >= 70 && spot.image_url && (
                     <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground shadow-lg">
                       <Sparkles className="w-3 h-3 mr-1" />
@@ -424,7 +499,20 @@ export default function NearbySpots() {
                     <div className="flex items-start justify-between gap-3">
                       <h3 className="font-bold text-xl text-foreground">{spot.name}</h3>
                     </div>
+                    
+                    {/* Famous For */}
+                    <div className="flex items-start gap-2 text-sm">
+                      <Sparkles className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                      <p className="text-primary font-medium">{getSpotFamousFor(spot.scene_types, spot.best_time)}</p>
+                    </div>
+                    
                     <p className="text-sm text-muted-foreground leading-relaxed">{spot.description}</p>
+                    
+                    {/* Location Coordinates */}
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 rounded px-2 py-1.5">
+                      <MapPin className="w-3 h-3" />
+                      <span className="font-mono">{Number(spot.latitude).toFixed(4)}°N, {Number(spot.longitude).toFixed(4)}°E</span>
+                    </div>
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm font-medium bg-accent/50 rounded-lg px-3 py-2">
