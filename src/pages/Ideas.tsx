@@ -9,7 +9,9 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, Lightbulb, MapPin, Cloud, Camera, Sun, Moon, Zap, Palette } from "lucide-react";
 import { photographyIdeas, IdeaCategory, DifficultyLevel } from "@/data/photographyIdeas";
+import { filterGuides } from "@/data/filterGuides";
 import IdeaCard from "@/components/ideas/IdeaCard";
+import FilterGuideCard from "@/components/ideas/FilterGuideCard";
 import { useTheme } from "@/hooks/useTheme";
 
 export default function Ideas() {
@@ -193,17 +195,36 @@ export default function Ideas() {
         </Card>
 
         {/* Content Tabs */}
-        <Tabs defaultValue="all" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 h-12">
-            <TabsTrigger value="all" className="text-base">
-              <Camera className="w-4 h-4 mr-2" />
-              All Ideas ({filteredIdeas.length})
+        <Tabs defaultValue="filters" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 h-12">
+            <TabsTrigger value="filters" className="text-sm">
+              <Palette className="w-4 h-4 mr-2" />
+              Filter Guides
             </TabsTrigger>
-            <TabsTrigger value="bookmarked" className="text-base">
+            <TabsTrigger value="all" className="text-sm">
+              <Camera className="w-4 h-4 mr-2" />
+              All Ideas
+            </TabsTrigger>
+            <TabsTrigger value="bookmarked" className="text-sm">
               <Lightbulb className="w-4 h-4 mr-2" />
-              Bookmarked ({bookmarkedIdeaObjects.length})
+              Saved
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="filters" className="space-y-6">
+            <div className="bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 rounded-lg p-4 mb-6 border border-primary/20">
+              <h3 className="text-lg font-bold mb-2">🎨 Master Our 12 Cinematic Filters</h3>
+              <p className="text-sm text-muted-foreground">
+                Learn from a mentor's perspective - each guide includes detailed camera settings, 
+                step-by-step instructions, common mistakes to avoid, and pro techniques to elevate your photography.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filterGuides.map((guide) => (
+                <FilterGuideCard key={guide.id} guide={guide} />
+              ))}
+            </div>
+          </TabsContent>
 
           <TabsContent value="all" className="space-y-6">
             {filteredIdeas.length === 0 ? (
