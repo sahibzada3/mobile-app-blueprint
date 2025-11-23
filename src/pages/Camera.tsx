@@ -25,6 +25,8 @@ export default function Camera() {
   const [selectedFilter, setSelectedFilter] = useState<FilterType | null>(null);
   const [focusPoint, setFocusPoint] = useState<{ x: number; y: number } | null>(null);
   const [showAdvancedControls, setShowAdvancedControls] = useState(false);
+  const [videoZoom, setVideoZoom] = useState(1);
+  const [videoPosition, setVideoPosition] = useState({ x: 0, y: 0 });
   const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
     brightness: 100,
     contrast: 100,
@@ -149,6 +151,9 @@ export default function Camera() {
     const video = videoRef.current;
     if (!video || !stream) return;
 
+    // Prevent default to avoid browser zoom
+    e.preventDefault();
+
     // Get tap coordinates relative to video element
     const rect = video.getBoundingClientRect();
     let clientX: number, clientY: number;
@@ -174,6 +179,20 @@ export default function Camera() {
 
     // Set focus point for visual indicator
     setFocusPoint({ x: xPercent, y: yPercent });
+
+    // Calculate distance from center for zoom effect
+    const distanceFromCenter = Math.sqrt(
+      Math.pow(normalizedX - 0.5, 2) + Math.pow(normalizedY - 0.5, 2)
+    );
+
+    // Apply visual zoom (1.2x to 1.8x based on distance from center)
+    const newZoom = 1 + (0.6 * (1 - distanceFromCenter));
+    setVideoZoom(newZoom);
+
+    // Calculate pan offset to keep tap point centered after zoom
+    const offsetX = (0.5 - normalizedX) * (newZoom - 1) * 100;
+    const offsetY = (0.5 - normalizedY) * (newZoom - 1) * 100;
+    setVideoPosition({ x: offsetX, y: offsetY });
 
     // Apply automatic focus, zoom, and exposure adjustments
     const videoTrack = stream.getVideoTracks()[0];
@@ -232,10 +251,12 @@ export default function Camera() {
       }
     }
 
-    // Auto-hide focus indicator after animation
+    // Auto-hide focus indicator and reset zoom after delay
     setTimeout(() => {
       setFocusPoint(null);
-    }, 1500);
+      setVideoZoom(1);
+      setVideoPosition({ x: 0, y: 0 });
+    }, 2500);
 
     // Haptic feedback if supported
     if ('vibrate' in navigator) {
@@ -251,8 +272,12 @@ export default function Camera() {
           autoPlay
           playsInline
           muted
-          className="absolute inset-0 w-full h-full object-cover cursor-crosshair"
-          style={{ filter: getFilterStyle() }}
+          className="absolute inset-0 w-full h-full object-cover cursor-crosshair transition-transform duration-300 ease-out"
+          style={{ 
+            filter: getFilterStyle(),
+            transform: `scale(${videoZoom}) translate(${videoPosition.x}%, ${videoPosition.y}%)`,
+            transformOrigin: 'center center'
+          }}
           onClick={handleTapToFocus}
           onTouchStart={handleTapToFocus}
         />
