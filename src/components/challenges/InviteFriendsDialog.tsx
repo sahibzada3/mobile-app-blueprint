@@ -105,7 +105,7 @@ export default function InviteFriendsDialog({ challengeId, open, onOpenChange }:
         <DialogHeader>
           <DialogTitle>Invite Friends to Challenge</DialogTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            👥 Invite 3-10 friends ({invited.size}/10 invited)
+            Invite 3-10 friends ({invited.size}/10 invited)
             {invited.size < 3 && <span className="text-destructive ml-1">⚠️ Min 3 required</span>}
           </p>
         </DialogHeader>
