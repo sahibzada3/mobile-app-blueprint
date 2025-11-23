@@ -200,142 +200,88 @@ export default function Feed() {
           )}
         </div>
       </motion.div>
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-card/95 border-b border-border/30 shadow-sm">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Camera className="w-5 h-5 text-primary" strokeWidth={2.5} />
-              </div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Frame
-              </h1>
-            </div>
-            <div className="flex items-center gap-2">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-card/95 border-b border-border">
+        <div className="max-w-2xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-xl font-semibold tracking-tight">Frame</h1>
+            <div className="flex items-center gap-1">
               <NotificationBell />
-              <Button variant="ghost" size="icon" onClick={toggleTheme} className="hover:bg-primary/10">
-                {theme === "light" ? <Moon className="w-5 h-5" strokeWidth={2} /> : <Sun className="w-5 h-5" strokeWidth={2} />}
+              <Button variant="ghost" size="icon" onClick={toggleTheme}>
+                {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
               </Button>
-              <Button variant="ghost" size="icon" onClick={handleLogout} className="hover:bg-destructive/10 hover:text-destructive">
-                <LogOut className="w-5 h-5" strokeWidth={2} />
+              <Button variant="ghost" size="icon" onClick={handleLogout}>
+                <LogOut className="w-5 h-5" />
               </Button>
             </div>
           </div>
           
-          {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search photos, users, challenges..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => navigate("/search")}
-              className="pl-10 h-11 bg-background/50 border-border/50 focus:bg-background focus:border-primary/50 transition-all"
+              className="pl-10 h-10 bg-muted/50"
             />
           </div>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* Weather Widget */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
+      <main className="max-w-2xl mx-auto py-4 space-y-4">
+        <div className="px-4">
           <WeatherWidget />
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card 
-            className="cursor-pointer hover:shadow-card-hover transition-all duration-300 active:scale-[0.99] group" 
-            onClick={() => navigate("/ideas")}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
-                  <Lightbulb className="w-6 h-6 text-primary" strokeWidth={2.5} />
+        <div className="px-4">
+          <Card className="cursor-pointer hover-lift" onClick={() => navigate("/ideas")}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                  <Lightbulb className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
-                    Photography Ideas
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Discover techniques and locations
-                  </p>
+                  <h3 className="text-sm font-medium">Photography Ideas</h3>
+                  <p className="text-xs text-muted-foreground">Discover techniques</p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" strokeWidth={2.5} />
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Card>
-            <CardContent className="text-center p-8">
-              <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Camera className="w-10 h-10 text-primary" strokeWidth={2.5} />
-              </div>
-              <h2 className="text-3xl font-bold mb-3">Welcome to Frame</h2>
-              <p className="text-base text-muted-foreground mb-6">
-                Start capturing cinematic nature moments
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  onClick={() => navigate("/camera")}
-                  size="lg"
-                  className="flex-1 sm:flex-none"
-                >
-                  <Camera className="w-5 h-5" />
-                  Open Camera
-                </Button>
-                <Button
-                  onClick={() => navigate("/ideas")}
-                  variant="outline"
-                  size="lg"
-                  className="flex-1 sm:flex-none"
-                >
-                  <Lightbulb className="w-5 h-5" />
-                  Get Ideas
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+        {photos.length === 0 && (
+          <div className="px-4">
+            <Card>
+              <CardContent className="text-center py-12">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                  <Camera className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h2 className="text-lg font-semibold mb-2">Welcome to Frame</h2>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Start capturing nature
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <Button onClick={() => navigate("/camera")}>
+                    <Camera className="w-4 h-4 mr-2" />
+                    Camera
+                  </Button>
+                  <Button onClick={() => navigate("/ideas")} variant="outline">
+                    Ideas
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-        {photos.length > 0 ? (
-          <div className="space-y-8">
-            {photos.map((photo, index) => (
-              <motion.div
-                key={photo.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index }}
-              >
-                <PhotoCard photo={photo} currentUserId={user?.id} />
-              </motion.div>
+        {photos.length > 0 && (
+          <div className="space-y-6">
+            {photos.map((photo) => (
+              <PhotoCard key={photo.id} photo={photo} currentUserId={user?.id} />
             ))}
           </div>
-        ) : (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Camera className="w-8 h-8 text-primary" strokeWidth={2} />
-              </div>
-              <p className="text-base text-muted-foreground font-medium">
-                No photos yet. Be the first to share!
-              </p>
-            </CardContent>
-          </Card>
         )}
       </main>
 
