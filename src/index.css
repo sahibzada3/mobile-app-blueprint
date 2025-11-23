@@ -48,34 +48,44 @@
   }
 
   .dark {
-    --background: 0 0% 7%;
+    /* Premium dark palette - Rich blacks with refined contrast */
+    --background: 0 0% 9%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 10%;
+    --card: 0 0% 12%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 7%;
+    --popover: 0 0% 11%;
     --popover-foreground: 0 0% 98%;
-    --primary: 180 30% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 13%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 180 30% 50%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 65% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 180 30% 50%;
     
-    --sidebar-background: 0 0% 8%;
+    /* Sophisticated teal accent for dark mode */
+    --primary: 180 35% 55%;
+    --primary-foreground: 0 0% 9%;
+    
+    /* Refined neutral surfaces */
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 65%;
+    
+    /* Accent */
+    --accent: 180 35% 55%;
+    --accent-foreground: 0 0% 9%;
+    
+    /* System colors */
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 22%;
+    --input: 0 0% 22%;
+    --ring: 180 35% 55%;
+    
+    /* Sidebar */
+    --sidebar-background: 0 0% 10%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 180 30% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
+    --sidebar-primary: 180 35% 55%;
+    --sidebar-primary-foreground: 0 0% 9%;
+    --sidebar-accent: 0 0% 18%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 180 30% 50%;
+    --sidebar-border: 0 0% 22%;
+    --sidebar-ring: 180 35% 55%;
   }
 }
 
