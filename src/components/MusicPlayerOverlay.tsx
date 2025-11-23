@@ -21,14 +21,17 @@ export default function MusicPlayerOverlay({ trackName, artist, onClose }: Music
     const savedMusicEnabled = localStorage.getItem('musicEnabled');
     const savedMusicVolume = localStorage.getItem('musicVolume');
     
+    // If music is disabled in settings, don't play
     if (savedMusicEnabled === 'false') {
       setIsPlaying(false);
+      onClose(); // Auto-close if music is disabled
+      return;
     }
     
     if (savedMusicVolume) {
       setVolume([parseInt(savedMusicVolume)]);
     }
-  }, []);
+  }, [onClose]);
 
   // Update localStorage when volume changes
   useEffect(() => {
