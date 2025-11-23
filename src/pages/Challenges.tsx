@@ -41,18 +41,67 @@ export default function Challenges() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const { data, error } = await supabase
+      // Fetch challenges created by user
+      const { data: createdChallenges, error: createdError } = await supabase
         .from("friend_challenges")
         .select(`
           *,
-          creator:profiles!creator_id(username, avatar_url),
-          participants:challenge_participants(count)
+          creator:profiles!creator_id(username, avatar_url)
         `)
-        .or(`creator_id.eq.${session.user.id},id.in.(SELECT challenge_id FROM challenge_participants WHERE user_id = '${session.user.id}')`)
-        .order("created_at", { ascending: false });
+        .eq("creator_id", session.user.id);
 
-      if (error) throw error;
-      setChallenges(data || []);
+      if (createdError) throw createdError;
+
+      // Fetch challenges user is participating in
+      const { data: participantData, error: participantError } = await supabase
+        .from("challenge_participants")
+        .select("challenge_id")
+        .eq("user_id", session.user.id);
+
+      if (participantError) throw participantError;
+
+      const participantChallengeIds = participantData?.map(p => p.challenge_id) || [];
+      
+      let participatedChallenges = [];
+      if (participantChallengeIds.length > 0) {
+        const { data: participatedData, error: participatedError } = await supabase
+          .from("friend_challenges")
+          .select(`
+            *,
+            creator:profiles!creator_id(username, avatar_url)
+          `)
+          .in("id", participantChallengeIds);
+
+        if (participatedError) throw participatedError;
+        participatedChallenges = participatedData || [];
+      }
+
+      // Combine and deduplicate
+      const allChallenges = [...(createdChallenges || []), ...participatedChallenges];
+      const uniqueChallenges = Array.from(
+        new Map(allChallenges.map(c => [c.id, c])).values()
+      );
+
+      // Get participant counts
+      const challengesWithCounts = await Promise.all(
+        uniqueChallenges.map(async (challenge) => {
+          const { count } = await supabase
+            .from("challenge_participants")
+            .select("*", { count: "exact", head: true })
+            .eq("challenge_id", challenge.id);
+
+          return {
+            ...challenge,
+            participants: [{ count: count || 0 }]
+          };
+        })
+      );
+
+      challengesWithCounts.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setChallenges(challengesWithCounts);
     } catch (error: any) {
       console.error("Error fetching challenges:", error);
       toast({
