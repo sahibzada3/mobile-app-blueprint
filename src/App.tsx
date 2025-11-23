@@ -27,10 +27,11 @@ import Slices from "./pages/Slices";
 import MusicLibrary from "./pages/MusicLibrary";
 import Search from "./pages/Search";
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+const App = () => {
+  const [queryClient] = React.useState(() => new QueryClient());
+  
+  return (
+    <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <TooltipProvider>
         <Toaster />
@@ -65,6 +66,7 @@ const App = () => (
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
