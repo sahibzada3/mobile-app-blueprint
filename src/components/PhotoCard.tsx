@@ -1,13 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
-import { User, Music, Share2, Play, Pause, Volume2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { User, Share2 } from "lucide-react";
+import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { musicTracks } from "@/data/musicTracks";
 import { VoteButtons } from "@/components/feed/VoteButtons";
 import { CommentSection } from "@/components/feed/CommentSection";
 
@@ -29,63 +26,10 @@ interface PhotoCardProps {
 
 export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
-  const [isPlayingMusic, setIsPlayingMusic] = useState(false);
-  const [showVolumeControl, setShowVolumeControl] = useState(false);
-  const [volume, setVolume] = useState(() => {
-    const savedVolume = localStorage.getItem(`volume-${photo.id}`);
-    return savedVolume ? parseFloat(savedVolume) : 0.5;
-  });
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  
-  const musicTrack = photo.music_track ? musicTracks.find(t => t.id === photo.music_track) : null;
-  const isOwnPhoto = currentUserId === photo.user_id;
-
-  // Cleanup audio on unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
-
-  // Handle music auto-play
-  useEffect(() => {
-    if (!musicTrack?.audioUrl) return;
-
-    // Always auto-play music on posts
-    if (!audioRef.current) {
-      const audio = new Audio(musicTrack.audioUrl);
-      audio.loop = true;
-      audio.volume = volume;
-      audioRef.current = audio;
-      audio.play().catch((err) => console.log('Audio autoplay blocked:', err));
-    }
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, [musicTrack, volume]);
-
-  // Save volume preference
-  useEffect(() => {
-    localStorage.setItem(`volume-${photo.id}`, volume.toString());
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-    }
-  }, [volume, photo.id]);
 
   const handleDoubleTap = () => {
     setShowHeartAnimation(true);
     setTimeout(() => setShowHeartAnimation(false), 1000);
-  };
-
-  const toggleMusic = () => {
-    setIsPlayingMusic(!isPlayingMusic);
   };
 
   return (

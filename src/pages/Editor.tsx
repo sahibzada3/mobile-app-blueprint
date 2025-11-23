@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Save, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import TypographyControls from "@/components/editor/TypographyControls";
-import MusicSelector from "@/components/editor/MusicSelector";
 
 export default function Editor() {
   const navigate = useNavigate();
@@ -38,9 +37,6 @@ export default function Editor() {
   const [textStrokeWidth, setTextStrokeWidth] = useState(0);
   const [textStrokeColor, setTextStrokeColor] = useState("#000000");
   const [selectedLanguage, setSelectedLanguage] = useState("en");
-  
-  // Music state
-  const [selectedMusic, setSelectedMusic] = useState<string | null>(null);
   
   const [saving, setSaving] = useState(false);
 
@@ -302,7 +298,6 @@ export default function Editor() {
           user_id: user.id,
           image_url: publicUrl,
           caption,
-          music_track: selectedMusic,
           typography_data: overlayText ? {
             text: overlayText,
             font: fontFamily,
@@ -394,13 +389,12 @@ export default function Editor() {
 
         <Card className="p-6">
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="basic">
                 <ImageIcon className="w-4 h-4 mr-2" />
                 Basic
               </TabsTrigger>
               <TabsTrigger value="typography">Typography</TabsTrigger>
-              <TabsTrigger value="music">Music</TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4">
@@ -448,13 +442,6 @@ export default function Editor() {
                 onStrokeWidthChange={setTextStrokeWidth}
                 onStrokeColorChange={setTextStrokeColor}
                 onLanguageChange={setSelectedLanguage}
-              />
-            </TabsContent>
-
-            <TabsContent value="music" className="space-y-4">
-              <MusicSelector
-                selectedTrack={selectedMusic}
-                onSelectTrack={setSelectedMusic}
               />
             </TabsContent>
           </Tabs>
