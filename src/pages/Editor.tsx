@@ -202,6 +202,22 @@ export default function Editor() {
           xOffset = canvas.width * 0.4;
         }
 
+        // Calculate the leftmost x position of the main text for author alignment
+        let mainTextLeftX = xOffset;
+        if (textAlign === "center") {
+          // For centered text, find the leftmost point of the longest line
+          ctx.font = `${adjustedFontSize}px "${fontFamily}", serif`;
+          let maxTextWidth = 0;
+          mainLines.forEach(line => {
+            const width = ctx.measureText(line).width;
+            if (width > maxTextWidth) maxTextWidth = width;
+          });
+          mainTextLeftX = -(maxTextWidth / 2);
+        } else if (textAlign === "right") {
+          // For right-aligned text, use the right offset
+          mainTextLeftX = xOffset;
+        }
+
         allLines.forEach((line, index) => {
           const currentY = startY + index * lineHeight;
           
@@ -213,9 +229,13 @@ export default function Editor() {
             ctx.font = `${adjustedFontSize * 0.8}px "${fontFamily}", serif`;
             ctx.globalAlpha = (textOpacity / 100) * 0.9;
             
-            // Position author slightly down and to the left
-            const authorY = currentY + (lineHeight * 0.3); // Move down
-            const authorXOffset = xOffset - (canvas.width * 0.15); // Move more to left
+            // Position author at the left edge of the main text
+            const authorY = currentY + (lineHeight * 0.3); // Move down slightly
+            const authorXOffset = mainTextLeftX; // Align with main text's left edge
+            
+            // Force left alignment for author
+            const originalTextAlign = ctx.textAlign;
+            ctx.textAlign = "left";
             
             // Draw stroke first if enabled
             if (textStrokeWidth > 0 && line.trim()) {
@@ -226,6 +246,9 @@ export default function Editor() {
             if (line.trim()) {
               ctx.fillText(line, authorXOffset, authorY);
             }
+            
+            // Restore original alignment
+            ctx.textAlign = originalTextAlign;
           } else {
             ctx.font = `${adjustedFontSize}px "${fontFamily}", serif`;
             ctx.globalAlpha = textOpacity / 100;

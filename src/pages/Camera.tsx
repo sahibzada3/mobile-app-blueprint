@@ -40,6 +40,9 @@ export default function Camera() {
     greenBoost: 0,
     texture: 0,
   });
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [focusDistance, setFocusDistance] = useState(0.5);
+  const [showCameraControls, setShowCameraControls] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -67,11 +70,47 @@ export default function Camera() {
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
+      
+      // Apply initial zoom and focus if supported
+      const videoTrack = mediaStream.getVideoTracks()[0];
+      applyZoomAndFocus(videoTrack);
     } catch (error) {
       toast.error("Camera access denied");
       console.error("Camera error:", error);
     }
   };
+
+  const applyZoomAndFocus = async (track: MediaStreamTrack) => {
+    const capabilities = track.getCapabilities?.() as any;
+    
+    try {
+      const constraints: any = {};
+      
+      // Apply zoom if supported
+      if (capabilities?.zoom) {
+        constraints.zoom = zoomLevel;
+      }
+      
+      // Apply focus if supported
+      if (capabilities?.focusDistance) {
+        constraints.focusMode = 'manual';
+        constraints.focusDistance = focusDistance;
+      }
+      
+      if (Object.keys(constraints).length > 0) {
+        await track.applyConstraints({ advanced: [constraints] });
+      }
+    } catch (error) {
+      console.log("Camera constraints not fully supported:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (stream) {
+      const videoTrack = stream.getVideoTracks()[0];
+      applyZoomAndFocus(videoTrack);
+    }
+  }, [zoomLevel, focusDistance, stream]);
 
   const getFilterStyle = () => {
     if (!selectedFilter) {
@@ -332,6 +371,55 @@ export default function Camera() {
         )}
 
 
+        {/* Zoom and Focus Controls */}
+        {showCameraControls && (
+          <div className="absolute left-2 top-16 bottom-32 w-16 z-20 flex flex-col justify-center gap-6 pointer-events-auto">
+            {/* Zoom Control */}
+            <div className="flex flex-col items-center gap-2">
+              <div className="bg-black/70 backdrop-blur-md rounded-full px-2 py-1">
+                <span className="text-white text-[10px] font-bold">{zoomLevel.toFixed(1)}x</span>
+              </div>
+              <div className="h-48 flex items-center">
+                <Slider
+                  value={[zoomLevel]}
+                  onValueChange={([value]) => setZoomLevel(value)}
+                  min={1}
+                  max={5}
+                  step={0.1}
+                  orientation="vertical"
+                  className="h-full"
+                />
+              </div>
+              <div className="bg-black/70 backdrop-blur-md rounded-full p-1.5">
+                <CameraIcon className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            {/* Focus Control */}
+            <div className="flex flex-col items-center gap-2">
+              <div className="bg-black/70 backdrop-blur-md rounded-full p-1.5">
+                <div className="w-4 h-4 border-2 border-white rounded-full" />
+              </div>
+              <div className="h-48 flex items-center">
+                <Slider
+                  value={[focusDistance]}
+                  onValueChange={([value]) => setFocusDistance(value)}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  orientation="vertical"
+                  className="h-full"
+                />
+              </div>
+              <div className="bg-black/70 backdrop-blur-md rounded-full px-2 py-1">
+                <span className="text-white text-[10px] font-bold">
+                  {focusDistance === 0 ? 'Near' : focusDistance === 1 ? 'Far' : 'Mid'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Top Controls */}
         <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/80 via-black/40 to-transparent p-4 pb-8">
           <div className="flex items-center justify-between">
@@ -345,6 +433,18 @@ export default function Camera() {
             </Button>
 
             <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShowCameraControls(!showCameraControls)}
+                className={`w-10 h-10 rounded-full backdrop-blur-md border transition-colors ${
+                  showCameraControls 
+                    ? 'bg-green-600 hover:bg-green-700 border-green-400' 
+                    : 'bg-black/50 hover:bg-black/70 border-white/30'
+                }`}
+              >
+                <CameraIcon className="w-5 h-5 text-white" />
+              </Button>
               <Button 
                 variant="ghost" 
                 size="icon" 
