@@ -25,6 +25,7 @@ export default function Camera() {
   const [selectedFilter, setSelectedFilter] = useState<FilterType | null>(null);
   const [showAdvancedControls, setShowAdvancedControls] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [showZoomSlider, setShowZoomSlider] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
     brightness: 100,
@@ -212,6 +213,41 @@ export default function Camera() {
           }}
         />
         <canvas ref={canvasRef} className="hidden" />
+        
+        {/* Zoom Slider - Bottom Left Above Filters */}
+        {showZoomSlider && (
+          <div className="absolute bottom-28 left-4 right-4 z-20 max-w-xs pointer-events-auto">
+            <div className="bg-black/40 backdrop-blur-xl rounded-2xl border border-white/20 p-4 shadow-2xl">
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowZoomSlider(false)}
+                  className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex-shrink-0"
+                >
+                  <X className="w-3.5 h-3.5 text-white" />
+                </Button>
+                
+                <div className="flex-1 flex items-center gap-3">
+                  <span className="text-white text-xs font-bold drop-shadow-lg min-w-[32px]">
+                    {zoomLevel.toFixed(1)}×
+                  </span>
+                  <Slider
+                    value={[zoomLevel]}
+                    onValueChange={([value]) => handleZoomChange(value)}
+                    min={1}
+                    max={10}
+                    step={0.1}
+                    className="flex-1"
+                  />
+                  <span className="text-white/60 text-xs font-medium drop-shadow-lg">
+                    10×
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Side Advanced Controls Panel */}
         {showAdvancedControls && (
@@ -230,33 +266,6 @@ export default function Camera() {
               </div>
               <ScrollArea className="flex-1">
                 <div className="space-y-2 pr-1">
-                  {/* Zoom Control */}
-                  <div className="space-y-0.5">
-                    <div className="flex items-center justify-between px-1">
-                      <div>
-                        <label className="text-[10px] font-semibold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-                          Zoom
-                        </label>
-                        <p className="text-[7px] text-white/80 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] leading-tight">
-                          Digital zoom level
-                        </p>
-                      </div>
-                      <span className="text-[10px] text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] min-w-[24px] text-right">
-                        {zoomLevel.toFixed(1)}×
-                      </span>
-                    </div>
-                    <div className="relative pt-1">
-                      <Slider
-                        value={[zoomLevel]}
-                        onValueChange={([value]) => handleZoomChange(value)}
-                        min={1}
-                        max={10}
-                        step={0.1}
-                        className="w-full"
-                      />
-                    </div>
-                  </div>
-
                   {[
                     { key: "brightness", label: "Brightness", min: 50, max: 150, step: 1, desc: "Light balance" },
                     { key: "contrast", label: "Contrast", min: 50, max: 150, step: 1, desc: "Drama and depth" },
