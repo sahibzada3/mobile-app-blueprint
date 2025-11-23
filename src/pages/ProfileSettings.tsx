@@ -656,6 +656,28 @@ export default function ProfileSettings() {
               )}
             </div>
 
+            <Separator />
+
+            {/* Camera Sound Settings */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="camera-sound" className="text-base font-semibold">Camera Sounds</Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Enable shutter and interaction sound effects
+                  </p>
+                </div>
+                <Switch
+                  id="camera-sound"
+                  checked={musicEnabled}
+                  onCheckedChange={(checked) => {
+                    setMusicEnabled(checked);
+                    localStorage.setItem('cameraSound', checked.toString());
+                  }}
+                />
+              </div>
+            </div>
+
             <Button
               onClick={handleSavePrivacySettings}
               disabled={saving}

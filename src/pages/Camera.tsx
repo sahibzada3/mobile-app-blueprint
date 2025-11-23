@@ -25,7 +25,7 @@ export default function Camera() {
   const [selectedFilter, setSelectedFilter] = useState<FilterType | null>(null);
   const [showAdvancedControls, setShowAdvancedControls] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
-  const zoomLevels = [1, 2, 3, 4, 5];
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
     brightness: 100,
     contrast: 100,
@@ -50,6 +50,10 @@ export default function Camera() {
     });
 
     startCamera();
+    
+    // Load sound settings
+    const savedSound = localStorage.getItem('cameraSound');
+    if (savedSound !== null) setSoundEnabled(savedSound === 'true');
 
     return () => {
       if (stream) {
@@ -81,8 +85,29 @@ export default function Camera() {
     return applyFilter(advancedSettings, selectedFilter);
   };
 
+  const playSound = (type: 'capture' | 'zoom' | 'flip') => {
+    if (!soundEnabled) return;
+    
+    // Play sound effect
+    const audio = new Audio();
+    if (type === 'capture') {
+      // Camera shutter sound (short beep)
+      audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSSK0fPTgjMGHW7A7+OZUA0PVqzn77BdGAg+ltrzxnMpBSh+zPLaizsIGGS56+mfTgwOUKXh8bllHQU2jdXzzn0vBSZ8yvHajT4KFl606+mnVRQKRp/g8r5sIQUkitHz04IzBh1uwO/jmVAND1as5++wXRgIPpba88ZzKQUofszy2os7CBhkuevpn04MDlCl4fG5ZR0FNo3V885';
+    } else if (type === 'zoom') {
+      // Short click sound
+      audio.src = 'data:audio/wav;base64,UklGRhIAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YU4AAAA=';
+    } else if (type === 'flip') {
+      // Flip sound
+      audio.src = 'data:audio/wav;base64,UklGRhIAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YU4AAAA=';
+    }
+    audio.volume = 0.3;
+    audio.play().catch(() => {});
+  };
+
   const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current) return;
+
+    playSound('capture');
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -143,14 +168,13 @@ export default function Camera() {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
     }
+    playSound('flip');
     setFacingMode(prev => prev === "user" ? "environment" : "user");
   };
 
-  const cycleZoom = () => {
-    const currentIndex = zoomLevels.indexOf(zoomLevel);
-    const nextIndex = (currentIndex + 1) % zoomLevels.length;
-    const newZoom = zoomLevels[nextIndex];
-    setZoomLevel(newZoom);
+  const handleZoomChange = (value: number) => {
+    setZoomLevel(value);
+    playSound('zoom');
     
     // Apply zoom to video track if supported
     if (stream) {
@@ -159,7 +183,7 @@ export default function Camera() {
       
       if (capabilities?.zoom) {
         videoTrack.applyConstraints({
-          advanced: [{ zoom: Math.min(capabilities.zoom.max || 5, newZoom) } as any]
+          advanced: [{ zoom: Math.min(capabilities.zoom.max || 10, value) } as any]
         }).catch(() => {
           console.log("Hardware zoom not supported");
         });
@@ -188,40 +212,58 @@ export default function Camera() {
           }}
         />
         <canvas ref={canvasRef} className="hidden" />
-        
-        {/* Zoom Level Button */}
-        <div className="absolute bottom-32 right-4 z-30">
-          <Button
-            onClick={cycleZoom}
-            className="w-14 h-14 rounded-full bg-black/50 backdrop-blur-md hover:bg-black/70 border border-white/30 text-white font-bold text-lg"
-          >
-            {zoomLevel}×
-          </Button>
-        </div>
 
         {/* Side Advanced Controls Panel */}
         {showAdvancedControls && (
-          <div className="absolute right-2 top-16 bottom-32 w-40 md:w-44 z-20 overflow-hidden pointer-events-none">
+          <div className="absolute right-2 top-16 bottom-32 w-36 z-20 overflow-hidden pointer-events-none">
             <div className="h-full flex flex-col pointer-events-auto">
               <div className="flex items-center justify-between mb-2 px-1">
-                <h3 className="text-white font-bold text-xs drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Controls</h3>
+                <h3 className="text-white font-bold text-[10px] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Controls</h3>
                 <Button 
                   variant="ghost" 
                   size="icon"
                   onClick={() => setShowAdvancedControls(false)}
-                  className="w-6 h-6 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm"
+                  className="w-5 h-5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm"
                 >
                   <X className="w-3 h-3 text-white" />
                 </Button>
               </div>
-              <div className="space-y-2.5 pr-1">
-                {[
-                  { key: "brightness", label: "Brightness", min: 50, max: 150, step: 1, desc: "Adjust light balance" },
-                  { key: "contrast", label: "Contrast", min: 50, max: 150, step: 1, desc: "Add drama and depth" },
-                  { key: "saturation", label: "Saturation", min: 0, max: 200, step: 1, desc: "Boost color intensity" },
-                  { key: "shadows", label: "Shadows", min: -50, max: 50, step: 1, desc: "Recover dark details" },
-                  { key: "highlights", label: "Highlights", min: -50, max: 50, step: 1, desc: "Control bright areas" },
-                ].map((control) => {
+              <ScrollArea className="flex-1">
+                <div className="space-y-2 pr-1">
+                  {/* Zoom Control */}
+                  <div className="space-y-0.5">
+                    <div className="flex items-center justify-between px-1">
+                      <div>
+                        <label className="text-[10px] font-semibold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                          Zoom
+                        </label>
+                        <p className="text-[7px] text-white/80 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] leading-tight">
+                          Digital zoom level
+                        </p>
+                      </div>
+                      <span className="text-[10px] text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] min-w-[24px] text-right">
+                        {zoomLevel.toFixed(1)}×
+                      </span>
+                    </div>
+                    <div className="relative pt-1">
+                      <Slider
+                        value={[zoomLevel]}
+                        onValueChange={([value]) => handleZoomChange(value)}
+                        min={1}
+                        max={10}
+                        step={0.1}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+
+                  {[
+                    { key: "brightness", label: "Brightness", min: 50, max: 150, step: 1, desc: "Light balance" },
+                    { key: "contrast", label: "Contrast", min: 50, max: 150, step: 1, desc: "Drama and depth" },
+                    { key: "saturation", label: "Saturation", min: 0, max: 200, step: 1, desc: "Color intensity" },
+                    { key: "shadows", label: "Shadows", min: -50, max: 50, step: 1, desc: "Dark details" },
+                    { key: "highlights", label: "Highlights", min: -50, max: 50, step: 1, desc: "Bright areas" },
+                  ].map((control) => {
                   // Filter-specific recommended values
                   const getRecommendedValue = () => {
                     if (!selectedFilter) return { brightness: 100, contrast: 100, saturation: 100, shadows: 0, highlights: 0 }[control.key as keyof typeof advancedSettings] || 100;
@@ -248,42 +290,43 @@ export default function Camera() {
                   const recommended = getRecommendedValue();
                   const recommendedPercent = ((recommended - control.min) / (control.max - control.min)) * 100;
                   
-                  return (
-                    <div key={control.key} className="space-y-0.5">
-                      <div className="flex items-center justify-between px-1">
-                        <div>
-                          <label className="text-[11px] font-semibold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-                            {control.label}
-                          </label>
-                          <p className="text-[8px] text-white/80 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] leading-tight">
-                            {control.desc}
-                          </p>
+                    return (
+                      <div key={control.key} className="space-y-0.5">
+                        <div className="flex items-center justify-between px-1">
+                          <div>
+                            <label className="text-[10px] font-semibold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                              {control.label}
+                            </label>
+                            <p className="text-[7px] text-white/80 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] leading-tight">
+                              {control.desc}
+                            </p>
+                          </div>
+                          <span className="text-[10px] text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] min-w-[24px] text-right">
+                            {advancedSettings[control.key as keyof AdvancedSettings]}
+                          </span>
                         </div>
-                        <span className="text-[11px] text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] min-w-[28px] text-right">
-                          {advancedSettings[control.key as keyof AdvancedSettings]}
-                        </span>
-                      </div>
-                      <div className="relative pt-1">
-                        {/* Recommended level marker */}
-                        <div 
-                          className="absolute top-0 h-4 w-0.5 bg-blue-400 z-10 pointer-events-none drop-shadow-md"
-                          style={{ left: `${recommendedPercent}%`, transform: 'translateX(-50%)' }}
-                        >
-                          <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-blue-400" />
+                        <div className="relative pt-1">
+                          {/* Recommended level marker */}
+                          <div 
+                            className="absolute top-0 h-4 w-0.5 bg-blue-400 z-10 pointer-events-none drop-shadow-md"
+                            style={{ left: `${recommendedPercent}%`, transform: 'translateX(-50%)' }}
+                          >
+                            <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-blue-400" />
+                          </div>
+                          <Slider
+                            value={[advancedSettings[control.key as keyof AdvancedSettings]]}
+                            onValueChange={([value]) => setAdvancedSettings({ ...advancedSettings, [control.key]: value })}
+                            min={control.min}
+                            max={control.max}
+                            step={control.step}
+                            className="w-full"
+                          />
                         </div>
-                        <Slider
-                          value={[advancedSettings[control.key as keyof AdvancedSettings]]}
-                          onValueChange={([value]) => setAdvancedSettings({ ...advancedSettings, [control.key]: value })}
-                          min={control.min}
-                          max={control.max}
-                          step={control.step}
-                          className="w-full"
-                        />
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
             </div>
           </div>
         )}
