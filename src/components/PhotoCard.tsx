@@ -3,8 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, Music, Share2, Play, Pause } from "lucide-react";
-import { motion } from "framer-motion";
+import { Slider } from "@/components/ui/slider";
+import { User, Music, Share2, Play, Pause, Volume2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { musicTracks } from "@/data/musicTracks";
 import { VoteButtons } from "@/components/feed/VoteButtons";
@@ -29,6 +30,11 @@ interface PhotoCardProps {
 export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
+  const [showVolumeControl, setShowVolumeControl] = useState(false);
+  const [volume, setVolume] = useState(() => {
+    const savedVolume = localStorage.getItem(`volume-${photo.id}`);
+    return savedVolume ? parseFloat(savedVolume) : 0.5;
+  });
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const musicTrack = photo.music_track ? musicTracks.find(t => t.id === photo.music_track) : null;
@@ -44,25 +50,37 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
     };
   }, []);
 
-  // Handle music play/pause
+  // Handle music play/pause and auto-play
   useEffect(() => {
     if (!musicTrack?.audioUrl) return;
 
-    const musicEnabled = localStorage.getItem('musicEnabled') !== 'false';
-    const musicVolume = parseFloat(localStorage.getItem('musicVolume') || '0.5');
+    const autoPlayEnabled = localStorage.getItem('autoPlayMusic') === 'true';
+    
+    if (autoPlayEnabled && !isPlayingMusic) {
+      setIsPlayingMusic(true);
+    }
 
-    if (isPlayingMusic && musicEnabled) {
+    if (isPlayingMusic) {
       if (!audioRef.current) {
         const audio = new Audio(musicTrack.audioUrl);
         audio.loop = true;
-        audio.volume = musicVolume;
+        audio.volume = volume;
         audioRef.current = audio;
       }
+      audioRef.current.volume = volume;
       audioRef.current.play().catch(() => setIsPlayingMusic(false));
     } else if (audioRef.current) {
       audioRef.current.pause();
     }
-  }, [isPlayingMusic, musicTrack]);
+  }, [isPlayingMusic, musicTrack, volume]);
+
+  // Save volume preference
+  useEffect(() => {
+    localStorage.setItem(`volume-${photo.id}`, volume.toString());
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume, photo.id]);
 
   const handleDoubleTap = () => {
     setShowHeartAnimation(true);
@@ -129,30 +147,63 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
         <div className="p-5 space-y-4">
           {musicTrack && (
             <motion.div 
-              className="flex items-center gap-3 text-xs bg-primary/5 rounded-xl px-4 py-3 border border-primary/10 cursor-pointer hover:bg-primary/10 transition-colors"
+              className="space-y-2"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              onClick={toggleMusic}
             >
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-9 h-9 rounded-lg bg-primary/10 hover:bg-primary/20 flex-shrink-0"
-              >
-                {isPlayingMusic ? (
-                  <Pause className="w-4 h-4 text-primary" strokeWidth={2.5} />
-                ) : (
-                  <Play className="w-4 h-4 text-primary" strokeWidth={2.5} />
-                )}
-              </Button>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-foreground truncate text-sm">{musicTrack.name}</p>
-                <p className="text-muted-foreground truncate">{musicTrack.artist}</p>
+              <div className="flex items-center gap-3 text-xs bg-primary/5 rounded-xl px-4 py-3 border border-primary/10">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-9 h-9 rounded-lg bg-primary/10 hover:bg-primary/20 flex-shrink-0"
+                  onClick={toggleMusic}
+                >
+                  {isPlayingMusic ? (
+                    <Pause className="w-4 h-4 text-primary" strokeWidth={2.5} />
+                  ) : (
+                    <Play className="w-4 h-4 text-primary" strokeWidth={2.5} />
+                  )}
+                </Button>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-foreground truncate text-sm">{musicTrack.name}</p>
+                  <p className="text-muted-foreground truncate">{musicTrack.artist}</p>
+                </div>
+                <Badge variant="outline" className="ml-auto text-xs border-primary/20 bg-primary/5 font-medium">
+                  {musicTrack.mood}
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-9 h-9 rounded-lg bg-primary/10 hover:bg-primary/20 flex-shrink-0"
+                  onClick={() => setShowVolumeControl(!showVolumeControl)}
+                >
+                  <Volume2 className="w-4 h-4 text-primary" strokeWidth={2.5} />
+                </Button>
               </div>
-              <Badge variant="outline" className="ml-auto text-xs border-primary/20 bg-primary/5 font-medium">
-                {musicTrack.mood}
-              </Badge>
+              
+              <AnimatePresence>
+                {showVolumeControl && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="flex items-center gap-3 px-4"
+                  >
+                    <Volume2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <Slider
+                      value={[volume * 100]}
+                      onValueChange={(value) => setVolume(value[0] / 100)}
+                      max={100}
+                      step={1}
+                      className="flex-1"
+                    />
+                    <span className="text-xs text-muted-foreground w-12 text-right">
+                      {Math.round(volume * 100)}%
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           )}
 

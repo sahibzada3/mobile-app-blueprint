@@ -46,6 +46,7 @@ export default function ProfileSettings() {
 
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [musicVolume, setMusicVolume] = useState(70);
+  const [autoPlayMusic, setAutoPlayMusic] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -54,8 +55,10 @@ export default function ProfileSettings() {
     // Load music preferences from localStorage
     const savedMusicEnabled = localStorage.getItem('musicEnabled');
     const savedMusicVolume = localStorage.getItem('musicVolume');
+    const savedAutoPlayMusic = localStorage.getItem('autoPlayMusic');
     if (savedMusicEnabled !== null) setMusicEnabled(savedMusicEnabled === 'true');
     if (savedMusicVolume !== null) setMusicVolume(parseInt(savedMusicVolume));
+    if (savedAutoPlayMusic !== null) setAutoPlayMusic(savedAutoPlayMusic === 'true');
   }, []);
 
   const loadProfile = async () => {
@@ -226,6 +229,7 @@ export default function ProfileSettings() {
       // Save music preferences to localStorage
       localStorage.setItem('musicEnabled', musicEnabled.toString());
       localStorage.setItem('musicVolume', musicVolume.toString());
+      localStorage.setItem('autoPlayMusic', autoPlayMusic.toString());
 
       toast.success("Settings updated successfully!");
     } catch (error: any) {
@@ -650,6 +654,21 @@ export default function ProfileSettings() {
                       max={100}
                       step={1}
                       className="w-full"
+                    />
+                  </div>
+                  
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="auto-play-music" className="text-base font-semibold">Auto-Play Music</Label>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Automatically play music when viewing posts with audio
+                      </p>
+                    </div>
+                    <Switch
+                      id="auto-play-music"
+                      checked={autoPlayMusic}
+                      onCheckedChange={setAutoPlayMusic}
                     />
                   </div>
                 </>
