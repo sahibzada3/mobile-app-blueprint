@@ -13,6 +13,7 @@ interface WeatherWidgetData {
   sunrise: string;
   sunset: string;
   photographyTip: string;
+  isNight: boolean;
 }
 
 export default function WeatherWidget() {
@@ -63,7 +64,8 @@ export default function WeatherWidget() {
         location,
         sunrise: sunrise.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         sunset: sunset.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-        photographyTip: getPhotographyTip(weatherCode, isNight)
+        photographyTip: getPhotographyTip(weatherCode, isNight),
+        isNight
       });
     } catch (error) {
       console.error("Weather widget error:", error);
@@ -99,19 +101,79 @@ export default function WeatherWidget() {
   };
 
   const getPhotographyTip = (code: number, isNight: boolean): string => {
-    if (isNight && (code === 0 || code === 1)) {
-      return "Perfect for night sky and star photography!";
+    if (isNight) {
+      const nightTips = [
+        "Capture city lights and urban nightscapes",
+        "Perfect for long exposure light trails",
+        "Try moon photography with telephoto lens",
+        "Experiment with reflections in water bodies",
+        "Shoot illuminated architecture and buildings",
+        "Capture star trails with long exposure",
+        "Try silhouette photography with city backdrop",
+        "Perfect for night street photography"
+      ];
+      
+      if (code === 0 || code === 1) {
+        const clearNightTips = [
+          "Perfect for astrophotography and Milky Way",
+          "Capture moon details with telephoto lens",
+          "Try star trail photography",
+          "Shoot cityscapes with starry skies",
+          "Perfect for light painting techniques"
+        ];
+        return clearNightTips[Math.floor(Math.random() * clearNightTips.length)];
+      }
+      
+      return nightTips[Math.floor(Math.random() * nightTips.length)];
     }
-    const tips: { [key: number]: string } = {
-      0: "Perfect for golden hour shots!",
-      1: "Great lighting conditions today",
-      2: "Soft light ideal for portraits",
-      3: "Even lighting for street photography",
-      45: "Mysterious fog - perfect for atmosphere",
-      61: "Capture reflections in the rain",
-      71: "Winter wonderland awaits!"
+    
+    const dayTips: { [key: number]: string[] } = {
+      0: [
+        "Golden hour magic - shoot 1 hour before sunset",
+        "Perfect for dramatic landscape photography",
+        "Try high-contrast architectural photography",
+        "Capture vibrant nature colors"
+      ],
+      1: [
+        "Soft clouds create diffused lighting",
+        "Great for outdoor portraits",
+        "Try cloud formations and sky photography",
+        "Perfect for cityscape photography"
+      ],
+      2: [
+        "Soft light ideal for portrait photography",
+        "Capture dramatic cloud formations",
+        "Great for moody landscape shots",
+        "Try silhouette photography"
+      ],
+      3: [
+        "Even lighting perfect for street photography",
+        "Great for capturing urban life",
+        "Try architectural detail shots",
+        "Moody atmosphere for creative shots"
+      ],
+      45: [
+        "Mysterious fog creates atmospheric shots",
+        "Perfect for moody forest photography",
+        "Try minimalist landscape compositions",
+        "Capture ethereal morning scenes"
+      ],
+      61: [
+        "Capture reflections in rain puddles",
+        "Try raindrop macro photography",
+        "Shoot through rain-covered windows",
+        "Urban rain photography opportunities"
+      ],
+      71: [
+        "Winter wonderland landscape photography",
+        "Capture falling snow with fast shutter",
+        "Try snow-covered architecture",
+        "Perfect for minimalist white compositions"
+      ]
     };
-    return tips[code] || "Great day for photography!";
+    
+    const tips = dayTips[code] || ["Great conditions for photography today!"];
+    return tips[Math.floor(Math.random() * tips.length)];
   };
 
   if (loading) {
@@ -126,29 +188,80 @@ export default function WeatherWidget() {
 
   if (!weather) return null;
 
+  const cardClassName = weather.isNight 
+    ? "shadow-lg border-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 cursor-pointer hover:shadow-2xl transition-all duration-300 overflow-hidden group relative text-white"
+    : "shadow-lg border-0 bg-gradient-to-br from-primary/10 via-card to-accent/10 cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden group relative";
+
   return (
     <Card 
-      className="shadow-lg border-0 bg-gradient-to-br from-primary/10 via-card to-accent/10 cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden group relative"
+      className={cardClassName}
       onClick={() => navigate("/weather")}
     >
+      {/* Night Sky with Stars */}
+      {weather.isNight && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Animated stars */}
+          {[...Array(30)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`,
+                opacity: 0.3 + Math.random() * 0.7,
+              }}
+            />
+          ))}
+          {/* Larger twinkling stars */}
+          {[...Array(10)].map((_, i) => (
+            <div
+              key={`star-${i}`}
+              className="absolute w-1.5 h-1.5 bg-white rounded-full animate-pulse"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${1.5 + Math.random() * 2}s`,
+                opacity: 0.5 + Math.random() * 0.5,
+                boxShadow: '0 0 4px rgba(255, 255, 255, 0.8)',
+              }}
+            />
+          ))}
+        </div>
+      )}
+      
       {/* Decorative Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(0,0,0,0.1)_1px,_transparent_1px)] bg-[size:20px_20px]"></div>
-      </div>
+      {!weather.isNight && (
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(0,0,0,0.1)_1px,_transparent_1px)] bg-[size:20px_20px]"></div>
+        </div>
+      )}
       
       <CardContent className="p-5 relative z-10">
         {/* Header with Location */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <MapPin className="w-4 h-4 text-primary" strokeWidth={2.5} />
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+              weather.isNight ? 'bg-white/10' : 'bg-primary/10'
+            }`}>
+              <MapPin className={`w-4 h-4 ${weather.isNight ? 'text-white' : 'text-primary'}`} strokeWidth={2.5} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">{weather.location}</p>
-              <p className="text-xs text-muted-foreground">Current Conditions</p>
+              <p className={`text-sm font-semibold ${weather.isNight ? 'text-white' : 'text-foreground'}`}>
+                {weather.location}
+              </p>
+              <p className={`text-xs ${weather.isNight ? 'text-white/60' : 'text-muted-foreground'}`}>
+                Current Conditions
+              </p>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+          <ChevronRight className={`w-5 h-5 transition-all ${
+            weather.isNight 
+              ? 'text-white/60 group-hover:text-white group-hover:translate-x-1' 
+              : 'text-muted-foreground group-hover:text-primary group-hover:translate-x-1'
+          }`} />
         </div>
 
         {/* Main Temperature Display */}
@@ -157,10 +270,22 @@ export default function WeatherWidget() {
             <div className="text-7xl leading-none filter drop-shadow-lg">{weather.icon}</div>
             <div className="pt-2">
               <div className="flex items-baseline gap-1">
-                <span className="text-5xl font-bold tracking-tight">{weather.temperature}</span>
-                <span className="text-2xl text-muted-foreground font-medium">°C</span>
+                <span className={`text-5xl font-bold tracking-tight ${
+                  weather.isNight ? 'text-white' : 'text-foreground'
+                }`}>
+                  {weather.temperature}
+                </span>
+                <span className={`text-2xl font-medium ${
+                  weather.isNight ? 'text-white/60' : 'text-muted-foreground'
+                }`}>
+                  °C
+                </span>
               </div>
-              <Badge variant="secondary" className="mt-2 bg-primary/15 text-primary border-primary/30 font-medium">
+              <Badge variant="secondary" className={`mt-2 font-medium ${
+                weather.isNight 
+                  ? 'bg-white/10 text-white border-white/20' 
+                  : 'bg-primary/15 text-primary border-primary/30'
+              }`}>
                 {weather.condition}
               </Badge>
             </div>
@@ -168,28 +293,66 @@ export default function WeatherWidget() {
         </div>
 
         {/* Photography Tip */}
-        <div className="bg-accent/10 border border-accent/20 rounded-xl p-3 mb-4">
+        <div className={`rounded-xl p-3 mb-4 ${
+          weather.isNight 
+            ? 'bg-white/5 border border-white/10' 
+            : 'bg-accent/10 border border-accent/20'
+        }`}>
           <div className="flex items-start gap-2">
-            <Camera className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" strokeWidth={2.5} />
-            <p className="text-sm text-foreground font-medium leading-relaxed">{weather.photographyTip}</p>
+            <Camera className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
+              weather.isNight ? 'text-white' : 'text-accent'
+            }`} strokeWidth={2.5} />
+            <p className={`text-sm font-medium leading-relaxed ${
+              weather.isNight ? 'text-white' : 'text-foreground'
+            }`}>
+              {weather.photographyTip}
+            </p>
           </div>
         </div>
 
         {/* Sun Times */}
         <div className="flex items-center gap-4">
-          <div className="flex-1 bg-gradient-to-br from-accent/5 to-transparent rounded-lg p-3 border border-border/50">
+          <div className={`flex-1 rounded-lg p-3 border ${
+            weather.isNight 
+              ? 'bg-white/5 border-white/10' 
+              : 'bg-gradient-to-br from-accent/5 to-transparent border-border/50'
+          }`}>
             <div className="flex items-center gap-2 mb-1">
-              <Sunrise className="w-4 h-4 text-accent" strokeWidth={2.5} />
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Sunrise</span>
+              <Sunrise className={`w-4 h-4 ${
+                weather.isNight ? 'text-white/80' : 'text-accent'
+              }`} strokeWidth={2.5} />
+              <span className={`text-xs font-semibold uppercase tracking-wide ${
+                weather.isNight ? 'text-white/60' : 'text-muted-foreground'
+              }`}>
+                Sunrise
+              </span>
             </div>
-            <p className="text-base font-bold text-foreground">{weather.sunrise}</p>
+            <p className={`text-base font-bold ${
+              weather.isNight ? 'text-white' : 'text-foreground'
+            }`}>
+              {weather.sunrise}
+            </p>
           </div>
-          <div className="flex-1 bg-gradient-to-br from-primary/5 to-transparent rounded-lg p-3 border border-border/50">
+          <div className={`flex-1 rounded-lg p-3 border ${
+            weather.isNight 
+              ? 'bg-white/5 border-white/10' 
+              : 'bg-gradient-to-br from-primary/5 to-transparent border-border/50'
+          }`}>
             <div className="flex items-center gap-2 mb-1">
-              <Sunset className="w-4 h-4 text-primary" strokeWidth={2.5} />
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Sunset</span>
+              <Sunset className={`w-4 h-4 ${
+                weather.isNight ? 'text-white/80' : 'text-primary'
+              }`} strokeWidth={2.5} />
+              <span className={`text-xs font-semibold uppercase tracking-wide ${
+                weather.isNight ? 'text-white/60' : 'text-muted-foreground'
+              }`}>
+                Sunset
+              </span>
             </div>
-            <p className="text-base font-bold text-foreground">{weather.sunset}</p>
+            <p className={`text-base font-bold ${
+              weather.isNight ? 'text-white' : 'text-foreground'
+            }`}>
+              {weather.sunset}
+            </p>
           </div>
         </div>
       </CardContent>
