@@ -71,6 +71,8 @@ CRITICAL Requirements:
 - For ${scene} scenes, use imagery/metaphors/quotes that relate directly to that specific atmosphere
 - Use evocative, sensory language that matches the visual scene
 - In the specified language throughout
+- DO NOT start quotes with punctuation marks (commas, periods, etc.)
+- Begin each quote with actual words, not punctuation
 
 Format as JSON array:
 [
