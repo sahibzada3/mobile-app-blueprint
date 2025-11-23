@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Sunrise, Sunset, Camera, ChevronRight, Loader2 } from "lucide-react";
+import { MapPin, Sunrise, Sunset, Camera, ChevronRight, Loader2, Cloud, Droplets, Wind, Eye } from "lucide-react";
 
 interface WeatherWidgetData {
   temperature: number;
@@ -128,41 +128,68 @@ export default function WeatherWidget() {
 
   return (
     <Card 
-      className="shadow-nature border-0 bg-gradient-to-br from-primary/5 via-card to-accent/5 cursor-pointer hover-scale transition-all"
+      className="shadow-lg border-0 bg-gradient-to-br from-primary/10 via-card to-accent/10 cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden group relative"
       onClick={() => navigate("/weather")}
     >
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-3">
+      {/* Decorative Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(0,0,0,0.1)_1px,_transparent_1px)] bg-[size:20px_20px]"></div>
+      </div>
+      
+      <CardContent className="p-5 relative z-10">
+        {/* Header with Location */}
+        <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">{weather.location}</span>
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <MapPin className="w-4 h-4 text-primary" strokeWidth={2.5} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">{weather.location}</p>
+              <p className="text-xs text-muted-foreground">Current Conditions</p>
+            </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
+          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
         </div>
 
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold">{weather.temperature}°</span>
-            <span className="text-lg text-muted-foreground">C</span>
+        {/* Main Temperature Display */}
+        <div className="flex items-start justify-between mb-5">
+          <div className="flex items-start gap-3">
+            <div className="text-7xl leading-none filter drop-shadow-lg">{weather.icon}</div>
+            <div className="pt-2">
+              <div className="flex items-baseline gap-1">
+                <span className="text-5xl font-bold tracking-tight">{weather.temperature}</span>
+                <span className="text-2xl text-muted-foreground font-medium">°C</span>
+              </div>
+              <Badge variant="secondary" className="mt-2 bg-primary/15 text-primary border-primary/30 font-medium">
+                {weather.condition}
+              </Badge>
+            </div>
           </div>
-          <div className="text-5xl">{weather.icon}</div>
         </div>
 
-        <Badge variant="secondary" className="mb-3 bg-primary/10 text-primary border-primary/20">
-          <Camera className="w-3 h-3 mr-1" />
-          {weather.condition}
-        </Badge>
-
-        <p className="text-sm text-muted-foreground mb-3">{weather.photographyTip}</p>
-
-        <div className="flex items-center gap-4 text-xs">
-          <div className="flex items-center gap-1">
-            <Sunrise className="w-4 h-4 text-accent" />
-            <span className="text-muted-foreground">{weather.sunrise}</span>
+        {/* Photography Tip */}
+        <div className="bg-accent/10 border border-accent/20 rounded-xl p-3 mb-4">
+          <div className="flex items-start gap-2">
+            <Camera className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" strokeWidth={2.5} />
+            <p className="text-sm text-foreground font-medium leading-relaxed">{weather.photographyTip}</p>
           </div>
-          <div className="flex items-center gap-1">
-            <Sunset className="w-4 h-4 text-primary" />
-            <span className="text-muted-foreground">{weather.sunset}</span>
+        </div>
+
+        {/* Sun Times */}
+        <div className="flex items-center gap-4">
+          <div className="flex-1 bg-gradient-to-br from-accent/5 to-transparent rounded-lg p-3 border border-border/50">
+            <div className="flex items-center gap-2 mb-1">
+              <Sunrise className="w-4 h-4 text-accent" strokeWidth={2.5} />
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Sunrise</span>
+            </div>
+            <p className="text-base font-bold text-foreground">{weather.sunrise}</p>
+          </div>
+          <div className="flex-1 bg-gradient-to-br from-primary/5 to-transparent rounded-lg p-3 border border-border/50">
+            <div className="flex items-center gap-2 mb-1">
+              <Sunset className="w-4 h-4 text-primary" strokeWidth={2.5} />
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Sunset</span>
+            </div>
+            <p className="text-base font-bold text-foreground">{weather.sunset}</p>
           </div>
         </div>
       </CardContent>

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { User, Share2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { User, Share2, MoreHorizontal, Bookmark } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { VoteButtons } from "@/components/feed/VoteButtons";
@@ -26,6 +27,7 @@ interface PhotoCardProps {
 
 export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   const handleDoubleTap = () => {
     setShowHeartAnimation(true);
@@ -33,29 +35,38 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   };
 
   return (
-    <Card className="overflow-hidden group">
+    <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-card group">
       <CardContent className="p-0">
+        {/* Header with User Info */}
         <motion.div 
-          className="flex items-center gap-3 p-5"
+          className="flex items-center gap-3 px-4 py-3 border-b border-border/50"
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <Avatar className="w-11 h-11 ring-2 ring-primary/20">
-            <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-              {photo.profiles?.username?.charAt(0).toUpperCase() || <User className="w-5 h-5" strokeWidth={2} />}
+          <Avatar className="w-10 h-10 ring-2 ring-primary/20 ring-offset-2 ring-offset-background cursor-pointer hover:ring-primary/40 transition-all">
+            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-primary font-semibold text-sm">
+              {photo.profiles?.username?.charAt(0).toUpperCase() || <User className="w-4 h-4" strokeWidth={2.5} />}
             </AvatarFallback>
           </Avatar>
-          <div className="flex-1">
-            <p className="font-semibold text-foreground text-sm">{photo.profiles?.username || "Unknown"}</p>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-foreground text-sm truncate">{photo.profiles?.username || "Unknown"}</p>
             <p className="text-xs text-muted-foreground">
-              {new Date(photo.created_at).toLocaleDateString()}
+              {new Date(photo.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </p>
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 hover:bg-muted"
+          >
+            <MoreHorizontal className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
+          </Button>
         </motion.div>
 
+        {/* Photo with Enhanced Interaction */}
         <motion.div 
           className="relative aspect-square bg-muted overflow-hidden cursor-pointer"
-          whileHover={{ scale: 1.01 }}
+          whileHover={{ scale: 1.005 }}
           transition={{ duration: 0.3 }}
           onDoubleClick={handleDoubleTap}
         >
@@ -63,7 +74,11 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
             src={photo.image_url}
             alt={photo.caption || "Photo"}
             className="w-full h-full object-cover"
+            loading="lazy"
           />
+          
+          {/* Gradient Overlay on Hover */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           
           {/* Double-tap heart animation */}
           {showHeartAnimation && (
@@ -85,51 +100,78 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
           )}
         </motion.div>
 
-        <div className="p-5 space-y-4">
-
+        {/* Action Buttons Section */}
+        <div className="px-4 py-3 space-y-3">
           <motion.div 
-            className="flex items-center gap-5"
+            className="flex items-center justify-between"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <VoteButtons photoId={photo.id} currentUserId={currentUserId} />
+            <div className="flex items-center gap-4">
+              <VoteButtons photoId={photo.id} currentUserId={currentUserId} />
+            </div>
             
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2 p-0 h-auto hover:bg-transparent group/share ml-auto"
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: 'Check out this photo on Frame',
-                    text: photo.caption || 'Amazing photo!',
-                    url: window.location.href,
-                  }).catch(() => {});
-                } else {
-                  navigator.clipboard.writeText(window.location.href);
-                  toast.success('Link copied to clipboard!');
-                }
-              }}
-            >
-              <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
-                <Share2 className="w-6 h-6 text-muted-foreground group-hover/share:text-primary transition-colors" strokeWidth={2} />
-              </motion.div>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 hover:bg-muted group/bookmark"
+                onClick={() => {
+                  setIsBookmarked(!isBookmarked);
+                  toast.success(isBookmarked ? "Removed from saved" : "Saved to collection");
+                }}
+              >
+                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                  <Bookmark 
+                    className={`w-5 h-5 transition-colors ${
+                      isBookmarked 
+                        ? 'fill-primary text-primary' 
+                        : 'text-muted-foreground group-hover/bookmark:text-primary'
+                    }`} 
+                    strokeWidth={2} 
+                  />
+                </motion.div>
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 hover:bg-muted group/share"
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({
+                      title: 'Check out this photo on Frame',
+                      text: photo.caption || 'Amazing photo!',
+                      url: window.location.href,
+                    }).catch(() => {});
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success('Link copied to clipboard!');
+                  }
+                }}
+              >
+                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                  <Share2 className="w-5 h-5 text-muted-foreground group-hover/share:text-primary transition-colors" strokeWidth={2} />
+                </motion.div>
+              </Button>
+            </div>
           </motion.div>
 
           <CommentSection photoId={photo.id} currentUserId={currentUserId} />
 
           {photo.caption && (
-            <motion.p 
-              className="text-sm leading-relaxed pt-1"
+            <motion.div 
+              className="pt-1"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <span className="font-semibold text-primary mr-2">{photo.profiles?.username}</span>
-              <span className="text-foreground">{photo.caption}</span>
-            </motion.p>
+              <p className="text-sm leading-relaxed">
+                <span className="font-semibold text-foreground mr-2">{photo.profiles?.username}</span>
+                <span className="text-muted-foreground">{photo.caption}</span>
+              </p>
+            </motion.div>
           )}
         </div>
       </CardContent>

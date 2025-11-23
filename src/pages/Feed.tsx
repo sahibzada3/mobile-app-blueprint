@@ -5,7 +5,8 @@ import { User } from "@supabase/supabase-js";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, LogOut, Camera, Moon, Sun, Lightbulb, ChevronRight, Sparkles, TrendingUp } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Heart, LogOut, Camera, Moon, Sun, Lightbulb, ChevronRight, Sparkles, TrendingUp, Search } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import PhotoCard from "@/components/PhotoCard";
@@ -22,6 +23,7 @@ export default function Feed() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [startY, setStartY] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     // Check current session
@@ -198,24 +200,39 @@ export default function Feed() {
           )}
         </div>
       </motion.div>
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-card/95 border-b border-border/30">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Camera className="w-5 h-5 text-primary" strokeWidth={2.5} />
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-card/95 border-b border-border/30 shadow-sm">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Camera className="w-5 h-5 text-primary" strokeWidth={2.5} />
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                Frame
+              </h1>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Frame
-            </h1>
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+              <Button variant="ghost" size="icon" onClick={toggleTheme} className="hover:bg-primary/10">
+                {theme === "light" ? <Moon className="w-5 h-5" strokeWidth={2} /> : <Sun className="w-5 h-5" strokeWidth={2} />}
+              </Button>
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="hover:bg-destructive/10 hover:text-destructive">
+                <LogOut className="w-5 h-5" strokeWidth={2} />
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <NotificationBell />
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="hover:bg-primary/10">
-              {theme === "light" ? <Moon className="w-5 h-5" strokeWidth={2} /> : <Sun className="w-5 h-5" strokeWidth={2} />}
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="hover:bg-destructive/10 hover:text-destructive">
-              <LogOut className="w-5 h-5" strokeWidth={2} />
-            </Button>
+          
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+            <Input
+              type="text"
+              placeholder="Search photos, users, challenges..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => navigate("/search")}
+              className="pl-10 h-11 bg-background/50 border-border/50 focus:bg-background focus:border-primary/50 transition-all"
+            />
           </div>
         </div>
       </header>
