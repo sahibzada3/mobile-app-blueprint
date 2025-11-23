@@ -388,8 +388,8 @@ export default function Editor() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        <div className="relative aspect-square bg-black rounded-2xl overflow-hidden shadow-card">
-          <canvas ref={canvasRef} className="w-full h-full object-contain" />
+        <div className="relative rounded-2xl overflow-hidden shadow-card bg-muted">
+          <canvas ref={canvasRef} className="w-full h-auto" />
         </div>
 
         <Card className="p-6">

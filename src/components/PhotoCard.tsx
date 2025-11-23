@@ -50,29 +50,26 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
     };
   }, []);
 
-  // Handle music play/pause and auto-play
+  // Handle music auto-play
   useEffect(() => {
     if (!musicTrack?.audioUrl) return;
 
-    const autoPlayEnabled = localStorage.getItem('autoPlayMusic') === 'true';
-    
-    if (autoPlayEnabled && !isPlayingMusic) {
-      setIsPlayingMusic(true);
+    // Always auto-play music on posts
+    if (!audioRef.current) {
+      const audio = new Audio(musicTrack.audioUrl);
+      audio.loop = true;
+      audio.volume = volume;
+      audioRef.current = audio;
+      audio.play().catch((err) => console.log('Audio autoplay blocked:', err));
     }
 
-    if (isPlayingMusic) {
-      if (!audioRef.current) {
-        const audio = new Audio(musicTrack.audioUrl);
-        audio.loop = true;
-        audio.volume = volume;
-        audioRef.current = audio;
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
       }
-      audioRef.current.volume = volume;
-      audioRef.current.play().catch(() => setIsPlayingMusic(false));
-    } else if (audioRef.current) {
-      audioRef.current.pause();
-    }
-  }, [isPlayingMusic, musicTrack, volume]);
+    };
+  }, [musicTrack, volume]);
 
   // Save volume preference
   useEffect(() => {
@@ -145,67 +142,6 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
         </motion.div>
 
         <div className="p-5 space-y-4">
-          {musicTrack && (
-            <motion.div 
-              className="relative bg-primary/5 rounded-xl px-4 py-3 border border-primary/10"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <div className="flex items-center gap-3 text-xs">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-9 h-9 rounded-lg bg-primary/10 hover:bg-primary/20 flex-shrink-0"
-                  onClick={toggleMusic}
-                >
-                  {isPlayingMusic ? (
-                    <Pause className="w-4 h-4 text-primary" strokeWidth={2.5} />
-                  ) : (
-                    <Play className="w-4 h-4 text-primary" strokeWidth={2.5} />
-                  )}
-                </Button>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-foreground truncate text-sm">{musicTrack.name}</p>
-                  <p className="text-muted-foreground truncate">{musicTrack.artist}</p>
-                </div>
-                <Badge variant="outline" className="text-xs border-primary/20 bg-primary/5 font-medium">
-                  {musicTrack.mood}
-                </Badge>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-9 h-9 rounded-lg bg-primary/10 hover:bg-primary/20 flex-shrink-0"
-                  onClick={() => setShowVolumeControl(!showVolumeControl)}
-                >
-                  <Volume2 className="w-4 h-4 text-primary" strokeWidth={2.5} />
-                </Button>
-              </div>
-              
-              <AnimatePresence>
-                {showVolumeControl && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                    animate={{ opacity: 1, height: "auto", marginTop: 12 }}
-                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                    className="flex items-center gap-3"
-                  >
-                    <Volume2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <Slider
-                      value={[volume * 100]}
-                      onValueChange={(value) => setVolume(value[0] / 100)}
-                      max={100}
-                      step={1}
-                      className="flex-1"
-                    />
-                    <span className="text-xs text-muted-foreground w-12 text-right font-medium">
-                      {Math.round(volume * 100)}%
-                    </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          )}
 
           <motion.div 
             className="flex items-center gap-5"
