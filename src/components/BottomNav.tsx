@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Camera, Trophy, User, MapPin, Link2 } from "lucide-react";
+import { Camera, Trophy, User, Lightbulb, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function BottomNav() {
@@ -11,7 +11,7 @@ export default function BottomNav() {
   };
   
   const navItems = [
-    { icon: MapPin, label: "Spots", path: "/nearby-spots" },
+    { icon: Lightbulb, label: "Ideas", path: "/ideas" },
     { icon: Link2, label: "Chains", path: "/spotlight" },
     { icon: Camera, label: "Camera", path: "/camera" },
     { icon: Trophy, label: "Challenges", path: "/challenges" },
