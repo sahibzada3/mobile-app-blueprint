@@ -243,7 +243,7 @@ export default function Profile() {
             </div>
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="grid grid-cols-2 gap-3 mb-4">
               <Button 
                 onClick={() => navigate("/profile/settings")} 
                 variant="outline" 
@@ -251,14 +251,6 @@ export default function Profile() {
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
-              </Button>
-              <Button 
-                onClick={() => navigate("/slices")} 
-                variant="outline"
-                className="flex-1"
-              >
-                <ImageIcon className="w-4 h-4 mr-2" />
-                Slices
               </Button>
               <Button 
                 onClick={() => navigate("/camera")} 
