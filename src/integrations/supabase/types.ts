@@ -337,6 +337,7 @@ export type Database = {
       }
       friend_challenges: {
         Row: {
+          auto_judge_scheduled: boolean | null
           challenge_prompt: string
           created_at: string | null
           creator_id: string
@@ -344,6 +345,7 @@ export type Database = {
           end_date: string
           id: string
           judging_completed_at: string | null
+          max_participants: number
           min_participants: number
           points_reward: number
           status: string
@@ -351,6 +353,7 @@ export type Database = {
           winner_id: string | null
         }
         Insert: {
+          auto_judge_scheduled?: boolean | null
           challenge_prompt: string
           created_at?: string | null
           creator_id: string
@@ -358,6 +361,7 @@ export type Database = {
           end_date: string
           id?: string
           judging_completed_at?: string | null
+          max_participants?: number
           min_participants?: number
           points_reward?: number
           status?: string
@@ -365,6 +369,7 @@ export type Database = {
           winner_id?: string | null
         }
         Update: {
+          auto_judge_scheduled?: boolean | null
           challenge_prompt?: string
           created_at?: string | null
           creator_id?: string
@@ -372,6 +377,7 @@ export type Database = {
           end_date?: string
           id?: string
           judging_completed_at?: string | null
+          max_participants?: number
           min_participants?: number
           points_reward?: number
           status?: string
@@ -844,7 +850,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      auto_judge_ended_challenges: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

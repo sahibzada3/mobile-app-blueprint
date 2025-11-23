@@ -94,8 +94,13 @@ export default function ChallengeDetail() {
       return;
     }
 
-    if (submissions.length < challenge.min_participants) {
-      sonnerToast.error(`Need at least ${challenge.min_participants} participants to judge`);
+    if (submissions.length < 3) {
+      sonnerToast.error("Need at least 3 participants to judge");
+      return;
+    }
+
+    if (submissions.length > 10) {
+      sonnerToast.error("Maximum 10 participants allowed");
       return;
     }
 
@@ -251,12 +256,17 @@ export default function ChallengeDetail() {
                 size="lg" 
                 className="w-full shadow-glow" 
                 onClick={handleJudge}
-                disabled={judgingLoading}
+                disabled={judgingLoading || submissions.length < 3}
               >
                 {judgingLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Judging...
+                    AI is Judging...
+                  </>
+                ) : submissions.length < 3 ? (
+                  <>
+                    <Trophy className="w-5 h-5 mr-2" />
+                    Need {3 - submissions.length} More Participants
                   </>
                 ) : (
                   <>
@@ -265,6 +275,14 @@ export default function ChallengeDetail() {
                   </>
                 )}
               </Button>
+            )}
+
+            {challenge.auto_judge_scheduled && challenge.status === "active" && (
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
+                <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                  ⏰ Auto-judging scheduled - Challenge ended and ready to judge!
+                </p>
+              </div>
             )}
 
             {!userSubmission && challenge.status === "active" && new Date(challenge.end_date) > new Date() && (
