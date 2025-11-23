@@ -236,16 +236,16 @@ export default function TypographyControls({
         {generatedQuotes.length > 0 && (
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground">AI Generated Quotes (tap to use)</Label>
-            <ScrollArea className="h-32 rounded-md border p-2">
-              <div className="space-y-2">
+            <ScrollArea className="h-48 max-h-[200px] rounded-md border p-2">
+              <div className="space-y-2 pr-4">
                 {generatedQuotes.map((quote, index) => (
                   <Button
                     key={index}
                     variant="ghost"
-                    className="w-full justify-start text-left h-auto py-2 px-3 hover:bg-primary/5"
+                    className="w-full justify-start text-left h-auto py-3 px-3 hover:bg-primary/5 whitespace-normal"
                     onClick={() => onTextChange(quote)}
                   >
-                    <span className="text-sm leading-relaxed">{quote}</span>
+                    <span className="text-sm leading-relaxed break-words">{quote}</span>
                   </Button>
                 ))}
               </div>
