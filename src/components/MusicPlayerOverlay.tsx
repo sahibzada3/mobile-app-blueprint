@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Music, Play, Pause, X, Volume2 } from "lucide-react";
@@ -15,6 +15,25 @@ export default function MusicPlayerOverlay({ trackName, artist, onClose }: Music
   const [isPlaying, setIsPlaying] = useState(true);
   const [volume, setVolume] = useState([70]);
   const [showVolume, setShowVolume] = useState(false);
+
+  // Load music settings from localStorage
+  useEffect(() => {
+    const savedMusicEnabled = localStorage.getItem('musicEnabled');
+    const savedMusicVolume = localStorage.getItem('musicVolume');
+    
+    if (savedMusicEnabled === 'false') {
+      setIsPlaying(false);
+    }
+    
+    if (savedMusicVolume) {
+      setVolume([parseInt(savedMusicVolume)]);
+    }
+  }, []);
+
+  // Update localStorage when volume changes
+  useEffect(() => {
+    localStorage.setItem('musicVolume', volume[0].toString());
+  }, [volume]);
 
   return (
     <AnimatePresence>

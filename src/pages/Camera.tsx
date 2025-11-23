@@ -27,6 +27,7 @@ export default function Camera() {
   const [showAdvancedControls, setShowAdvancedControls] = useState(false);
   const [videoZoom, setVideoZoom] = useState(1);
   const [videoPosition, setVideoPosition] = useState({ x: 0, y: 0 });
+  const [showZoomIndicator, setShowZoomIndicator] = useState(false);
   const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
     brightness: 100,
     contrast: 100,
@@ -188,6 +189,7 @@ export default function Camera() {
     // Apply visual zoom (1.2x to 1.8x based on distance from center)
     const newZoom = 1 + (0.6 * (1 - distanceFromCenter));
     setVideoZoom(newZoom);
+    setShowZoomIndicator(true);
 
     // Calculate pan offset to keep tap point centered after zoom
     const offsetX = (0.5 - normalizedX) * (newZoom - 1) * 100;
@@ -256,6 +258,7 @@ export default function Camera() {
       setFocusPoint(null);
       setVideoZoom(1);
       setVideoPosition({ x: 0, y: 0 });
+      setShowZoomIndicator(false);
     }, 2500);
 
     // Haptic feedback if supported
@@ -283,6 +286,17 @@ export default function Camera() {
         />
         <canvas ref={canvasRef} className="hidden" />
         
+        {/* Zoom Level Indicator */}
+        {showZoomIndicator && (
+          <div className="absolute bottom-32 left-1/2 -translate-x-1/2 pointer-events-none z-30 animate-in fade-in slide-in-from-bottom-4 duration-200">
+            <div className="bg-black/80 backdrop-blur-xl rounded-full px-6 py-3 border border-white/20">
+              <span className="text-white text-2xl font-bold tracking-wider">
+                {videoZoom.toFixed(1)}×
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Focus Indicator */}
         {focusPoint && (
           <div

@@ -1,23 +1,88 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Music, Play, Pause, Search, Heart } from "lucide-react";
+import { Music, Play, Pause, Search, Heart, Upload } from "lucide-react";
 import { musicTracks } from "@/data/musicTracks";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function MusicLibrary() {
   const [searchQuery, setSearchQuery] = useState("");
   const [playingTrack, setPlayingTrack] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [uploadedTracks, setUploadedTracks] = useState<any[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const filteredTracks = musicTracks.filter(
+  const allTracks = [...musicTracks, ...uploadedTracks];
+  
+  const filteredTracks = allTracks.filter(
     (track) =>
       track.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       track.mood.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleUploadMusic = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file type
+    if (!file.type.startsWith('audio/')) {
+      toast.error("Please upload an audio file");
+      return;
+    }
+
+    // Check file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File size must be less than 10MB");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please log in to upload music");
+        return;
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
+      
+      // Upload to Supabase storage
+      const { error: uploadError } = await supabase.storage
+        .from("photos")
+        .upload(`music/${fileName}`, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from("photos")
+        .getPublicUrl(`music/${fileName}`);
+
+      // Add to uploaded tracks
+      const newTrack = {
+        id: `custom-${Date.now()}`,
+        name: file.name.replace(/\.[^/.]+$/, ""),
+        mood: "Custom",
+        url: publicUrl,
+        isCustom: true
+      };
+
+      setUploadedTracks(prev => [...prev, newTrack]);
+      toast.success("Music uploaded successfully!");
+    } catch (error: any) {
+      console.error("Error uploading music:", error);
+      toast.error("Failed to upload music");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const toggleFavorite = (trackId: string) => {
     setFavorites((prev) =>
@@ -40,14 +105,33 @@ export default function MusicLibrary() {
     }
   };
 
-  const categories = [...new Set(musicTracks.map((t) => t.mood))];
+  const categories = [...new Set(allTracks.map((t) => t.mood))];
 
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Music Library</h1>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold text-foreground">Music Library</h1>
+            <div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleUploadMusic}
+                accept="audio/*"
+                className="hidden"
+              />
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                size="sm"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                {uploading ? "Uploading..." : "Upload Music"}
+              </Button>
+            </div>
+          </div>
           
           {/* Search */}
           <div className="relative">
@@ -113,7 +197,7 @@ export default function MusicLibrary() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {musicTracks
+                {allTracks
                   .filter((track) => favorites.includes(track.id))
                   .map((track) => (
                     <TrackCard
