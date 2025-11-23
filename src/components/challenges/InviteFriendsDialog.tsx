@@ -16,19 +16,39 @@ export default function InviteFriendsDialog({ challengeId, open, onOpenChange }:
   const [friends, setFriends] = useState<any[]>([]);
   const [invited, setInvited] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [challenge, setChallenge] = useState<any>(null);
 
   useEffect(() => {
     if (open) {
-      fetchFriends();
+      fetchChallengeAndFriends();
     }
   }, [open, challengeId]);
 
-  const fetchFriends = async () => {
+  const fetchChallengeAndFriends = async () => {
     setLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
+      // Fetch challenge details
+      const { data: challengeData } = await supabase
+        .from("friend_challenges")
+        .select("min_participants, max_participants")
+        .eq("id", challengeId)
+        .single();
+      
+      setChallenge(challengeData);
+
+      // Fetch current participants count
+      const { data: participantsData } = await supabase
+        .from("challenge_participants")
+        .select("user_id")
+        .eq("challenge_id", challengeId);
+
+      const currentParticipants = new Set(participantsData?.map(p => p.user_id) || []);
+      setInvited(currentParticipants);
+
+      // Fetch friends
       const { data, error } = await supabase
         .from("friendships")
         .select("friend_id, profiles!friendships_friend_id_fkey(id, username, avatar_url)")
@@ -40,7 +60,7 @@ export default function InviteFriendsDialog({ challengeId, open, onOpenChange }:
       const friendsList = data?.map(f => f.profiles).filter(Boolean) || [];
       setFriends(friendsList);
     } catch (error: any) {
-      console.error("Error fetching friends:", error);
+      console.error("Error fetching data:", error);
       toast.error("Failed to load friends");
     } finally {
       setLoading(false);
@@ -48,6 +68,12 @@ export default function InviteFriendsDialog({ challengeId, open, onOpenChange }:
   };
 
   const handleInvite = async (friendId: string) => {
+    // Check max participants limit
+    if (challenge && invited.size >= challenge.max_participants) {
+      toast.error(`Maximum ${challenge.max_participants} participants allowed`);
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from("challenge_participants")
@@ -79,7 +105,8 @@ export default function InviteFriendsDialog({ challengeId, open, onOpenChange }:
         <DialogHeader>
           <DialogTitle>Invite Friends to Challenge</DialogTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            ⚠️ Minimum 10 friends required to start judging
+            👥 Invite 3-10 friends ({invited.size}/10 invited)
+            {invited.size < 3 && <span className="text-destructive ml-1">⚠️ Min 3 required</span>}
           </p>
         </DialogHeader>
         {loading ? (
@@ -109,7 +136,7 @@ export default function InviteFriendsDialog({ challengeId, open, onOpenChange }:
                   size="sm"
                   variant={invited.has(friend.id) ? "secondary" : "default"}
                   onClick={() => handleInvite(friend.id)}
-                  disabled={invited.has(friend.id)}
+                  disabled={invited.has(friend.id) || (challenge && invited.size >= challenge.max_participants)}
                 >
                   {invited.has(friend.id) ? (
                     <>
