@@ -387,9 +387,23 @@ export default function Camera() {
           </div>
         </div>
 
-        {/* Bottom Controls - Filter Strip Only */}
+        {/* Bottom Controls - Filter Strip and Zoom Toggle */}
         <div className="absolute bottom-14 left-0 right-0 z-10 pointer-events-none">
           <div className="flex flex-col items-center pb-4 bg-gradient-to-t from-black/95 via-black/70 to-transparent pt-6 pointer-events-auto">
+            {/* Zoom Toggle Button */}
+            {!showZoomSlider && (
+              <div className="w-full px-4 mb-3 flex justify-start">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowZoomSlider(true)}
+                  className="h-8 w-8 rounded-full bg-black/50 backdrop-blur-md hover:bg-black/70 border border-white/30"
+                >
+                  <span className="text-white text-xs font-bold">{zoomLevel.toFixed(1)}×</span>
+                </Button>
+              </div>
+            )}
+            
             {/* Filter Strip */}
             <div className="w-full px-4">
               <CameraFilterStrip 
