@@ -106,53 +106,56 @@ export default function CreateChallengeDialog({ children, onSuccess }: CreateCha
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create Friend Challenge</DialogTitle>
+            <DialogTitle className="text-lg">Create Friend Challenge</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <Label htmlFor="title">Challenge Title *</Label>
+              <Label htmlFor="title" className="text-sm">Challenge Title *</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Golden Hour Challenge"
+                className="h-9 text-sm"
                 required
               />
             </div>
             
             <div>
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="text-sm">Description</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Let's see who can capture the best golden hour photo!"
+                placeholder="Let's see who can capture the best!"
+                className="text-sm min-h-[60px]"
                 rows={2}
               />
             </div>
 
             <div>
-              <Label htmlFor="prompt">Challenge Prompt *</Label>
+              <Label htmlFor="prompt" className="text-sm">Challenge Prompt *</Label>
               <Input
                 id="prompt"
                 value={challengePrompt}
                 onChange={(e) => setChallengePrompt(e.target.value)}
                 placeholder="Capture the best golden hour photo"
+                className="h-9 text-sm"
                 required
               />
             </div>
 
             <div>
-              <Label htmlFor="endDate">End Date *</Label>
+              <Label htmlFor="endDate" className="text-sm">End Date *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-start text-left font-normal"
+                    className="w-full h-9 justify-start text-left font-normal text-sm"
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="mr-2 h-3.5 w-3.5" />
                     {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
                   </Button>
                 </PopoverTrigger>
@@ -169,7 +172,7 @@ export default function CreateChallengeDialog({ children, onSuccess }: CreateCha
             </div>
 
             <div>
-              <Label htmlFor="points">Points Reward (100-200)</Label>
+              <Label htmlFor="points" className="text-sm">Points Reward (100-200)</Label>
               <Input
                 id="points"
                 type="number"
@@ -201,24 +204,25 @@ export default function CreateChallengeDialog({ children, onSuccess }: CreateCha
                 }}
                 min={100}
                 max={200}
+                className="h-9 text-sm"
                 placeholder="Enter points (100-200)"
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                🥇 1st: {pointsReward} pts | 🥈 2nd: {Math.round(pointsReward * 0.6)} pts | 🥉 3rd: {Math.round(pointsReward * 0.3)} pts
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                🥇 {pointsReward} | 🥈 {Math.round(pointsReward * 0.6)} | 🥉 {Math.round(pointsReward * 0.3)} pts
               </p>
             </div>
 
-            <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
-              <p className="text-sm font-medium mb-1">Participants: 3-10 friends required</p>
-              <p className="text-xs text-muted-foreground">
-                Invite between 3 to 10 friends to compete in this challenge
+            <div className="bg-primary/5 rounded-lg p-2.5 border border-primary/10">
+              <p className="text-xs font-medium mb-0.5">3-10 friends required</p>
+              <p className="text-[10px] text-muted-foreground">
+                Invite friends to compete in this challenge
               </p>
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full h-9 text-sm" disabled={loading}>
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
                   Creating...
                 </>
               ) : (
