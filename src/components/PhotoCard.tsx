@@ -28,13 +28,44 @@ interface PhotoCardProps {
 
 export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
+  const [isPlayingMusic, setIsPlayingMusic] = useState(false);
+  const audioRef = useState<HTMLAudioElement | null>(null)[0];
   
   const musicTrack = photo.music_track ? musicTracks.find(t => t.id === photo.music_track) : null;
   const isOwnPhoto = currentUserId === photo.user_id;
 
+  // Initialize audio when music track is available
+  useEffect(() => {
+    if (musicTrack?.audioUrl) {
+      const audio = new Audio(musicTrack.audioUrl);
+      audio.loop = true;
+      audio.volume = 0.3;
+      
+      // Check if music is enabled in settings
+      const musicEnabled = localStorage.getItem('musicEnabled') !== 'false';
+      const musicVolume = parseInt(localStorage.getItem('musicVolume') || '70');
+      
+      if (musicEnabled) {
+        audio.volume = musicVolume / 100;
+        audio.play().catch(() => setIsPlayingMusic(false));
+        setIsPlayingMusic(true);
+      }
+      
+      return () => {
+        audio.pause();
+        audio.src = '';
+      };
+    }
+  }, [musicTrack]);
+
   const handleDoubleTap = () => {
     setShowHeartAnimation(true);
     setTimeout(() => setShowHeartAnimation(false), 1000);
+  };
+
+  const toggleMusic = () => {
+    // Music toggle functionality can be added here if needed
+    setIsPlayingMusic(!isPlayingMusic);
   };
 
   return (

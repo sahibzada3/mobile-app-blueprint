@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Music, Play, Pause, X, Volume2 } from "lucide-react";
@@ -8,15 +8,32 @@ import { Slider } from "@/components/ui/slider";
 interface MusicPlayerOverlayProps {
   trackName: string;
   artist?: string;
+  audioUrl?: string;
   onClose: () => void;
 }
 
-export default function MusicPlayerOverlay({ trackName, artist, onClose }: MusicPlayerOverlayProps) {
+export default function MusicPlayerOverlay({ trackName, artist, audioUrl, onClose }: MusicPlayerOverlayProps) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [volume, setVolume] = useState([70]);
   const [showVolume, setShowVolume] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Load music settings from localStorage
+  // Initialize audio element
+  useEffect(() => {
+    if (audioUrl) {
+      audioRef.current = new Audio(audioUrl);
+      audioRef.current.loop = true;
+      
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current = null;
+        }
+      };
+    }
+  }, [audioUrl]);
+
+  // Load music settings from localStorage and start playback
   useEffect(() => {
     const savedMusicEnabled = localStorage.getItem('musicEnabled');
     const savedMusicVolume = localStorage.getItem('musicVolume');
@@ -24,17 +41,43 @@ export default function MusicPlayerOverlay({ trackName, artist, onClose }: Music
     // If music is disabled in settings, don't play
     if (savedMusicEnabled === 'false') {
       setIsPlaying(false);
-      onClose(); // Auto-close if music is disabled
+      onClose();
       return;
     }
     
     if (savedMusicVolume) {
-      setVolume([parseInt(savedMusicVolume)]);
+      const vol = parseInt(savedMusicVolume);
+      setVolume([vol]);
+      if (audioRef.current) {
+        audioRef.current.volume = vol / 100;
+      }
     }
-  }, [onClose]);
 
-  // Update localStorage when volume changes
+    // Start playing
+    if (audioRef.current && audioUrl) {
+      audioRef.current.play().catch(err => {
+        console.log("Audio autoplay blocked:", err);
+        setIsPlaying(false);
+      });
+    }
+  }, [audioUrl, onClose]);
+
+  // Handle play/pause
   useEffect(() => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.play().catch(() => setIsPlaying(false));
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [isPlaying]);
+
+  // Handle volume changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume[0] / 100;
+    }
     localStorage.setItem('musicVolume', volume[0].toString());
   }, [volume]);
 

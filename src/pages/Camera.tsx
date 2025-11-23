@@ -66,7 +66,11 @@ export default function Camera() {
   const startCamera = async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        video: { 
+          facingMode, 
+          width: { ideal: 3840 }, 
+          height: { ideal: 2160 }
+        },
         audio: false,
       });
       setStream(mediaStream);
@@ -108,7 +112,7 @@ export default function Camera() {
   const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current) return;
 
-    playSound('capture');
+    // Removed capture sound as requested
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -137,7 +141,7 @@ export default function Camera() {
     
     canvas.toBlob((blob) => {
       if (blob) {
-        sessionStorage.setItem("capturedPhoto", canvas.toDataURL("image/jpeg", 0.95));
+        sessionStorage.setItem("capturedPhoto", canvas.toDataURL("image/jpeg", 0.98));
         sessionStorage.setItem("photoFilters", JSON.stringify({ 
           mode, 
           filter: selectedFilter, 
@@ -152,7 +156,7 @@ export default function Camera() {
           navigate("/editor");
         }
       }
-    }, "image/jpeg", 0.95);
+    }, "image/jpeg", 0.98);
   };
 
   // Listen for capture event from nav bar
