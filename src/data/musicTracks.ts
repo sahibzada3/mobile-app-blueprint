@@ -4,19 +4,20 @@ export interface MusicTrack {
   artist: string;
   mood: string;
   duration: string;
+  audioUrl?: string;
 }
 
 export const musicTracks: MusicTrack[] = [
-  { id: "serene-dawn", name: "Serene Dawn", artist: "Nature Sounds", mood: "Calm", duration: "3:24" },
-  { id: "forest-whisper", name: "Forest Whisper", artist: "Ambient Dreams", mood: "Peaceful", duration: "4:12" },
-  { id: "mountain-breeze", name: "Mountain Breeze", artist: "Earth Tones", mood: "Uplifting", duration: "3:45" },
-  { id: "ocean-waves", name: "Ocean Waves", artist: "Coastal Vibes", mood: "Relaxing", duration: "5:03" },
-  { id: "sunset-glow", name: "Sunset Glow", artist: "Golden Hour", mood: "Warm", duration: "3:58" },
-  { id: "rain-drops", name: "Rain Drops", artist: "Weather Sounds", mood: "Meditative", duration: "4:30" },
-  { id: "meadow-dance", name: "Meadow Dance", artist: "Spring Collection", mood: "Joyful", duration: "3:15" },
-  { id: "night-sky", name: "Night Sky", artist: "Starlight Series", mood: "Dreamy", duration: "4:45" },
-  { id: "river-flow", name: "River Flow", artist: "Water Elements", mood: "Flowing", duration: "3:52" },
-  { id: "autumn-leaves", name: "Autumn Leaves", artist: "Seasonal Sounds", mood: "Nostalgic", duration: "4:18" },
+  { id: "serene-dawn", name: "Serene Dawn", artist: "Nature Sounds", mood: "Calm", duration: "3:24", audioUrl: "https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8c7f3f3.mp3" },
+  { id: "forest-whisper", name: "Forest Whisper", artist: "Ambient Dreams", mood: "Peaceful", duration: "4:12", audioUrl: "https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" },
+  { id: "mountain-breeze", name: "Mountain Breeze", artist: "Earth Tones", mood: "Uplifting", duration: "3:45", audioUrl: "https://cdn.pixabay.com/audio/2022/03/10/audio_d1718ab41b.mp3" },
+  { id: "ocean-waves", name: "Ocean Waves", artist: "Coastal Vibes", mood: "Relaxing", duration: "5:03", audioUrl: "https://cdn.pixabay.com/audio/2022/06/07/audio_14f0868c8c.mp3" },
+  { id: "sunset-glow", name: "Sunset Glow", artist: "Golden Hour", mood: "Warm", duration: "3:58", audioUrl: "https://cdn.pixabay.com/audio/2022/03/24/audio_c8ec090bd6.mp3" },
+  { id: "rain-drops", name: "Rain Drops", artist: "Weather Sounds", mood: "Meditative", duration: "4:30", audioUrl: "https://cdn.pixabay.com/audio/2022/01/18/audio_d3a80c0f3f.mp3" },
+  { id: "meadow-dance", name: "Meadow Dance", artist: "Spring Collection", mood: "Joyful", duration: "3:15", audioUrl: "https://cdn.pixabay.com/audio/2022/03/15/audio_25c826e44b.mp3" },
+  { id: "night-sky", name: "Night Sky", artist: "Starlight Series", mood: "Dreamy", duration: "4:45", audioUrl: "https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3" },
+  { id: "river-flow", name: "River Flow", artist: "Water Elements", mood: "Flowing", duration: "3:52", audioUrl: "https://cdn.pixabay.com/audio/2022/05/13/audio_af883c0440.mp3" },
+  { id: "autumn-leaves", name: "Autumn Leaves", artist: "Seasonal Sounds", mood: "Nostalgic", duration: "4:18", audioUrl: "https://cdn.pixabay.com/audio/2022/08/23/audio_d33ab99b41.mp3" },
 ];
 
 export const getMoodColor = (mood: string): string => {
