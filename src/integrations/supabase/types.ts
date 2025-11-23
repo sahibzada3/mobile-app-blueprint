@@ -202,31 +202,70 @@ export type Database = {
           },
         ]
       }
-      challenge_submissions: {
+      challenge_participants: {
         Row: {
           challenge_id: string
           id: string
-          is_winner: boolean | null
-          photo_id: string
-          score: number | null
-          submitted_at: string | null
+          joined_at: string | null
           user_id: string
         }
         Insert: {
           challenge_id: string
           id?: string
-          is_winner?: boolean | null
-          photo_id: string
-          score?: number | null
-          submitted_at?: string | null
+          joined_at?: string | null
           user_id: string
         }
         Update: {
           challenge_id?: string
           id?: string
-          is_winner?: boolean | null
+          joined_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_participants_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "friend_challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_participants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_submissions: {
+        Row: {
+          ai_feedback: string | null
+          ai_score: number | null
+          challenge_id: string
+          id: string
+          photo_id: string
+          rank: number | null
+          submitted_at: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_feedback?: string | null
+          ai_score?: number | null
+          challenge_id: string
+          id?: string
+          photo_id: string
+          rank?: number | null
+          submitted_at?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_feedback?: string | null
+          ai_score?: number | null
+          challenge_id?: string
+          id?: string
           photo_id?: string
-          score?: number | null
+          rank?: number | null
           submitted_at?: string | null
           user_id?: string
         }
@@ -235,7 +274,7 @@ export type Database = {
             foreignKeyName: "challenge_submissions_challenge_id_fkey"
             columns: ["challenge_id"]
             isOneToOne: false
-            referencedRelation: "challenges"
+            referencedRelation: "friend_challenges"
             referencedColumns: ["id"]
           },
           {
@@ -253,60 +292,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      challenges: {
-        Row: {
-          badges_awarded: boolean | null
-          category: string
-          created_at: string | null
-          description: string
-          difficulty: string
-          end_date: string
-          id: string
-          image_url: string | null
-          max_submissions: number | null
-          prize_description: string | null
-          requirements: string
-          start_date: string
-          status: string
-          title: string
-          updated_at: string | null
-        }
-        Insert: {
-          badges_awarded?: boolean | null
-          category: string
-          created_at?: string | null
-          description: string
-          difficulty: string
-          end_date: string
-          id?: string
-          image_url?: string | null
-          max_submissions?: number | null
-          prize_description?: string | null
-          requirements: string
-          start_date: string
-          status?: string
-          title: string
-          updated_at?: string | null
-        }
-        Update: {
-          badges_awarded?: boolean | null
-          category?: string
-          created_at?: string | null
-          description?: string
-          difficulty?: string
-          end_date?: string
-          id?: string
-          image_url?: string | null
-          max_submissions?: number | null
-          prize_description?: string | null
-          requirements?: string
-          start_date?: string
-          status?: string
-          title?: string
-          updated_at?: string | null
-        }
-        Relationships: []
       }
       comments: {
         Row: {
@@ -344,6 +329,63 @@ export type Database = {
           {
             foreignKeyName: "comments_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      friend_challenges: {
+        Row: {
+          challenge_prompt: string
+          created_at: string | null
+          creator_id: string
+          description: string
+          end_date: string
+          id: string
+          judging_completed_at: string | null
+          points_reward: number
+          status: string
+          title: string
+          winner_id: string | null
+        }
+        Insert: {
+          challenge_prompt: string
+          created_at?: string | null
+          creator_id: string
+          description: string
+          end_date: string
+          id?: string
+          judging_completed_at?: string | null
+          points_reward?: number
+          status?: string
+          title: string
+          winner_id?: string | null
+        }
+        Update: {
+          challenge_prompt?: string
+          created_at?: string | null
+          creator_id?: string
+          description?: string
+          end_date?: string
+          id?: string
+          judging_completed_at?: string | null
+          points_reward?: number
+          status?: string
+          title?: string
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friend_challenges_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friend_challenges_winner_id_fkey"
+            columns: ["winner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -711,13 +753,6 @@ export type Database = {
             columns: ["badge_id"]
             isOneToOne: false
             referencedRelation: "badges"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_badges_challenge_id_fkey"
-            columns: ["challenge_id"]
-            isOneToOne: false
-            referencedRelation: "challenges"
             referencedColumns: ["id"]
           },
         ]
