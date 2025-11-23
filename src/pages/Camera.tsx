@@ -27,6 +27,11 @@ export default function Camera() {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [showZoomSlider, setShowZoomSlider] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [captureMode, setCaptureMode] = useState<"photo" | "video">("photo");
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
   const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
     brightness: 100,
     contrast: 100,
@@ -59,6 +64,9 @@ export default function Camera() {
     return () => {
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
+      }
+      if (mediaRecorderRef.current && isRecording) {
+        mediaRecorderRef.current.stop();
       }
     };
   }, [facingMode, navigate]);
@@ -107,6 +115,89 @@ export default function Camera() {
     }
     audio.volume = 0.3;
     audio.play().catch(() => {});
+  };
+
+  // Recording timer
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+    } else {
+      setRecordingTime(0);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording]);
+
+  const formatRecordingTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const startVideoRecording = async () => {
+    if (!stream) return;
+
+    try {
+      recordedChunksRef.current = [];
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm;codecs=vp9',
+        videoBitsPerSecond: 5000000 // 5 Mbps for high quality
+      });
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          recordedChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+        const videoUrl = URL.createObjectURL(blob);
+        
+        // Store video in session storage for editor
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          sessionStorage.setItem("capturedVideo", reader.result as string);
+          sessionStorage.setItem("videoFilters", JSON.stringify({ 
+            mode, 
+            filter: selectedFilter, 
+            settings: advancedSettings
+          }));
+          navigate("/editor");
+        };
+        reader.readAsDataURL(blob);
+      };
+
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+      setIsRecording(true);
+      toast.success("Recording started");
+    } catch (error) {
+      console.error("Error starting recording:", error);
+      toast.error("Failed to start recording");
+    }
+  };
+
+  const stopVideoRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      toast.success("Recording stopped");
+    }
+  };
+
+  const handleCaptureClick = () => {
+    if (captureMode === "photo") {
+      capturePhoto();
+    } else {
+      if (isRecording) {
+        stopVideoRecording();
+      } else {
+        startVideoRecording();
+      }
+    }
   };
 
   const capturePhoto = async () => {
@@ -162,12 +253,12 @@ export default function Camera() {
   // Listen for capture event from nav bar
   useEffect(() => {
     const handleCaptureEvent = () => {
-      capturePhoto();
+      handleCaptureClick();
     };
 
     window.addEventListener('camera-capture', handleCaptureEvent);
     return () => window.removeEventListener('camera-capture', handleCaptureEvent);
-  }, [videoRef.current, canvasRef.current, mode, selectedFilter, advancedSettings]);
+  }, [videoRef.current, canvasRef.current, mode, selectedFilter, advancedSettings, captureMode, isRecording]);
 
   const toggleCamera = () => {
     if (stream) {
@@ -218,36 +309,46 @@ export default function Camera() {
         />
         <canvas ref={canvasRef} className="hidden" />
         
+        {/* Recording Indicator */}
+        {isRecording && (
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 animate-in fade-in slide-in-from-top-4 duration-200">
+            <div className="bg-red-600/90 backdrop-blur-xl rounded-full px-6 py-3 border border-white/20 flex items-center gap-3">
+              <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+              <span className="text-white text-lg font-bold tracking-wider">
+                {formatRecordingTime(recordingTime)}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Zoom Slider - Bottom Left Above Filters */}
         {showZoomSlider && (
           <div className="absolute bottom-28 left-4 right-4 z-20 max-w-xs pointer-events-auto">
-            <div className="bg-black/40 backdrop-blur-xl rounded-2xl border border-white/20 p-4 shadow-2xl">
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowZoomSlider(false)}
-                  className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex-shrink-0"
-                >
-                  <X className="w-3.5 h-3.5 text-white" />
-                </Button>
-                
-                <div className="flex-1 flex items-center gap-3">
-                  <span className="text-white text-xs font-bold drop-shadow-lg min-w-[32px]">
-                    {zoomLevel.toFixed(1)}×
-                  </span>
-                  <Slider
-                    value={[zoomLevel]}
-                    onValueChange={([value]) => handleZoomChange(value)}
-                    min={1}
-                    max={10}
-                    step={0.1}
-                    className="flex-1"
-                  />
-                  <span className="text-white/60 text-xs font-medium drop-shadow-lg">
-                    10×
-                  </span>
-                </div>
+            <div className="flex items-center gap-3 px-4 py-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowZoomSlider(false)}
+                className="h-7 w-7 rounded-full bg-black/50 hover:bg-black/70 flex-shrink-0 backdrop-blur-sm border border-white/20"
+              >
+                <X className="w-3.5 h-3.5 text-white" />
+              </Button>
+              
+              <div className="flex-1 flex items-center gap-3">
+                <span className="text-white text-xs font-bold drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] min-w-[32px]">
+                  {zoomLevel.toFixed(1)}×
+                </span>
+                <Slider
+                  value={[zoomLevel]}
+                  onValueChange={([value]) => handleZoomChange(value)}
+                  min={1}
+                  max={10}
+                  step={0.1}
+                  className="flex-1"
+                />
+                <span className="text-white/60 text-xs font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+                  10×
+                </span>
               </div>
             </div>
           </div>
@@ -394,9 +495,34 @@ export default function Camera() {
         {/* Bottom Controls - Filter Strip and Zoom Toggle */}
         <div className="absolute bottom-14 left-0 right-0 z-10 pointer-events-none">
           <div className="flex flex-col items-center pb-4 bg-gradient-to-t from-black/95 via-black/70 to-transparent pt-6 pointer-events-auto">
-            {/* Zoom Toggle Button */}
-            {!showZoomSlider && (
-              <div className="w-full px-4 mb-3 flex justify-start">
+            {/* Mode Selector and Zoom Toggle */}
+            <div className="w-full px-4 mb-3 flex justify-between items-center">
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setCaptureMode("photo")}
+                  variant="ghost"
+                  className={`h-8 px-4 rounded-full text-xs font-semibold transition-all ${
+                    captureMode === "photo"
+                      ? "bg-white text-black"
+                      : "bg-black/50 text-white hover:bg-black/70"
+                  } backdrop-blur-md border border-white/30`}
+                >
+                  Photo
+                </Button>
+                <Button
+                  onClick={() => setCaptureMode("video")}
+                  variant="ghost"
+                  className={`h-8 px-4 rounded-full text-xs font-semibold transition-all ${
+                    captureMode === "video"
+                      ? "bg-white text-black"
+                      : "bg-black/50 text-white hover:bg-black/70"
+                  } backdrop-blur-md border border-white/30`}
+                >
+                  Video
+                </Button>
+              </div>
+              
+              {!showZoomSlider && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -405,8 +531,8 @@ export default function Camera() {
                 >
                   <span className="text-white text-xs font-bold">{zoomLevel.toFixed(1)}×</span>
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
             
             {/* Filter Strip */}
             <div className="w-full px-4">
