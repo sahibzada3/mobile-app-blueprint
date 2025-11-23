@@ -49,6 +49,36 @@ export default function NearbySpots() {
     }
   }, [userLocation, radius]);
 
+  const generateSpotImage = async (spot: Spot) => {
+    try {
+      toast.info(`Generating image for ${spot.name}...`);
+      
+      const { data, error } = await supabase.functions.invoke('generate-spot-image', {
+        body: {
+          spotId: spot.id,
+          spotName: spot.name,
+          description: spot.description,
+          sceneTypes: spot.scene_types
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success(`Image generated for ${spot.name}!`);
+        // Refresh spots to show new image
+        if (userLocation) {
+          fetchNearbySpots();
+        } else {
+          fetchAllSpots();
+        }
+      }
+    } catch (error: any) {
+      console.error('Error generating image:', error);
+      toast.error(`Failed to generate image: ${error.message}`);
+    }
+  };
+
   const getUserLocation = () => {
     if (!navigator.geolocation) {
       setLocationStatus("unavailable");
@@ -356,21 +386,38 @@ export default function NearbySpots() {
             
             {spots.map((spot) => (
               <Card key={spot.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-card/80 backdrop-blur-sm border-border/50">
-                {spot.image_url && (
-                  <div className="relative w-full h-48 overflow-hidden">
+                <div className="relative w-full h-48 overflow-hidden bg-accent/20">
+                  {spot.image_url ? (
                     <img 
                       src={spot.image_url} 
                       alt={spot.name}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error(`Failed to load image for ${spot.name}`);
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
-                    {spot.matchScore && spot.matchScore >= 70 && (
-                      <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground shadow-lg">
-                        <Sparkles className="w-3 h-3 mr-1" />
-                        Perfect Match
-                      </Badge>
-                    )}
-                  </div>
-                )}
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-accent/30 to-accent/10">
+                      <Camera className="w-12 h-12 text-muted-foreground/40" />
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => generateSpotImage(spot)}
+                        className="shadow-md"
+                      >
+                        <Sparkles className="w-3 h-3 mr-1.5" />
+                        Generate Image
+                      </Button>
+                    </div>
+                  )}
+                  {spot.matchScore && spot.matchScore >= 70 && spot.image_url && (
+                    <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground shadow-lg">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      Perfect Match
+                    </Badge>
+                  )}
+                </div>
                 
                 <div className="p-5 space-y-4">
                   <div className="space-y-2">
