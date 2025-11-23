@@ -78,6 +78,9 @@ export default function InviteFriendsDialog({ challengeId, open, onOpenChange }:
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Invite Friends to Challenge</DialogTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            ⚠️ Minimum 10 friends required to start judging
+          </p>
         </DialogHeader>
         {loading ? (
           <div className="flex items-center justify-center py-8">
