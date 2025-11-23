@@ -5,96 +5,31 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Camera, Trophy, Users, Calendar, Clock, CheckCircle2, ThumbsUp, ThumbsDown } from "lucide-react";
+import { ArrowLeft, Camera, Trophy, Users, Calendar, Clock, CheckCircle2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
-import BadgeDisplay from "@/components/challenges/BadgeDisplay";
 import SubmitDialog from "@/components/challenges/SubmitDialog";
-import SubmissionModal from "@/components/challenges/SubmissionModal";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSound } from "@/hooks/useSound";
 import { useConfetti } from "@/hooks/useConfetti";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function ChallengeDetail() {
   const { challengeId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { playSound } = useSound();
-  const { celebrateTopThree, celebrateNewSubmission } = useConfetti();
+  const { celebrateTopThree } = useConfetti();
   const [challenge, setChallenge] = useState<any>(null);
   const [submissions, setSubmissions] = useState<any[]>([]);
-  const [previousSubmissions, setPreviousSubmissions] = useState<any[]>([]);
-  const [badges, setBadges] = useState<any[]>([]);
   const [userSubmission, setUserSubmission] = useState<any>(null);
-  const [userVotes, setUserVotes] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [judgingLoading, setJudgingLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
-  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     checkAuth();
     if (challengeId) {
       fetchChallengeData();
     }
-  }, [challengeId]);
-
-  // Real-time subscription for leaderboard updates
-  useEffect(() => {
-    if (!challengeId) return;
-
-    const channel = supabase
-      .channel(`challenge-${challengeId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'challenge_submissions',
-          filter: `challenge_id=eq.${challengeId}`
-        },
-        async (payload) => {
-          console.log('Submission update:', payload);
-          // Refetch submissions to get updated scores and rankings
-          await fetchChallengeData();
-          
-          if (payload.eventType === 'UPDATE') {
-            sonnerToast.info('Leaderboard updated!', {
-              description: 'Scores have changed'
-            });
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'votes'
-        },
-        async (payload) => {
-          console.log('Vote update:', payload);
-          // Check if this vote is for a submission in this challenge
-          const photoId = (payload.new as any)?.photo_id || (payload.old as any)?.photo_id;
-          if (!photoId) return;
-          
-          const { data: submission } = await supabase
-            .from('challenge_submissions')
-            .select('id')
-            .eq('photo_id', photoId)
-            .eq('challenge_id', challengeId)
-            .maybeSingle();
-          
-          if (submission) {
-            await fetchChallengeData();
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [challengeId]);
 
   const checkAuth = async () => {
@@ -109,98 +44,37 @@ export default function ChallengeDetail() {
   const fetchChallengeData = async () => {
     setLoading(true);
     try {
-      // Fetch challenge details
       const { data: challengeData, error: challengeError } = await supabase
-        .from("challenges")
-        .select("*")
+        .from("friend_challenges")
+        .select(`
+          *,
+          creator:profiles!creator_id(username, avatar_url),
+          winner:profiles!winner_id(username, avatar_url)
+        `)
         .eq("id", challengeId)
         .single();
 
       if (challengeError) throw challengeError;
       setChallenge(challengeData);
 
-      // Fetch submissions with user profiles
       const { data: submissionsData, error: submissionsError } = await supabase
         .from("challenge_submissions")
         .select(`
           *,
           photo:photos(*),
-          profile:profiles(username, avatar_url)
+          profile:profiles!user_id(username, avatar_url)
         `)
         .eq("challenge_id", challengeId)
-        .order("score", { ascending: false })
+        .order("ai_score", { ascending: false, nullsFirst: false })
         .order("submitted_at", { ascending: true });
 
       if (submissionsError) throw submissionsError;
-      
-      const newSubmissions = submissionsData || [];
+      setSubmissions(submissionsData || []);
 
-      // Detect changes and play sounds/confetti
-      if (previousSubmissions.length > 0) {
-        // Check for new submissions
-        if (newSubmissions.length > previousSubmissions.length) {
-          playSound('newSubmission');
-          celebrateNewSubmission();
-          sonnerToast.success('New submission!', {
-            description: 'A new entry has been added to the challenge'
-          });
-        }
-
-        // Check for position changes and celebrate top 3
-        newSubmissions.forEach((submission, newIndex) => {
-          const oldIndex = previousSubmissions.findIndex(s => s.id === submission.id);
-          if (oldIndex !== -1 && oldIndex !== newIndex) {
-            if (newIndex < oldIndex) {
-              playSound('positionUp');
-              
-              // Celebrate if user moved into top 3
-              if (newIndex < 3 && user && submission.user_id === user.id) {
-                celebrateTopThree(newIndex + 1);
-                sonnerToast.success(`🎉 You're in ${newIndex === 0 ? '1st' : newIndex === 1 ? '2nd' : '3rd'} place!`, {
-                  description: 'Amazing work! Keep it up!'
-                });
-              }
-            } else {
-              playSound('positionDown');
-            }
-          }
-        });
-      }
-
-      setPreviousSubmissions(newSubmissions);
-      setSubmissions(newSubmissions);
-
-      // Check if current user has submitted
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         const userSub = submissionsData?.find((s) => s.user_id === session.user.id);
         setUserSubmission(userSub);
-      }
-
-      // Fetch associated badges (from prize description)
-      const { data: badgesData } = await supabase
-        .from("badges")
-        .select("*")
-        .limit(3);
-      
-      setBadges(badgesData || []);
-
-      // Fetch user's votes for these submissions
-      if (session && submissionsData) {
-        const photoIds = submissionsData.map(s => s.photo_id);
-        const { data: votesData } = await supabase
-          .from("votes")
-          .select("photo_id, vote_type")
-          .eq("user_id", session.user.id)
-          .in("photo_id", photoIds);
-        
-        if (votesData) {
-          const votesMap: Record<string, string> = {};
-          votesData.forEach(vote => {
-            votesMap[vote.photo_id] = vote.vote_type;
-          });
-          setUserVotes(votesMap);
-        }
       }
     } catch (error: any) {
       console.error("Error fetching challenge:", error);
@@ -211,6 +85,35 @@ export default function ChallengeDetail() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleJudge = async () => {
+    if (submissions.length === 0) {
+      sonnerToast.error("No submissions to judge");
+      return;
+    }
+
+    setJudgingLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('judge-challenge', {
+        body: { challengeId: challenge.id }
+      });
+
+      if (error) throw error;
+
+      sonnerToast.success("Challenge judged! Winner announced!");
+      await fetchChallengeData();
+      
+      // Celebrate if user won
+      if (userSubmission && challenge.winner_id === userSubmission.user_id) {
+        celebrateTopThree(1);
+      }
+    } catch (error: any) {
+      console.error("Error judging challenge:", error);
+      sonnerToast.error("Failed to judge challenge");
+    } finally {
+      setJudgingLoading(false);
     }
   };
 
@@ -230,107 +133,14 @@ export default function ChallengeDetail() {
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
+    if (diff < 0) return "Challenge ended";
     if (days > 0) return `${days} day${days > 1 ? "s" : ""} remaining`;
     if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} remaining`;
-    return "Challenge ended";
+    return "Ending soon";
   };
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "beginner":
-        return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
-      case "intermediate":
-        return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
-      case "advanced":
-        return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
-      default:
-        return "bg-primary/10 text-primary";
-    }
-  };
-
-  const handleVote = async (photoId: string, voteType: "upvote" | "downvote") => {
-    if (!user) {
-      sonnerToast.error("Please sign in to vote");
-      navigate("/login");
-      return;
-    }
-
-    try {
-      const existingVote = userVotes[photoId];
-
-      // If clicking the same vote type, remove the vote
-      if (existingVote === voteType) {
-        const { error } = await supabase
-          .from("votes")
-          .delete()
-          .eq("photo_id", photoId)
-          .eq("user_id", user.id);
-
-        if (error) throw error;
-
-        // Update local state
-        const newVotes = { ...userVotes };
-        delete newVotes[photoId];
-        setUserVotes(newVotes);
-
-        // Update submission score
-        setSubmissions(prev => prev.map(sub => {
-          if (sub.photo_id === photoId) {
-            const scoreChange = voteType === "upvote" ? -1 : 1;
-            return { ...sub, score: sub.score + scoreChange };
-          }
-          return sub;
-        }));
-      } else {
-        // Insert or update vote
-        const { error } = await supabase
-          .from("votes")
-          .upsert({
-            photo_id: photoId,
-            user_id: user.id,
-            vote_type: voteType,
-          }, {
-            onConflict: "user_id,photo_id"
-          });
-
-        if (error) throw error;
-
-        // Update local state
-        setUserVotes(prev => ({ ...prev, [photoId]: voteType }));
-
-        // Update submission score
-        setSubmissions(prev => prev.map(sub => {
-          if (sub.photo_id === photoId) {
-            let scoreChange = voteType === "upvote" ? 1 : -1;
-            if (existingVote) {
-              scoreChange = voteType === "upvote" ? 2 : -2;
-            }
-            return { ...sub, score: sub.score + scoreChange };
-          }
-          return sub;
-        }));
-
-        // Update challenge_submission score
-        const submission = submissions.find(s => s.photo_id === photoId);
-        if (submission) {
-          await supabase
-            .from("challenge_submissions")
-            .update({ score: submission.score + (voteType === "upvote" ? 1 : -1) })
-            .eq("id", submission.id);
-        }
-      }
-
-      sonnerToast.success(voteType === "upvote" ? "Upvoted!" : "Downvoted!");
-    } catch (error: any) {
-      console.error("Vote error:", error);
-      sonnerToast.error("Failed to vote");
-    }
-  };
-
-  const openSubmissionModal = (submission: any, index: number) => {
-    setSelectedSubmission({ ...submission, rank: index + 1 });
-    setModalOpen(true);
-  };
+  const isCreator = user && challenge && user.id === challenge.creator_id;
+  const canJudge = isCreator && challenge?.status === "active" && new Date(challenge.end_date) < new Date();
 
   if (loading) {
     return (
@@ -355,54 +165,51 @@ export default function ChallengeDetail() {
 
   return (
     <div className="min-h-screen bg-gradient-soft pb-20">
-      {/* Header */}
       <header className="sticky top-0 bg-card/95 backdrop-blur-lg border-b border-border z-40 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/challenges")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <Trophy className="w-6 h-6 text-secondary" />
-          <h1 className="text-xl font-display font-bold text-primary">Challenge Details</h1>
+          <Trophy className="w-6 h-6 text-primary" />
+          <h1 className="text-xl font-display font-bold">Challenge Details</h1>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-6">
-        {/* Challenge Hero */}
-        <Card className="overflow-hidden mb-6 shadow-nature">
-          <div className="relative h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+        <Card className="overflow-hidden mb-6 shadow-elevated">
+          <div className="relative h-32 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
             <div className="text-center z-10">
               <h2 className="text-3xl font-bold text-foreground mb-2">{challenge.title}</h2>
               <div className="flex gap-2 justify-center flex-wrap">
-                <Badge className={getDifficultyColor(challenge.difficulty)}>
-                  {challenge.difficulty}
+                <Badge variant="outline">
+                  {challenge.points_reward} points
                 </Badge>
-                <Badge variant="outline">{challenge.category}</Badge>
-                <Badge variant="outline" className="gap-1">
-                  <Clock className="w-3 h-3" />
-                  {formatTimeRemaining()}
-                </Badge>
+                {challenge.status === "completed" && (
+                  <Badge variant="secondary">Completed</Badge>
+                )}
               </div>
             </div>
           </div>
 
           <CardContent className="p-6 space-y-6">
-            <p className="text-muted-foreground leading-relaxed">{challenge.description}</p>
+            <p className="text-muted-foreground">{challenge.description}</p>
 
-            {/* Challenge Info Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
+              <div className="flex items-center gap-2 mb-2">
+                <Camera className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">Challenge Prompt</h3>
+              </div>
+              <p className="text-sm">{challenge.challenge_prompt}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <Card className="p-4 bg-secondary/5">
                 <div className="flex items-center gap-2 mb-2">
                   <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Start Date</span>
-                </div>
-                <p className="text-sm font-semibold">{formatDate(challenge.start_date)}</p>
-              </Card>
-              <Card className="p-4 bg-secondary/5">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">End Date</span>
+                  <span className="text-xs text-muted-foreground">Ends</span>
                 </div>
                 <p className="text-sm font-semibold">{formatDate(challenge.end_date)}</p>
+                <p className="text-xs text-muted-foreground">{formatTimeRemaining()}</p>
               </Card>
               <Card className="p-4 bg-secondary/5">
                 <div className="flex items-center gap-2 mb-2">
@@ -411,44 +218,51 @@ export default function ChallengeDetail() {
                 </div>
                 <p className="text-sm font-semibold">{submissions.length}</p>
               </Card>
-              <Card className="p-4 bg-secondary/5">
-                <div className="flex items-center gap-2 mb-2">
-                  <Trophy className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Max Entries</span>
-                </div>
-                <p className="text-sm font-semibold">{challenge.max_submissions}</p>
-              </Card>
             </div>
 
-            {/* Requirements */}
-            <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
-              <div className="flex items-center gap-2 mb-3">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-foreground">Requirements</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">{challenge.requirements}</p>
-            </div>
-
-            {/* Prize */}
-            {challenge.prize_description && (
-              <div className="bg-secondary/10 rounded-lg p-4 border border-secondary/20">
-                <div className="flex items-center gap-2 mb-3">
-                  <Trophy className="w-5 h-5 text-secondary" />
-                  <h3 className="font-semibold text-foreground">Prize</h3>
+            {challenge.winner && (
+              <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-lg p-4 border-2 border-yellow-400/30">
+                <div className="flex items-center gap-3">
+                  <Trophy className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
+                  <div>
+                    <p className="font-semibold text-yellow-900 dark:text-yellow-100">Winner</p>
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">{challenge.winner.username}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground">{challenge.prize_description}</p>
               </div>
             )}
 
-            {/* Action Button */}
-            {!userSubmission ? (
+            {canJudge && (
+              <Button 
+                size="lg" 
+                className="w-full shadow-glow" 
+                onClick={handleJudge}
+                disabled={judgingLoading}
+              >
+                {judgingLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Judging...
+                  </>
+                ) : (
+                  <>
+                    <Trophy className="w-5 h-5 mr-2" />
+                    Judge Challenge with AI
+                  </>
+                )}
+              </Button>
+            )}
+
+            {!userSubmission && challenge.status === "active" && new Date(challenge.end_date) > new Date() && (
               <SubmitDialog challengeId={challenge.id} onSuccess={fetchChallengeData}>
                 <Button size="lg" className="w-full shadow-glow">
                   <Camera className="w-5 h-5 mr-2" />
                   Submit Entry
                 </Button>
               </SubmitDialog>
-            ) : (
+            )}
+
+            {userSubmission && (
               <div className="flex items-center justify-center gap-2 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                 <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
                 <span className="text-sm font-medium text-green-700 dark:text-green-300">
@@ -459,174 +273,82 @@ export default function ChallengeDetail() {
           </CardContent>
         </Card>
 
-        {/* Tabs Section */}
-        <Tabs defaultValue="gallery" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="gallery">
+        <Tabs defaultValue="submissions" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-1">
+            <TabsTrigger value="submissions">
               <Camera className="w-4 h-4 mr-2" />
-              Gallery ({submissions.length})
-            </TabsTrigger>
-            <TabsTrigger value="leaderboard">
-              <Trophy className="w-4 h-4 mr-2" />
-              Leaderboard
-            </TabsTrigger>
-            <TabsTrigger value="badges">
-              <Trophy className="w-4 h-4 mr-2" />
-              Badges
+              Submissions ({submissions.length})
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="gallery" className="space-y-4">
+          <TabsContent value="submissions">
             {submissions.length === 0 ? (
               <Card className="p-12 text-center">
                 <Camera className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-lg font-medium text-muted-foreground mb-2">No submissions yet</p>
-                <p className="text-sm text-muted-foreground">Be the first to take on this challenge!</p>
+                <p className="text-lg font-medium text-muted-foreground">No submissions yet</p>
+                <p className="text-sm text-muted-foreground">Be the first to submit!</p>
               </Card>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {submissions.map((submission, index) => (
-                  <Card 
-                    key={submission.id} 
-                    className="overflow-hidden group hover:shadow-xl transition-all duration-300 cursor-pointer"
-                    onClick={() => openSubmissionModal(submission, index)}
-                  >
-                    <div className="relative aspect-square bg-muted">
-                      {submission.photo?.image_url ? (
-                        <img
-                          src={submission.photo.image_url}
-                          alt={`Submission by ${submission.profile?.username || "Anonymous"}`}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Camera className="w-12 h-12 text-muted-foreground opacity-20" />
-                        </div>
-                      )}
-                      {index < 3 && (
-                        <div className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                          index === 0 ? "bg-amber-500 text-white" :
-                          index === 1 ? "bg-gray-400 text-white" :
-                          "bg-amber-700 text-white"
-                        }`}>
-                          {index + 1}
-                        </div>
-                      )}
-                      {submission.is_winner && (
-                        <div className="absolute top-2 left-2 bg-secondary text-secondary-foreground rounded-full p-2">
-                          <Trophy className="w-4 h-4" />
-                        </div>
-                      )}
-                      
-                      {/* Voting Buttons - Only show if not user's own submission */}
-                      {user && submission.user_id !== user.id && (
-                        <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            size="icon"
-                            variant={userVotes[submission.photo_id] === "upvote" ? "default" : "secondary"}
-                            className="h-8 w-8 shadow-lg"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleVote(submission.photo_id, "upvote");
-                            }}
-                          >
-                            <ThumbsUp className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant={userVotes[submission.photo_id] === "downvote" ? "default" : "secondary"}
-                            className="h-8 w-8 shadow-lg"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleVote(submission.photo_id, "downvote");
-                            }}
-                          >
-                            <ThumbsDown className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-3 space-y-1">
-                      <p className="font-semibold text-sm truncate">{submission.profile?.username || "Anonymous"}</p>
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span className="font-semibold text-primary">{submission.score} pts</span>
-                        <span>{new Date(submission.submitted_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                      </div>
-                      {submission.photo?.caption && (
-                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                          {submission.photo.caption}
-                        </p>
-                      )}
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="leaderboard" className="space-y-4">
-            {submissions.length === 0 ? (
-              <Card className="p-12 text-center">
-                <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-lg font-medium text-muted-foreground mb-2">No submissions yet</p>
-                <p className="text-sm text-muted-foreground">Be the first to take on this challenge!</p>
-              </Card>
-            ) : (
-              <div className="space-y-3">
-                <AnimatePresence mode="popLayout">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <AnimatePresence>
                   {submissions.map((submission, index) => (
                     <motion.div
                       key={submission.id}
-                      layout
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{
-                        layout: {
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 30
-                        },
-                        opacity: { duration: 0.3 },
-                        y: { duration: 0.3 }
-                      }}
+                      transition={{ delay: index * 0.05 }}
                     >
-                      <Card className="p-4 hover:shadow-lg transition-shadow">
-                        <div className="flex items-center gap-4">
-                          <motion.div 
-                            layout
-                            className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
-                              index === 0 ? "bg-amber-500 text-white" :
-                              index === 1 ? "bg-gray-400 text-white" :
-                              index === 2 ? "bg-amber-700 text-white" :
-                              "bg-muted text-muted-foreground"
-                            }`}
-                            transition={{ layout: { duration: 0.3 } }}
-                          >
-                            {index + 1}
-                          </motion.div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold truncate">{submission.profile?.username || "Anonymous"}</p>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <motion.span
-                                key={`score-${submission.id}-${submission.score}`}
-                                initial={{ scale: 1.3, color: "hsl(var(--secondary))" }}
-                                animate={{ scale: 1, color: "hsl(var(--muted-foreground))" }}
-                                transition={{ duration: 0.5 }}
+                      <Card className="overflow-hidden hover:shadow-elevated transition-all">
+                        <div className="relative aspect-square">
+                          <img
+                            src={submission.photo.image_url}
+                            alt={submission.photo.caption || "Submission"}
+                            className="w-full h-full object-cover"
+                          />
+                          {submission.rank && (
+                            <div className="absolute top-3 right-3">
+                              <Badge 
+                                className={
+                                  submission.rank === 1 
+                                    ? "bg-yellow-500 text-white" 
+                                    : submission.rank === 2 
+                                    ? "bg-gray-400 text-white" 
+                                    : submission.rank === 3 
+                                    ? "bg-orange-600 text-white"
+                                    : "bg-muted"
+                                }
                               >
-                                {submission.score} points
-                              </motion.span>
-                              <span>•</span>
-                              <span>{new Date(submission.submitted_at).toLocaleDateString()}</span>
-                              {submission.is_winner && (
-                                <>
-                                  <span>•</span>
-                                  <Trophy className="w-3 h-3 text-secondary" />
-                                </>
+                                #{submission.rank}
+                              </Badge>
+                            </div>
+                          )}
+                        </div>
+                        <CardContent className="p-4 space-y-3">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="w-10 h-10">
+                              <AvatarImage src={submission.profile.avatar_url || undefined} />
+                              <AvatarFallback>{submission.profile.username[0]}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <p className="font-semibold">{submission.profile.username}</p>
+                              {submission.ai_score && (
+                                <p className="text-sm text-primary font-medium">
+                                  Score: {submission.ai_score}/100
+                                </p>
                               )}
                             </div>
                           </div>
-                        </div>
+                          {submission.photo.caption && (
+                            <p className="text-sm text-muted-foreground">{submission.photo.caption}</p>
+                          )}
+                          {submission.ai_feedback && (
+                            <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
+                              <p className="text-xs font-semibold text-primary mb-1">AI Feedback:</p>
+                              <p className="text-xs text-muted-foreground">{submission.ai_feedback}</p>
+                            </div>
+                          )}
+                        </CardContent>
                       </Card>
                     </motion.div>
                   ))}
@@ -634,36 +356,8 @@ export default function ChallengeDetail() {
               </div>
             )}
           </TabsContent>
-
-          <TabsContent value="badges" className="space-y-4">
-            {badges.length === 0 ? (
-              <Card className="p-12 text-center">
-                <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-lg font-medium text-muted-foreground">No badges available</p>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {badges.map((badge) => (
-                  <BadgeDisplay key={badge.id} badge={badge} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
         </Tabs>
       </main>
-
-      {/* Submission Modal */}
-      {selectedSubmission && (
-        <SubmissionModal
-          submission={selectedSubmission}
-          open={modalOpen}
-          onOpenChange={setModalOpen}
-          onVote={handleVote}
-          userVote={userVotes[selectedSubmission.photo_id]}
-          currentUserId={user?.id}
-          rank={selectedSubmission.rank}
-        />
-      )}
     </div>
   );
 }

@@ -4,12 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Moon, Sun, Target, Zap, Filter } from "lucide-react";
+import { Trophy, Moon, Sun, Plus } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useToast } from "@/hooks/use-toast";
-import ChallengeCard from "@/components/challenges/ChallengeCard";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import { motion } from "framer-motion";
+import CreateChallengeDialog from "@/components/challenges/CreateChallengeDialog";
 
 export default function Challenges() {
   const navigate = useNavigate();
@@ -17,45 +19,40 @@ export default function Challenges() {
   const { toast } = useToast();
   const [challenges, setChallenges] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
     fetchChallenges();
-  }, [navigate]);
+  }, []);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate("/login");
+      return;
     }
+    setUserId(session.user.id);
   };
 
   const fetchChallenges = async () => {
     setLoading(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
       const { data, error } = await supabase
-        .from("challenges")
-        .select("*")
-        .eq("status", "active")
-        .order("end_date", { ascending: true });
+        .from("friend_challenges")
+        .select(`
+          *,
+          creator:profiles!creator_id(username, avatar_url),
+          participants:challenge_participants(count)
+        `)
+        .or(`creator_id.eq.${session.user.id},id.in.(SELECT challenge_id FROM challenge_participants WHERE user_id = '${session.user.id}')`)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-
-      // Fetch submission counts for each challenge
-      const challengesWithCounts = await Promise.all(
-        (data || []).map(async (challenge) => {
-          const { count } = await supabase
-            .from("challenge_submissions")
-            .select("*", { count: "exact", head: true })
-            .eq("challenge_id", challenge.id);
-
-          return { ...challenge, submissionCount: count || 0 };
-        })
-      );
-
-      setChallenges(challengesWithCounts);
+      setChallenges(data || []);
     } catch (error: any) {
       console.error("Error fetching challenges:", error);
       toast({
@@ -68,23 +65,8 @@ export default function Challenges() {
     }
   };
 
-  const filteredChallenges = challenges.filter((challenge) => {
-    const matchesDifficulty = selectedDifficulty === "all" || challenge.difficulty === selectedDifficulty;
-    const matchesCategory = selectedCategory === "all" || challenge.category === selectedCategory;
-    return matchesDifficulty && matchesCategory;
-  });
-
-  const activeChallenges = filteredChallenges.filter((c) => {
-    const now = new Date();
-    const end = new Date(c.end_date);
-    return end > now;
-  });
-
-  const upcomingChallenges = filteredChallenges.filter((c) => {
-    const now = new Date();
-    const start = new Date(c.start_date);
-    return start > now;
-  });
+  const activeChallenges = challenges.filter((c) => c.status === "active" && new Date(c.end_date) > new Date());
+  const completedChallenges = challenges.filter((c) => c.status === "completed");
 
   if (loading) {
     return (
@@ -100,8 +82,8 @@ export default function Challenges() {
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Trophy className="w-6 h-6 text-secondary" />
-              <h1 className="text-2xl font-display font-bold text-primary">Challenges</h1>
+              <Trophy className="w-6 h-6 text-primary" />
+              <h1 className="text-2xl font-display font-bold">Friend Challenges</h1>
             </div>
             <div className="flex items-center gap-2">
               <NotificationBell />
@@ -111,101 +93,31 @@ export default function Challenges() {
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
-              <p className="text-2xl font-bold text-primary">{challenges.length}</p>
-              <p className="text-xs text-muted-foreground">Total</p>
-            </div>
-            <div className="p-3 rounded-lg bg-secondary/5 border border-secondary/10">
-              <p className="text-2xl font-bold text-secondary">{activeChallenges.length}</p>
+              <p className="text-2xl font-bold text-primary">{activeChallenges.length}</p>
               <p className="text-xs text-muted-foreground">Active</p>
             </div>
-            <div className="p-3 rounded-lg bg-accent/5 border border-accent/10">
-              <p className="text-2xl font-bold text-accent">{upcomingChallenges.length}</p>
-              <p className="text-xs text-muted-foreground">Upcoming</p>
+            <div className="p-3 rounded-lg bg-secondary/5 border border-secondary/10">
+              <p className="text-2xl font-bold text-secondary">{completedChallenges.length}</p>
+              <p className="text-xs text-muted-foreground">Completed</p>
             </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-6">
-        {/* Filters */}
-        <div className="mb-6 space-y-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Filter className="w-4 h-4 text-muted-foreground" />
-              <p className="text-sm font-semibold">Difficulty</p>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <Badge
-                variant={selectedDifficulty === "all" ? "default" : "outline"}
-                className="cursor-pointer hover:scale-105 transition-transform"
-                onClick={() => setSelectedDifficulty("all")}
-              >
-                All
-              </Badge>
-              <Badge
-                variant={selectedDifficulty === "beginner" ? "default" : "outline"}
-                className="cursor-pointer hover:scale-105 transition-transform"
-                onClick={() => setSelectedDifficulty("beginner")}
-              >
-                Beginner
-              </Badge>
-              <Badge
-                variant={selectedDifficulty === "intermediate" ? "default" : "outline"}
-                className="cursor-pointer hover:scale-105 transition-transform"
-                onClick={() => setSelectedDifficulty("intermediate")}
-              >
-                Intermediate
-              </Badge>
-              <Badge
-                variant={selectedDifficulty === "advanced" ? "default" : "outline"}
-                className="cursor-pointer hover:scale-105 transition-transform"
-                onClick={() => setSelectedDifficulty("advanced")}
-              >
-                Advanced
-              </Badge>
-            </div>
-          </div>
-
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Target className="w-4 h-4 text-muted-foreground" />
-              <p className="text-sm font-semibold">Category</p>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <Badge
-                variant={selectedCategory === "all" ? "default" : "outline"}
-                className="cursor-pointer hover:scale-105 transition-transform"
-                onClick={() => setSelectedCategory("all")}
-              >
-                All
-              </Badge>
-              {["lighting", "composition", "weather", "technique", "location"].map((cat) => (
-                <Badge
-                  key={cat}
-                  variant={selectedCategory === cat ? "default" : "outline"}
-                  className="cursor-pointer hover:scale-105 transition-transform capitalize"
-                  onClick={() => setSelectedCategory(cat)}
-                >
-                  {cat}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </div>
+        <CreateChallengeDialog onSuccess={fetchChallenges}>
+          <Button size="lg" className="w-full mb-6 shadow-glow">
+            <Plus className="w-5 h-5 mr-2" />
+            Create New Challenge
+          </Button>
+        </CreateChallengeDialog>
 
         <Tabs defaultValue="active" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="active">
-              <Zap className="w-4 h-4 mr-2" />
-              Active ({activeChallenges.length})
-            </TabsTrigger>
-            <TabsTrigger value="upcoming">
-              <Trophy className="w-4 h-4 mr-2" />
-              Upcoming ({upcomingChallenges.length})
-            </TabsTrigger>
+            <TabsTrigger value="active">Active ({activeChallenges.length})</TabsTrigger>
+            <TabsTrigger value="completed">Completed ({completedChallenges.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="active" className="space-y-4">
@@ -213,35 +125,79 @@ export default function Challenges() {
               <div className="text-center py-12">
                 <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
                 <p className="text-lg font-medium text-muted-foreground">No active challenges</p>
-                <p className="text-sm text-muted-foreground">Check back soon for new challenges!</p>
+                <p className="text-sm text-muted-foreground">Create a challenge to compete with friends!</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="space-y-4">
                 {activeChallenges.map((challenge) => (
-                  <ChallengeCard 
-                    key={challenge.id} 
-                    challenge={challenge}
-                    submissionCount={challenge.submissionCount}
-                  />
+                  <motion.div
+                    key={challenge.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <Card
+                      className="cursor-pointer hover:shadow-elevated transition-all"
+                      onClick={() => navigate(`/challenges/${challenge.id}`)}
+                    >
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold mb-1">{challenge.title}</h3>
+                            <p className="text-sm text-muted-foreground mb-2">{challenge.description}</p>
+                            <p className="text-xs text-primary font-medium">{challenge.challenge_prompt}</p>
+                          </div>
+                          <Badge variant="outline">{challenge.points_reward} pts</Badge>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>by {challenge.creator.username}</span>
+                          <span>•</span>
+                          <span>{challenge.participants?.[0]?.count || 0} participants</span>
+                          <span>•</span>
+                          <span>Ends {new Date(challenge.end_date).toLocaleDateString()}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 ))}
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="upcoming" className="space-y-4">
-            {upcomingChallenges.length === 0 ? (
+          <TabsContent value="completed" className="space-y-4">
+            {completedChallenges.length === 0 ? (
               <div className="text-center py-12">
                 <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-lg font-medium text-muted-foreground">No upcoming challenges</p>
+                <p className="text-lg font-medium text-muted-foreground">No completed challenges</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {upcomingChallenges.map((challenge) => (
-                  <ChallengeCard 
-                    key={challenge.id} 
-                    challenge={challenge}
-                    submissionCount={challenge.submissionCount}
-                  />
+              <div className="space-y-4">
+                {completedChallenges.map((challenge) => (
+                  <motion.div
+                    key={challenge.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <Card
+                      className="cursor-pointer hover:shadow-elevated transition-all opacity-75"
+                      onClick={() => navigate(`/challenges/${challenge.id}`)}
+                    >
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="text-xl font-bold">{challenge.title}</h3>
+                              <Badge variant="secondary">Completed</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2">{challenge.description}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>by {challenge.creator.username}</span>
+                          {challenge.winner_id && <><span>•</span><span className="text-primary">Winner declared!</span></>}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 ))}
               </div>
             )}

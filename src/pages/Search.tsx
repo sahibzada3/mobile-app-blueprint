@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search as SearchIcon, Users, Camera, Trophy, Link2, TrendingUp } from "lucide-react";
+import { Search as SearchIcon, Users, Camera, Link2, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 
@@ -28,15 +28,6 @@ interface SearchPhoto {
   };
 }
 
-interface SearchChallenge {
-  id: string;
-  title: string;
-  description: string;
-  difficulty: string;
-  category: string;
-  image_url: string | null;
-}
-
 interface SearchChain {
   id: string;
   title: string;
@@ -52,7 +43,6 @@ export default function Search() {
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState<SearchUser[]>([]);
   const [photos, setPhotos] = useState<SearchPhoto[]>([]);
-  const [challenges, setChallenges] = useState<SearchChallenge[]>([]);
   const [chains, setChains] = useState<SearchChain[]>([]);
   const [loading, setLoading] = useState(false);
   const [trending, setTrending] = useState<string[]>([
@@ -107,13 +97,6 @@ export default function Search() {
         }));
       }
 
-      // Search challenges
-      const { data: challengesData } = await supabase
-        .from("challenges")
-        .select("id, title, description, difficulty, category, image_url")
-        .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
-        .limit(10);
-
       // Search chains with creator info
       const { data: chainsData } = await supabase
         .from("spotlight_chains")
@@ -136,12 +119,10 @@ export default function Search() {
             username: creatorsData?.find(p => p.id === chain.creator_id)?.username || "Unknown"
           }
         }));
-
       }
 
       setUsers(usersData || []);
       setPhotos(photosWithProfiles);
-      setChallenges(challengesData || []);
       setChains(chainsWithProfiles);
     } catch (error) {
       console.error("Search error:", error);
@@ -154,20 +135,18 @@ export default function Search() {
   const clearResults = () => {
     setUsers([]);
     setPhotos([]);
-    setChallenges([]);
     setChains([]);
   };
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="relative">
             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
             <Input
               type="text"
-              placeholder="Search users, photos, challenges..."
+              placeholder="Search users, photos, chains..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-12 text-lg h-12"
@@ -180,7 +159,6 @@ export default function Search() {
       <div className="container mx-auto px-4 py-6">
         {searchQuery.trim().length < 2 ? (
           <div className="space-y-6">
-            {/* Trending */}
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <TrendingUp className="w-5 h-5 text-primary" />
@@ -202,11 +180,10 @@ export default function Search() {
           </div>
         ) : (
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-6">
+            <TabsList className="grid w-full grid-cols-4 mb-6">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
               <TabsTrigger value="photos">Photos</TabsTrigger>
-              <TabsTrigger value="challenges">Challenges</TabsTrigger>
               <TabsTrigger value="chains">Chains</TabsTrigger>
             </TabsList>
 
@@ -231,11 +208,11 @@ export default function Search() {
                 </ResultSection>
               )}
 
-              {challenges.length > 0 && (
-                <ResultSection title="Challenges" icon={Trophy}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {challenges.slice(0, 4).map((challenge) => (
-                      <ChallengeCard key={challenge.id} challenge={challenge} onClick={() => navigate(`/challenges/${challenge.id}`)} />
+              {chains.length > 0 && (
+                <ResultSection title="Chains" icon={Link2}>
+                  <div className="space-y-4">
+                    {chains.slice(0, 4).map((chain) => (
+                      <ChainCard key={chain.id} chain={chain} onClick={() => navigate(`/spotlight/${chain.id}`)} />
                     ))}
                   </div>
                 </ResultSection>
@@ -254,14 +231,6 @@ export default function Search() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {photos.map((photo) => (
                   <PhotoCard key={photo.id} photo={photo} />
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="challenges">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {challenges.map((challenge) => (
-                  <ChallengeCard key={challenge.id} challenge={challenge} onClick={() => navigate(`/challenges/${challenge.id}`)} />
                 ))}
               </div>
             </TabsContent>
@@ -320,28 +289,6 @@ function PhotoCard({ photo }: { photo: SearchPhoto }) {
     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
       <Card className="overflow-hidden cursor-pointer aspect-square">
         <img src={photo.image_url} alt={photo.caption || ""} className="w-full h-full object-cover" />
-      </Card>
-    </motion.div>
-  );
-}
-
-function ChallengeCard({ challenge, onClick }: { challenge: SearchChallenge; onClick: () => void }) {
-  return (
-    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-      <Card className="cursor-pointer overflow-hidden" onClick={onClick}>
-        <div className="aspect-video bg-muted relative">
-          {challenge.image_url && (
-            <img src={challenge.image_url} alt={challenge.title} className="w-full h-full object-cover" />
-          )}
-        </div>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Badge variant="secondary">{challenge.category}</Badge>
-            <Badge variant="outline">{challenge.difficulty}</Badge>
-          </div>
-          <h3 className="font-semibold mb-1">{challenge.title}</h3>
-          <p className="text-sm text-muted-foreground line-clamp-2">{challenge.description}</p>
-        </CardContent>
       </Card>
     </motion.div>
   );
