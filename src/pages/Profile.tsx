@@ -6,10 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { LogOut, User as UserIcon, Camera, Heart, Moon, Sun, Settings, Award, TrendingUp, Zap, Users, UserPlus, Share2, Lock, Globe, Eye, ImageIcon, Star, Wind } from "lucide-react";
+import { LogOut, User as UserIcon, Camera, Heart, Moon, Sun, Settings, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
 import NotificationBell from "@/components/notifications/NotificationBell";
@@ -22,7 +20,6 @@ export default function Profile() {
   const [photos, setPhotos] = useState<any[]>([]);
   const [stats, setStats] = useState({ photoCount: 0, totalLikes: 0, followers: 0, following: 0 });
   const [loading, setLoading] = useState(true);
-  const [isPrivate, setIsPrivate] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -36,7 +33,6 @@ export default function Profile() {
         return;
       }
 
-      // Load profile
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
@@ -45,14 +41,7 @@ export default function Profile() {
 
       if (profileError) throw profileError;
       setProfile(profileData);
-      
-      // Load privacy settings
-      if (profileData.privacy_settings && typeof profileData.privacy_settings === 'object') {
-        const settings = profileData.privacy_settings as any;
-        setIsPrivate(settings.profile_visibility === 'private');
-      }
 
-      // Load user's photos
       const { data: photosData, error: photosError } = await supabase
         .from("photos")
         .select("*")
@@ -62,14 +51,12 @@ export default function Profile() {
       if (photosError) throw photosError;
       setPhotos(photosData || []);
 
-      // Calculate stats
       const { data: votesData } = await supabase
         .from("votes")
         .select("id")
         .eq("vote_type", "like")
         .in("photo_id", (photosData || []).map(p => p.id));
 
-      // Load followers/following count (mock data for now)
       const { data: friendsData } = await supabase
         .from("friendships")
         .select("id, status")
@@ -91,42 +78,8 @@ export default function Profile() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    toast.success("Logged out successfully");
+    toast.success("Logged out");
     navigate("/login");
-  };
-
-  const handleShareProfile = () => {
-    const profileUrl = `${window.location.origin}/profile/${profile?.id}`;
-    navigator.clipboard.writeText(profileUrl);
-    toast.success("Profile link copied!");
-  };
-
-  const togglePrivacy = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      const newVisibility = !isPrivate ? 'private' : 'everyone';
-      const currentSettings = profile?.privacy_settings || {};
-      
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          privacy_settings: {
-            ...currentSettings,
-            profile_visibility: newVisibility
-          }
-        })
-        .eq("id", session.user.id);
-
-      if (error) throw error;
-
-      setIsPrivate(!isPrivate);
-      toast.success(`Profile is now ${!isPrivate ? 'private' : 'public'}`);
-    } catch (error) {
-      console.error("Error updating privacy:", error);
-      toast.error("Failed to update privacy");
-    }
   };
 
   if (loading) {
@@ -134,18 +87,19 @@ export default function Profile() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading profile...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-soft pb-20">
-      <header className="sticky top-0 bg-card/80 backdrop-blur-lg border-b border-border z-40">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-display font-bold text-primary">Profile</h1>
-          <div className="flex items-center gap-2">
+    <div className="min-h-screen bg-background pb-20">
+      {/* Clean Header */}
+      <header className="sticky top-0 bg-card border-b border-border z-40">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+          <h1 className="text-xl font-semibold">Profile</h1>
+          <div className="flex items-center gap-1">
             <NotificationBell />
             <Button variant="ghost" size="icon" onClick={() => navigate("/profile/settings")}>
               <Settings className="w-5 h-5" />
@@ -160,230 +114,125 @@ export default function Profile() {
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-4 pt-4 pb-6 space-y-6">
-        {/* Nature Photography Profile Card */}
-        <Card className="shadow-nature overflow-hidden border-0 bg-gradient-to-br from-primary/5 via-card to-card">
-          {/* Cover Banner */}
-          <div className="h-40 bg-gradient-to-r from-primary/20 via-accent/15 to-primary/20 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
-            <div className="absolute top-4 right-4 flex gap-2">
-              <Button 
-                onClick={handleShareProfile} 
-                size="sm"
-                variant="secondary"
-                className="bg-card/80 backdrop-blur-sm"
-              >
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
-              </Button>
-            </div>
-          </div>
-          
-          <CardContent className="p-6 -mt-16">
-            {/* Profile Avatar & Info */}
-            <div className="flex items-start gap-4 mb-6">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/30 rounded-full blur-md"></div>
-                <Avatar className="w-28 h-28 border-4 border-card shadow-xl relative z-10 cursor-pointer hover-scale">
-                  {profile?.avatar_url ? (
-                    <AvatarImage src={profile.avatar_url} />
-                  ) : (
-                    <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-primary text-3xl">
-                      {profile?.username?.charAt(0).toUpperCase() || <UserIcon />}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                {isPrivate && (
-                  <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-card rounded-full flex items-center justify-center border-2 border-border shadow-md">
-                    <Lock className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex-1 pt-14 min-w-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <h2 className="text-2xl font-bold truncate">
-                    {profile?.username || "Unknown User"}
-                  </h2>
-                  <Badge variant="secondary" className="flex-shrink-0 bg-primary/10 text-primary border-primary/20">
-                    <Camera className="w-3 h-3 mr-1" />
-                    Photographer
-                  </Badge>
-                </div>
-                {profile?.bio ? (
-                  <p className="text-sm text-muted-foreground line-clamp-2">{profile.bio}</p>
+      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        {/* Profile Info Card */}
+        <Card className="shadow-elevated">
+          <CardContent className="p-6">
+            {/* Centered Profile Picture */}
+            <div className="flex flex-col items-center mb-6">
+              <Avatar className="w-24 h-24 mb-4">
+                {profile?.avatar_url ? (
+                  <AvatarImage src={profile.avatar_url} />
                 ) : (
-                  <p className="text-sm text-muted-foreground/60 italic">Nature enthusiast</p>
+                  <AvatarFallback className="bg-muted text-foreground text-2xl">
+                    {profile?.username?.charAt(0).toUpperCase() || <UserIcon />}
+                  </AvatarFallback>
                 )}
-              </div>
+              </Avatar>
+              <h2 className="text-xl font-semibold mb-1">
+                {profile?.username || "Unknown User"}
+              </h2>
+              {profile?.bio && (
+                <p className="text-sm text-muted-foreground text-center max-w-sm">
+                  {profile.bio}
+                </p>
+              )}
             </div>
 
-            {/* Stats Row */}
-            <div className="grid grid-cols-4 gap-3 mb-6">
-              <div className="text-center p-3 rounded-lg bg-gradient-to-br from-primary/5 to-transparent hover-scale cursor-pointer transition-all">
-                <Camera className="w-5 h-5 text-primary mx-auto mb-1" />
-                <p className="text-xl font-bold">{stats.photoCount}</p>
-                <p className="text-xs text-muted-foreground">Captures</p>
+            {/* Clean Stats Row */}
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="text-center">
+                <p className="text-xl font-semibold">{stats.photoCount}</p>
+                <p className="text-xs text-muted-foreground">Posts</p>
               </div>
-              <div className="text-center p-3 rounded-lg bg-gradient-to-br from-accent/5 to-transparent hover-scale cursor-pointer transition-all">
-                <Users className="w-5 h-5 text-accent mx-auto mb-1" />
-                <p className="text-xl font-bold">{stats.followers}</p>
-                <p className="text-xs text-muted-foreground">Admirers</p>
+              <div className="text-center">
+                <p className="text-xl font-semibold">{stats.followers}</p>
+                <p className="text-xs text-muted-foreground">Followers</p>
               </div>
-              <div className="text-center p-3 rounded-lg bg-gradient-to-br from-primary/5 to-transparent hover-scale cursor-pointer transition-all">
-                <Eye className="w-5 h-5 text-primary mx-auto mb-1" />
-                <p className="text-xl font-bold">{stats.following}</p>
+              <div className="text-center">
+                <p className="text-xl font-semibold">{stats.following}</p>
                 <p className="text-xs text-muted-foreground">Following</p>
               </div>
-              <div className="text-center p-3 rounded-lg bg-gradient-to-br from-accent/5 to-transparent hover-scale cursor-pointer transition-all">
-                <Heart className="w-5 h-5 text-accent mx-auto mb-1" />
-                <p className="text-xl font-bold">{stats.totalLikes}</p>
+              <div className="text-center">
+                <p className="text-xl font-semibold">{stats.totalLikes}</p>
                 <p className="text-xs text-muted-foreground">Likes</p>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <Button 
-                onClick={() => navigate("/profile/settings")} 
-                variant="outline" 
-                className="flex-1"
-              >
+            {/* Simple Action Buttons */}
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" onClick={() => navigate("/profile/settings")}>
                 <Settings className="w-4 h-4 mr-2" />
-                Settings
+                Edit Profile
               </Button>
-              <Button 
-                onClick={() => navigate("/camera")} 
-                className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90"
-              >
+              <Button onClick={() => navigate("/camera")}>
                 <Camera className="w-4 h-4 mr-2" />
-                Capture
-              </Button>
-            </div>
-
-            <Separator className="mb-4" />
-
-            {/* Privacy Toggle */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-              <div className="flex items-center gap-3">
-                {isPrivate ? (
-                  <>
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                      <Lock className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Private Account</p>
-                      <p className="text-xs text-muted-foreground">Only approved viewers</p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Globe className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Public Account</p>
-                      <p className="text-xs text-muted-foreground">Visible to everyone</p>
-                    </div>
-                  </>
-                )}
-              </div>
-              <Switch checked={isPrivate} onCheckedChange={togglePrivacy} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Achievements Banner */}
-        <Card className="shadow-nature border-0 bg-gradient-to-r from-accent/10 via-primary/10 to-accent/10 animate-fade-in hover-scale cursor-pointer" onClick={() => navigate("/weather")}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                  <Wind className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="font-semibold">Weather Forecast</p>
-                  <p className="text-xs text-muted-foreground">Best shooting times & conditions</p>
-                </div>
-              </div>
-              <Button variant="ghost" size="sm">
-                View →
+                New Post
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Rank and Badges Display */}
+        {/* Rank & Badges */}
         {profile?.id && <RankBadgeDisplay userId={profile.id} />}
 
-        {/* Photo Collection Tabs */}
-        <Tabs defaultValue="captures" className="w-full animate-fade-in">
-          <TabsList className="grid w-full grid-cols-2 bg-card/50 backdrop-blur-sm">
-            <TabsTrigger value="captures" className="data-[state=active]:bg-primary/10">
+        {/* Clean Photo Gallery */}
+        <Tabs defaultValue="photos" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="photos">
               <Camera className="w-4 h-4 mr-2" />
-              My Captures
+              Photos
             </TabsTrigger>
-            <TabsTrigger value="favorites" className="data-[state=active]:bg-accent/10">
-              <Star className="w-4 h-4 mr-2" />
-              Favorites
+            <TabsTrigger value="saved">
+              <Heart className="w-4 h-4 mr-2" />
+              Saved
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="captures" className="mt-4">
+          <TabsContent value="photos" className="mt-4">
             {photos.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3">
-                {photos.map((photo, index) => (
-                  <Card
+              <div className="photo-grid">
+                {photos.map((photo) => (
+                  <div
                     key={photo.id}
-                    className="overflow-hidden border-0 shadow-nature group cursor-pointer hover-scale animate-fade-in"
-                    style={{ animationDelay: `${index * 50}ms` }}
+                    className="aspect-square relative overflow-hidden bg-muted cursor-pointer hover-lift"
                   >
-                    <div className="aspect-square relative">
-                      <img
-                        src={photo.image_url}
-                        alt={photo.caption || "Nature photo"}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Heart className="w-4 h-4" />
-                            <Eye className="w-4 h-4" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
+                    <img
+                      src={photo.image_url}
+                      alt={photo.caption || ""}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 ))}
               </div>
             ) : (
-              <Card className="shadow-nature border-0">
-                <CardContent className="p-16 text-center">
-                  <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                    <Camera className="w-12 h-12 text-primary" />
+              <Card>
+                <CardContent className="text-center py-12">
+                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                    <Camera className="w-8 h-8 text-muted-foreground" />
                   </div>
-                  <h3 className="font-semibold text-xl mb-2">Start Your Collection</h3>
-                  <p className="text-muted-foreground mb-6 max-w-xs mx-auto">
-                    Capture and share stunning nature photography with the world
+                  <h3 className="font-semibold mb-2">No photos yet</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Start capturing moments
                   </p>
-                  <Button onClick={() => navigate("/camera")} className="bg-gradient-to-r from-primary to-accent hover:opacity-90" size="lg">
-                    <Camera className="w-5 h-5 mr-2" />
-                    Take Your First Photo
+                  <Button onClick={() => navigate("/camera")}>
+                    <Camera className="w-4 h-4 mr-2" />
+                    Take Photo
                   </Button>
                 </CardContent>
               </Card>
             )}
           </TabsContent>
           
-          <TabsContent value="favorites" className="mt-4">
-            <Card className="shadow-nature border-0">
-              <CardContent className="p-16 text-center">
-                <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-accent/10 to-primary/10 flex items-center justify-center">
-                  <Star className="w-12 h-12 text-accent" />
+          <TabsContent value="saved" className="mt-4">
+            <Card>
+              <CardContent className="text-center py-12">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                  <Heart className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <h3 className="font-semibold text-xl mb-2">Your Favorite Shots</h3>
-                <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-                  Mark your favorite nature captures to showcase your best work
+                <h3 className="font-semibold mb-2">No saved photos</h3>
+                <p className="text-sm text-muted-foreground">
+                  Save photos you love
                 </p>
               </CardContent>
             </Card>
