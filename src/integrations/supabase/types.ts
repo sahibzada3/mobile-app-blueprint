@@ -650,102 +650,6 @@ export type Database = {
         }
         Relationships: []
       }
-      slice_views: {
-        Row: {
-          id: string
-          slice_id: string
-          viewed_at: string | null
-          viewer_id: string
-        }
-        Insert: {
-          id?: string
-          slice_id: string
-          viewed_at?: string | null
-          viewer_id: string
-        }
-        Update: {
-          id?: string
-          slice_id?: string
-          viewed_at?: string | null
-          viewer_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "slice_views_slice_id_fkey"
-            columns: ["slice_id"]
-            isOneToOne: false
-            referencedRelation: "slices"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "slice_views_viewer_id_fkey"
-            columns: ["viewer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      slices: {
-        Row: {
-          chain_required: boolean | null
-          created_at: string | null
-          description: string | null
-          expires_at: string
-          id: string
-          image_url: string
-          music_track: string | null
-          required_chain_id: string | null
-          title: string
-          user_id: string
-          views_count: number | null
-          visibility: string
-        }
-        Insert: {
-          chain_required?: boolean | null
-          created_at?: string | null
-          description?: string | null
-          expires_at: string
-          id?: string
-          image_url: string
-          music_track?: string | null
-          required_chain_id?: string | null
-          title: string
-          user_id: string
-          views_count?: number | null
-          visibility?: string
-        }
-        Update: {
-          chain_required?: boolean | null
-          created_at?: string | null
-          description?: string | null
-          expires_at?: string
-          id?: string
-          image_url?: string
-          music_track?: string | null
-          required_chain_id?: string | null
-          title?: string
-          user_id?: string
-          views_count?: number | null
-          visibility?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "slices_required_chain_id_fkey"
-            columns: ["required_chain_id"]
-            isOneToOne: false
-            referencedRelation: "spotlight_chains"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "slices_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       spotlight_chains: {
         Row: {
           created_at: string | null
@@ -778,58 +682,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
-      }
-      tips: {
-        Row: {
-          amount: number
-          created_at: string | null
-          id: string
-          message: string | null
-          photo_id: string | null
-          recipient_id: string
-          sender_id: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string | null
-          id?: string
-          message?: string | null
-          photo_id?: string | null
-          recipient_id: string
-          sender_id: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string | null
-          id?: string
-          message?: string | null
-          photo_id?: string | null
-          recipient_id?: string
-          sender_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tips_photo_id_fkey"
-            columns: ["photo_id"]
-            isOneToOne: false
-            referencedRelation: "photos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tips_recipient_id_fkey"
-            columns: ["recipient_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tips_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       user_badges: {
         Row: {
@@ -866,41 +718,6 @@ export type Database = {
             columns: ["challenge_id"]
             isOneToOne: false
             referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_earnings: {
-        Row: {
-          available_balance: number | null
-          id: string
-          total_earned: number | null
-          total_withdrawn: number | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          available_balance?: number | null
-          id?: string
-          total_earned?: number | null
-          total_withdrawn?: number | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          available_balance?: number | null
-          id?: string
-          total_earned?: number | null
-          total_withdrawn?: number | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_earnings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
