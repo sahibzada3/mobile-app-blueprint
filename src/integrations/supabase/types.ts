@@ -344,6 +344,7 @@ export type Database = {
           end_date: string
           id: string
           judging_completed_at: string | null
+          min_participants: number
           points_reward: number
           status: string
           title: string
@@ -357,6 +358,7 @@ export type Database = {
           end_date: string
           id?: string
           judging_completed_at?: string | null
+          min_participants?: number
           points_reward?: number
           status?: string
           title: string
@@ -370,6 +372,7 @@ export type Database = {
           end_date?: string
           id?: string
           judging_completed_at?: string | null
+          min_participants?: number
           points_reward?: number
           status?: string
           title?: string
