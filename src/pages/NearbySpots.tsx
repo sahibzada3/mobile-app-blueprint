@@ -28,7 +28,7 @@ export default function NearbySpots() {
   const [spots, setSpots] = useState<Spot[]>([]);
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [radius, setRadius] = useState(10);
+  const [radius, setRadius] = useState(50);
   const [currentWeather, setCurrentWeather] = useState<string>("sunny");
   const [currentTime, setCurrentTime] = useState<string>("anytime");
 
@@ -159,7 +159,24 @@ export default function NearbySpots() {
 
         spotsWithScores.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
         
-        setSpots(spotsWithScores);
+        // If no spots found nearby, show all spots with distance
+        if (spotsWithScores.length === 0) {
+          const allSpotsWithDistance = data.map(spot => ({
+            ...spot,
+            distance: calculateDistance(
+              userLocation.lat,
+              userLocation.lng,
+              Number(spot.latitude),
+              Number(spot.longitude)
+            ),
+            matchScore: calculateMatchScore(spot)
+          }));
+          allSpotsWithDistance.sort((a, b) => a.distance! - b.distance!);
+          setSpots(allSpotsWithDistance);
+          toast.info(`No spots within ${radius}km. Showing all spots sorted by distance.`);
+        } else {
+          setSpots(spotsWithScores);
+        }
       }
     } catch (error: any) {
       console.error("Error fetching spots:", error);
@@ -253,10 +270,12 @@ export default function NearbySpots() {
         ) : spots.length === 0 ? (
           <Card className="p-8 text-center">
             <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No spots found nearby</h3>
-            <p className="text-muted-foreground mb-4">Try increasing the search radius</p>
-            <Button onClick={() => setRadius(50)}>
-              Expand to 50km
+            <h3 className="text-lg font-semibold mb-2">No spots available</h3>
+            <p className="text-muted-foreground mb-4">
+              Sample spots are in the US. Try expanding your search or wait for more spots to be added in your region.
+            </p>
+            <Button onClick={() => setRadius(5000)}>
+              Show All Spots
             </Button>
           </Card>
         ) : (
