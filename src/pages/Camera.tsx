@@ -67,9 +67,8 @@ export default function Camera() {
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
-      toast.success("Camera ready");
     } catch (error) {
-      toast.error("Failed to access camera");
+      toast.error("Camera access denied");
       console.error("Camera error:", error);
     }
   };
@@ -106,9 +105,8 @@ export default function Camera() {
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
     }
 
-    // Apply AI enhancements based on mode and scene
-    toast.loading("Applying AI enhancements...");
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate AI processing
+    // Apply AI enhancements based on mode and scene (silent processing)
+    await new Promise(resolve => setTimeout(resolve, 500)); // Quick processing
     
     canvas.toBlob((blob) => {
       if (blob) {
@@ -118,8 +116,6 @@ export default function Camera() {
           filter: selectedFilter, 
           settings: advancedSettings
         }));
-        
-        toast.success("Photo captured with AI enhancements!");
         
         if (challengeId) {
           navigate("/editor", { state: { challengeId } });
@@ -199,8 +195,6 @@ export default function Camera() {
     if ('vibrate' in navigator) {
       navigator.vibrate(10);
     }
-
-    toast.success("Focus adjusted", { duration: 1000 });
   };
 
   return (
@@ -241,7 +235,7 @@ export default function Camera() {
 
         {/* Side Advanced Controls Panel */}
         {showAdvancedControls && (
-          <div className="absolute right-2 top-20 bottom-64 w-44 z-20 overflow-hidden pointer-events-none">
+          <div className="absolute right-2 top-16 bottom-32 w-40 md:w-44 z-20 overflow-hidden pointer-events-none">
             <div className="h-full flex flex-col pointer-events-auto">
               <div className="flex items-center justify-between mb-2 px-1">
                 <h3 className="text-white font-bold text-xs drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Controls</h3>
