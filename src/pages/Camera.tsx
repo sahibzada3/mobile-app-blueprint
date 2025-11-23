@@ -23,11 +23,9 @@ export default function Camera() {
   const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
   const [mode, setMode] = useState<CameraMode>("auto");
   const [selectedFilter, setSelectedFilter] = useState<FilterType | null>(null);
-  const [focusPoint, setFocusPoint] = useState<{ x: number; y: number } | null>(null);
   const [showAdvancedControls, setShowAdvancedControls] = useState(false);
-  const [videoZoom, setVideoZoom] = useState(1);
-  const [videoPosition, setVideoPosition] = useState({ x: 0, y: 0 });
-  const [showZoomIndicator, setShowZoomIndicator] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const zoomLevels = [1, 2, 3, 4, 5];
   const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
     brightness: 100,
     contrast: 100,
@@ -148,120 +146,27 @@ export default function Camera() {
     setFacingMode(prev => prev === "user" ? "environment" : "user");
   };
 
-  const handleTapToFocus = async (e: React.MouseEvent<HTMLVideoElement> | React.TouchEvent<HTMLVideoElement>) => {
-    const video = videoRef.current;
-    if (!video || !stream) return;
-
-    // Prevent default to avoid browser zoom
-    e.preventDefault();
-
-    // Get tap coordinates relative to video element
-    const rect = video.getBoundingClientRect();
-    let clientX: number, clientY: number;
-
-    if ('touches' in e) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-
-    // Convert to percentage for positioning
-    const xPercent = (x / rect.width) * 100;
-    const yPercent = (y / rect.height) * 100;
-
-    // Calculate normalized coordinates (0-1) for focus point
-    const normalizedX = x / rect.width;
-    const normalizedY = y / rect.height;
-
-    // Set focus point for visual indicator
-    setFocusPoint({ x: xPercent, y: yPercent });
-
-    // Calculate distance from center for zoom effect
-    const distanceFromCenter = Math.sqrt(
-      Math.pow(normalizedX - 0.5, 2) + Math.pow(normalizedY - 0.5, 2)
-    );
-
-    // Apply visual zoom (1.2x to 1.8x based on distance from center)
-    const newZoom = 1 + (0.6 * (1 - distanceFromCenter));
-    setVideoZoom(newZoom);
-    setShowZoomIndicator(true);
-
-    // Calculate pan offset to keep tap point centered after zoom
-    const offsetX = (0.5 - normalizedX) * (newZoom - 1) * 100;
-    const offsetY = (0.5 - normalizedY) * (newZoom - 1) * 100;
-    setVideoPosition({ x: offsetX, y: offsetY });
-
-    // Apply automatic focus, zoom, and exposure adjustments
-    const videoTrack = stream.getVideoTracks()[0];
-    const capabilities = videoTrack.getCapabilities?.() as any;
-
-    try {
-      const constraints: any = {};
-
-      // Calculate distance from center (used for focus and zoom)
-      const distanceFromCenter = Math.sqrt(
-        Math.pow(normalizedX - 0.5, 2) + Math.pow(normalizedY - 0.5, 2)
-      );
-
-      // Apply focus at tap point if supported
-      if (capabilities?.focusMode) {
-        constraints.focusMode = 'manual';
-        
-        // Calculate focus distance based on tap location (center = far, edges = near)
-        if (capabilities?.focusDistance) {
-          // Closer to center = further focus distance
-          constraints.focusDistance = Math.max(0.3, Math.min(1, 1 - distanceFromCenter));
-        }
-      }
-
-      // Apply automatic zoom adjustment based on tap location
+  const cycleZoom = () => {
+    const currentIndex = zoomLevels.indexOf(zoomLevel);
+    const nextIndex = (currentIndex + 1) % zoomLevels.length;
+    const newZoom = zoomLevels[nextIndex];
+    setZoomLevel(newZoom);
+    
+    // Apply zoom to video track if supported
+    if (stream) {
+      const videoTrack = stream.getVideoTracks()[0];
+      const capabilities = videoTrack.getCapabilities?.() as any;
+      
       if (capabilities?.zoom) {
-        // Slight zoom in when tapping (1.2x to 1.5x depending on location)
-        const zoomFactor = 1 + (0.3 * (1 - distanceFromCenter));
-        constraints.zoom = Math.min(capabilities.zoom.max || 3, zoomFactor);
-      }
-
-      // Apply exposure compensation if supported
-      if (capabilities?.exposureCompensation) {
-        // Adjust exposure based on vertical position (top = darker, bottom = brighter)
-        const exposureAdjust = (normalizedY - 0.5) * 2;
-        constraints.exposureCompensation = exposureAdjust;
-      }
-
-      // Apply brightness adjustment based on tap point
-      if (capabilities?.brightness) {
-        const brightnessAdjust = 100 + (normalizedY - 0.5) * 20;
-        constraints.brightness = brightnessAdjust;
-      }
-
-      if (Object.keys(constraints).length > 0) {
-        await videoTrack.applyConstraints({ advanced: [constraints] });
-      }
-    } catch (error) {
-      // If manual focus fails, try continuous autofocus
-      try {
-        await videoTrack.applyConstraints({
-          advanced: [{ focusMode: 'continuous' } as any]
+        videoTrack.applyConstraints({
+          advanced: [{ zoom: Math.min(capabilities.zoom.max || 5, newZoom) } as any]
+        }).catch(() => {
+          console.log("Hardware zoom not supported");
         });
-      } catch (e) {
-        console.log("Focus adjustment not supported");
       }
     }
-
-    // Auto-hide focus indicator and reset zoom after delay
-    setTimeout(() => {
-      setFocusPoint(null);
-      setVideoZoom(1);
-      setVideoPosition({ x: 0, y: 0 });
-      setShowZoomIndicator(false);
-    }, 2500);
-
-    // Haptic feedback if supported
+    
+    // Haptic feedback
     if ('vibrate' in navigator) {
       navigator.vibrate(10);
     }
@@ -275,48 +180,24 @@ export default function Camera() {
           autoPlay
           playsInline
           muted
-          className="absolute inset-0 w-full h-full object-cover cursor-crosshair transition-transform duration-300 ease-out"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out"
           style={{ 
             filter: getFilterStyle(),
-            transform: `scale(${videoZoom}) translate(${videoPosition.x}%, ${videoPosition.y}%)`,
+            transform: `scale(${zoomLevel})`,
             transformOrigin: 'center center'
           }}
-          onClick={handleTapToFocus}
-          onTouchStart={handleTapToFocus}
         />
         <canvas ref={canvasRef} className="hidden" />
         
-        {/* Zoom Level Indicator */}
-        {showZoomIndicator && (
-          <div className="absolute bottom-32 left-1/2 -translate-x-1/2 pointer-events-none z-30 animate-in fade-in slide-in-from-bottom-4 duration-200">
-            <div className="bg-black/80 backdrop-blur-xl rounded-full px-6 py-3 border border-white/20">
-              <span className="text-white text-2xl font-bold tracking-wider">
-                {videoZoom.toFixed(1)}×
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Focus Indicator */}
-        {focusPoint && (
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              left: `${focusPoint.x}%`,
-              top: `${focusPoint.y}%`,
-              transform: 'translate(-50%, -50%)',
-            }}
+        {/* Zoom Level Button */}
+        <div className="absolute bottom-32 right-4 z-30">
+          <Button
+            onClick={cycleZoom}
+            className="w-14 h-14 rounded-full bg-black/50 backdrop-blur-md hover:bg-black/70 border border-white/30 text-white font-bold text-lg"
           >
-            <div className="relative w-20 h-20 animate-in fade-in zoom-in duration-200">
-              <div className="absolute inset-0 border-2 border-white rounded-full animate-pulse" />
-              <div className="absolute inset-2 border-2 border-white/50 rounded-full" />
-              <div className="absolute left-1/2 top-0 w-px h-4 bg-white -translate-x-1/2" />
-              <div className="absolute left-1/2 bottom-0 w-px h-4 bg-white -translate-x-1/2" />
-              <div className="absolute top-1/2 left-0 h-px w-4 bg-white -translate-y-1/2" />
-              <div className="absolute top-1/2 right-0 h-px w-4 bg-white -translate-y-1/2" />
-            </div>
-          </div>
-        )}
+            {zoomLevel}×
+          </Button>
+        </div>
 
         {/* Side Advanced Controls Panel */}
         {showAdvancedControls && (

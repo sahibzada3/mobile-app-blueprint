@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { Music, Play, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Music, Play, Check, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { musicTracks, getMoodColor, MusicTrack } from "@/data/musicTracks";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface MusicSelectorProps {
   selectedTrack: string | null;
@@ -13,6 +14,12 @@ interface MusicSelectorProps {
 
 export default function MusicSelector({ selectedTrack, onSelectTrack }: MusicSelectorProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [musicEnabled, setMusicEnabled] = useState(true);
+
+  useEffect(() => {
+    const savedMusicEnabled = localStorage.getItem('musicEnabled');
+    setMusicEnabled(savedMusicEnabled !== 'false');
+  }, []);
 
   const handleTrackClick = (trackId: string) => {
     if (selectedTrack === trackId) {
@@ -35,10 +42,20 @@ export default function MusicSelector({ selectedTrack, onSelectTrack }: MusicSel
           variant="ghost"
           size="sm"
           onClick={() => setIsExpanded(!isExpanded)}
+          disabled={!musicEnabled}
         >
           {isExpanded ? "Hide" : "Show"} Library
         </Button>
       </div>
+
+      {!musicEnabled && (
+        <Alert>
+          <VolumeX className="h-4 w-4" />
+          <AlertDescription>
+            Music is disabled in settings. Enable it to add music to your photos.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {selectedTrackData && (
         <div className="flex items-center justify-between p-3 bg-muted rounded-md">
