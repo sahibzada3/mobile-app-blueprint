@@ -135,25 +135,25 @@ export default function Challenges() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                   >
-                    <Card
+                     <Card
                       className="cursor-pointer hover:shadow-elevated transition-all"
                       onClick={() => navigate(`/challenges/${challenge.id}`)}
                     >
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-3">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
-                            <h3 className="text-xl font-bold mb-1">{challenge.title}</h3>
-                            <p className="text-sm text-muted-foreground mb-2">{challenge.description}</p>
-                            <p className="text-xs text-primary font-medium">{challenge.challenge_prompt}</p>
+                            <h3 className="text-base font-bold mb-1">{challenge.title}</h3>
+                            <p className="text-xs text-muted-foreground mb-1 line-clamp-1">{challenge.description}</p>
+                            <p className="text-xs text-primary font-medium line-clamp-1">{challenge.challenge_prompt}</p>
                           </div>
-                          <Badge variant="outline">{challenge.points_reward} pts</Badge>
+                          <Badge variant="outline" className="text-xs">{challenge.points_reward} pts</Badge>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>by {challenge.creator.username}</span>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>{challenge.creator.username}</span>
                           <span>•</span>
-                          <span>{challenge.participants?.[0]?.count || 0} participants</span>
+                          <span>{challenge.participants?.[0]?.count || 0} joined</span>
                           <span>•</span>
-                          <span>Ends {new Date(challenge.end_date).toLocaleDateString()}</span>
+                          <span>{new Date(challenge.end_date).toLocaleDateString()}</span>
                         </div>
                       </CardContent>
                     </Card>
@@ -181,19 +181,19 @@ export default function Challenges() {
                       className="cursor-pointer hover:shadow-elevated transition-all opacity-75"
                       onClick={() => navigate(`/challenges/${challenge.id}`)}
                     >
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-3">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h3 className="text-xl font-bold">{challenge.title}</h3>
-                              <Badge variant="secondary">Completed</Badge>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="text-base font-bold">{challenge.title}</h3>
+                              <Badge variant="secondary" className="text-xs">Completed</Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground mb-2">{challenge.description}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-1">{challenge.description}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>by {challenge.creator.username}</span>
-                          {challenge.winner_id && <><span>•</span><span className="text-primary">Winner declared!</span></>}
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>{challenge.creator.username}</span>
+                          {challenge.winner_id && <><span>•</span><span className="text-primary">Winner!</span></>}
                         </div>
                       </CardContent>
                     </Card>
