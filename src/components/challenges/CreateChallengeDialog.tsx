@@ -175,10 +175,25 @@ export default function CreateChallengeDialog({ children, onSuccess }: CreateCha
                 type="number"
                 value={pointsReward}
                 onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setPointsReward(100);
+                    return;
+                  }
+                  const numValue = parseInt(value);
+                  if (!isNaN(numValue)) {
+                    if (numValue < 100) {
+                      setPointsReward(100);
+                    } else if (numValue > 200) {
+                      setPointsReward(200);
+                    } else {
+                      setPointsReward(numValue);
+                    }
+                  }
+                }}
+                onBlur={(e) => {
                   const value = parseInt(e.target.value);
-                  if (value >= 100 && value <= 200) {
-                    setPointsReward(value);
-                  } else if (value < 100) {
+                  if (isNaN(value) || value < 100) {
                     setPointsReward(100);
                   } else if (value > 200) {
                     setPointsReward(200);
@@ -186,6 +201,7 @@ export default function CreateChallengeDialog({ children, onSuccess }: CreateCha
                 }}
                 min={100}
                 max={200}
+                placeholder="Enter points (100-200)"
               />
               <p className="text-xs text-muted-foreground mt-1">
                 🥇 1st: {pointsReward} pts | 🥈 2nd: {Math.round(pointsReward * 0.6)} pts | 🥉 3rd: {Math.round(pointsReward * 0.3)} pts
