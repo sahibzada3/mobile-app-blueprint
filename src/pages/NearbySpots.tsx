@@ -31,6 +31,7 @@ export default function NearbySpots() {
   const [radius, setRadius] = useState(50);
   const [currentWeather, setCurrentWeather] = useState<string>("sunny");
   const [currentTime, setCurrentTime] = useState<string>("anytime");
+  const [locationStatus, setLocationStatus] = useState<"detecting" | "granted" | "denied" | "unavailable">("detecting");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -50,10 +51,15 @@ export default function NearbySpots() {
 
   const getUserLocation = () => {
     if (!navigator.geolocation) {
+      setLocationStatus("unavailable");
       toast.error("Geolocation is not supported by your browser");
       setLoading(false);
+      fetchAllSpots();
       return;
     }
+
+    setLocationStatus("detecting");
+    toast.info("Detecting your location...", { duration: 2000 });
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -61,12 +67,28 @@ export default function NearbySpots() {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         });
+        setLocationStatus("granted");
+        toast.success(`Location detected! Finding spots near you...`, { duration: 2000 });
         detectCurrentConditions();
       },
       (error) => {
         console.error("Location error:", error);
-        toast.error("Unable to get your location. Showing all spots.");
+        setLocationStatus("denied");
+        
+        if (error.code === error.PERMISSION_DENIED) {
+          toast.error("Location permission denied. Please enable location access in your browser settings to see nearby spots.", { duration: 5000 });
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          toast.error("Location unavailable. Showing all spots.", { duration: 3000 });
+        } else {
+          toast.error("Location timeout. Showing all spots.", { duration: 3000 });
+        }
+        
         fetchAllSpots();
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
       }
     );
   };
@@ -219,10 +241,45 @@ export default function NearbySpots() {
     <div className="min-h-screen bg-background pb-20">
       <div className="sticky top-0 z-40 bg-card/95 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-2xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-3 mb-4">
-            <MapPin className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-bold">Nearby Spots</h1>
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3">
+              <MapPin className="w-6 h-6 text-primary" />
+              <h1 className="text-2xl font-bold">Nearby Spots</h1>
+            </div>
+            {locationStatus === "detecting" && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
+                <span>Detecting...</span>
+              </div>
+            )}
+            {locationStatus === "denied" && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={getUserLocation}
+                className="h-8"
+              >
+                <Navigation className="w-3 h-3 mr-1.5" />
+                Enable Location
+              </Button>
+            )}
           </div>
+          
+          {locationStatus === "denied" && (
+            <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <p className="text-sm text-destructive font-medium">
+                📍 Location access needed to find spots near you. Tap "Enable Location" and allow access in your browser.
+              </p>
+            </div>
+          )}
+          
+          {locationStatus === "granted" && userLocation && (
+            <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg">
+              <p className="text-sm text-primary font-medium">
+                ✓ Location detected! Showing spots near you in Peshawar
+              </p>
+            </div>
+          )}
           
           <div className="space-y-3">
             <div className="flex items-center gap-4 text-sm">
