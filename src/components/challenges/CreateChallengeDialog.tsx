@@ -24,7 +24,7 @@ export default function CreateChallengeDialog({ children, onSuccess }: CreateCha
   const [description, setDescription] = useState("");
   const [challengePrompt, setChallengePrompt] = useState("");
   const [endDate, setEndDate] = useState<Date>();
-  const [pointsReward, setPointsReward] = useState(100);
+  const [pointsReward, setPointsReward] = useState(150);
   const [minParticipants] = useState(3); // Fixed at 3 minimum
   const [maxParticipants] = useState(10); // Fixed at 10 maximum
   const [createdChallengeId, setCreatedChallengeId] = useState<string | null>(null);
@@ -81,7 +81,7 @@ export default function CreateChallengeDialog({ children, onSuccess }: CreateCha
       setDescription("");
       setChallengePrompt("");
       setEndDate(undefined);
-      setPointsReward(100);
+      setPointsReward(150);
     } catch (error: any) {
       console.error("Error creating challenge:", error);
       toast.error("Failed to create challenge");
@@ -170,8 +170,8 @@ export default function CreateChallengeDialog({ children, onSuccess }: CreateCha
                 type="number"
                 value={pointsReward}
                 onChange={(e) => setPointsReward(parseInt(e.target.value))}
-                min={10}
-                max={1000}
+                min={100}
+                max={200}
               />
               <p className="text-xs text-muted-foreground mt-1">
                 🥇 1st: {pointsReward} pts | 🥈 2nd: {Math.round(pointsReward * 0.6)} pts | 🥉 3rd: {Math.round(pointsReward * 0.3)} pts
@@ -179,7 +179,7 @@ export default function CreateChallengeDialog({ children, onSuccess }: CreateCha
             </div>
 
             <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
-              <p className="text-sm font-medium mb-1">👥 Participants: 3-10 friends required</p>
+              <p className="text-sm font-medium mb-1">Participants: 3-10 friends required</p>
               <p className="text-xs text-muted-foreground">
                 Invite between 3 to 10 friends to compete in this challenge
               </p>
