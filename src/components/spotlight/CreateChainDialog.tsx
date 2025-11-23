@@ -85,7 +85,7 @@ export default function CreateChainDialog({ open, onOpenChange, onSuccess }: Cre
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Spotlight Flare</DialogTitle>
+          <DialogTitle>Create Flare</DialogTitle>
           <DialogDescription>
             Start a collaborative photo story with your friends
           </DialogDescription>
