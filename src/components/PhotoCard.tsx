@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, Music, Share2 } from "lucide-react";
+import { User, Music, Share2, Play, Pause } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { musicTracks } from "@/data/musicTracks";
@@ -29,34 +29,40 @@ interface PhotoCardProps {
 export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
-  const audioRef = useState<HTMLAudioElement | null>(null)[0];
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const musicTrack = photo.music_track ? musicTracks.find(t => t.id === photo.music_track) : null;
   const isOwnPhoto = currentUserId === photo.user_id;
 
-  // Initialize audio when music track is available
+  // Cleanup audio on unmount
   useEffect(() => {
-    if (musicTrack?.audioUrl) {
-      const audio = new Audio(musicTrack.audioUrl);
-      audio.loop = true;
-      audio.volume = 0.3;
-      
-      // Check if music is enabled in settings
-      const musicEnabled = localStorage.getItem('musicEnabled') !== 'false';
-      const musicVolume = parseInt(localStorage.getItem('musicVolume') || '70');
-      
-      if (musicEnabled) {
-        audio.volume = musicVolume / 100;
-        audio.play().catch(() => setIsPlayingMusic(false));
-        setIsPlayingMusic(true);
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
       }
-      
-      return () => {
-        audio.pause();
-        audio.src = '';
-      };
+    };
+  }, []);
+
+  // Handle music play/pause
+  useEffect(() => {
+    if (!musicTrack?.audioUrl) return;
+
+    const musicEnabled = localStorage.getItem('musicEnabled') !== 'false';
+    const musicVolume = parseFloat(localStorage.getItem('musicVolume') || '0.5');
+
+    if (isPlayingMusic && musicEnabled) {
+      if (!audioRef.current) {
+        const audio = new Audio(musicTrack.audioUrl);
+        audio.loop = true;
+        audio.volume = musicVolume;
+        audioRef.current = audio;
+      }
+      audioRef.current.play().catch(() => setIsPlayingMusic(false));
+    } else if (audioRef.current) {
+      audioRef.current.pause();
     }
-  }, [musicTrack]);
+  }, [isPlayingMusic, musicTrack]);
 
   const handleDoubleTap = () => {
     setShowHeartAnimation(true);
@@ -64,7 +70,6 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   };
 
   const toggleMusic = () => {
-    // Music toggle functionality can be added here if needed
     setIsPlayingMusic(!isPlayingMusic);
   };
 
@@ -124,14 +129,23 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
         <div className="p-5 space-y-4">
           {musicTrack && (
             <motion.div 
-              className="flex items-center gap-3 text-xs bg-primary/5 rounded-xl px-4 py-3 border border-primary/10"
+              className="flex items-center gap-3 text-xs bg-primary/5 rounded-xl px-4 py-3 border border-primary/10 cursor-pointer hover:bg-primary/10 transition-colors"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
+              onClick={toggleMusic}
             >
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Music className="w-4 h-4 text-primary" strokeWidth={2.5} />
-              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-9 h-9 rounded-lg bg-primary/10 hover:bg-primary/20 flex-shrink-0"
+              >
+                {isPlayingMusic ? (
+                  <Pause className="w-4 h-4 text-primary" strokeWidth={2.5} />
+                ) : (
+                  <Play className="w-4 h-4 text-primary" strokeWidth={2.5} />
+                )}
+              </Button>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-foreground truncate text-sm">{musicTrack.name}</p>
                 <p className="text-muted-foreground truncate">{musicTrack.artist}</p>
