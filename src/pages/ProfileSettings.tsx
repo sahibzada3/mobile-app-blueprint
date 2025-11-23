@@ -9,7 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Camera, Loader2, Trash2, Shield } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { ArrowLeft, Camera, Loader2, Trash2, Shield, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -42,11 +43,19 @@ export default function ProfileSettings() {
     photo_visibility: "everyone",
     activity_visibility: "everyone"
   });
+
+  const [musicEnabled, setMusicEnabled] = useState(true);
+  const [musicVolume, setMusicVolume] = useState(70);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadProfile();
+    // Load music preferences from localStorage
+    const savedMusicEnabled = localStorage.getItem('musicEnabled');
+    const savedMusicVolume = localStorage.getItem('musicVolume');
+    if (savedMusicEnabled !== null) setMusicEnabled(savedMusicEnabled === 'true');
+    if (savedMusicVolume !== null) setMusicVolume(parseInt(savedMusicVolume));
   }, []);
 
   const loadProfile = async () => {
@@ -214,7 +223,11 @@ export default function ProfileSettings() {
 
       if (error) throw error;
 
-      toast.success("Privacy settings updated!");
+      // Save music preferences to localStorage
+      localStorage.setItem('musicEnabled', musicEnabled.toString());
+      localStorage.setItem('musicVolume', musicVolume.toString());
+
+      toast.success("Settings updated successfully!");
     } catch (error: any) {
       console.error("Error updating privacy settings:", error);
       toast.error("Failed to update privacy settings");
@@ -591,7 +604,65 @@ export default function ProfileSettings() {
               className="w-full"
             >
               {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Save Privacy Settings
+              Save Settings
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* App Preferences */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Volume2 className="w-5 h-5" />
+              App Preferences
+            </CardTitle>
+            <CardDescription>Customize your app experience</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Music Settings */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="music-enabled" className="text-base font-semibold">Enable Music</Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Play background music in feed and stories
+                  </p>
+                </div>
+                <Switch
+                  id="music-enabled"
+                  checked={musicEnabled}
+                  onCheckedChange={setMusicEnabled}
+                />
+              </div>
+
+              {musicEnabled && (
+                <>
+                  <Separator />
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>Music Volume</Label>
+                      <span className="text-sm text-muted-foreground">{musicVolume}%</span>
+                    </div>
+                    <Slider
+                      value={[musicVolume]}
+                      onValueChange={([value]) => setMusicVolume(value)}
+                      min={0}
+                      max={100}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+            <Button
+              onClick={handleSavePrivacySettings}
+              disabled={saving}
+              className="w-full"
+            >
+              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Save Preferences
             </Button>
           </CardContent>
         </Card>
