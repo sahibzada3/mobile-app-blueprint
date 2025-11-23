@@ -45,13 +45,17 @@ export const getWeatherData = async (): Promise<WeatherData | null> => {
     const temp = Math.round(data.current.temperature_2m);
 
     const weatherInfo = weatherCodes[weatherCode] || weatherCodes[0];
+    
+    // Check if it's night time (simplified check without sunrise/sunset)
+    const hour = new Date().getHours();
+    const isNight = hour < 6 || hour > 18;
 
     return {
       temperature: temp,
       condition: weatherInfo.description,
       description: weatherInfo.description,
-      icon: weatherInfo.icon,
-      photographyTip: weatherInfo.tip,
+      icon: isNight ? weatherInfo.iconNight : weatherInfo.icon,
+      photographyTip: isNight ? weatherInfo.tipNight : weatherInfo.tip,
     };
   } catch (error) {
     console.error("Error fetching weather:", error);

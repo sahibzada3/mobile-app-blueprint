@@ -131,6 +131,9 @@ export default function WeatherRecommendations() {
       };
 
       const weatherCode = data.current.weather_code;
+      const currentTime = new Date(data.current.time);
+      const isNight = currentTime < sunrise || currentTime > sunset;
+      
       const recommendations = getPhotographyRecommendations(
         weatherCode,
         data.current.temperature_2m,
@@ -152,7 +155,7 @@ export default function WeatherRecommendations() {
             max: Math.round(data.daily.temperature_2m_max[index])
           },
           condition: getWeatherCondition(weatherCode),
-          icon: getWeatherIcon(weatherCode),
+          icon: getWeatherIcon(weatherCode, false), // Always show day icons for forecast
           weatherCode,
           recommendation: getDailyRecommendation(weatherCode)
         };
@@ -161,7 +164,7 @@ export default function WeatherRecommendations() {
       setWeatherData({
         temperature: Math.round(data.current.temperature_2m),
         condition: getWeatherCondition(weatherCode),
-        icon: getWeatherIcon(weatherCode),
+        icon: getWeatherIcon(weatherCode, isNight),
         humidity: data.current.relative_humidity_2m,
         windSpeed: data.current.wind_speed_10m,
         location,
@@ -204,13 +207,22 @@ export default function WeatherRecommendations() {
     return conditions[code] || "Clear Sky";
   };
 
-  const getWeatherIcon = (code: number): string => {
-    const icons: { [key: number]: string } = {
+  const getWeatherIcon = (code: number, isNight: boolean = false): string => {
+    if (isNight) {
+      const nightIcons: { [key: number]: string } = {
+        0: "🌙", 1: "🌙", 2: "☁️", 3: "☁️",
+        45: "🌫️", 48: "🌫️", 51: "🌧️", 61: "🌧️",
+        71: "🌨️", 80: "🌧️", 95: "⛈️"
+      };
+      return nightIcons[code] || "🌙";
+    }
+    
+    const dayIcons: { [key: number]: string } = {
       0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️",
       45: "🌫️", 48: "🌫️", 51: "🌦️", 61: "🌧️",
       71: "🌨️", 80: "🌦️", 95: "⛈️"
     };
-    return icons[code] || "☀️";
+    return dayIcons[code] || "☀️";
   };
 
   const getDailyRecommendation = (weatherCode: number): string => {
