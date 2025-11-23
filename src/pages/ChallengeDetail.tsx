@@ -174,8 +174,8 @@ export default function ChallengeDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-soft pb-20">
-      <header className="sticky top-0 bg-card/95 backdrop-blur-lg border-b border-border z-40 shadow-sm">
+    <div className="min-h-screen h-screen flex flex-col bg-gradient-soft overflow-hidden">
+      <header className="flex-shrink-0 bg-card/95 backdrop-blur-lg border-b border-border z-40 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/challenges")}>
             <ArrowLeft className="w-5 h-5" />
@@ -185,7 +185,8 @@ export default function ChallengeDetail() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      <main className="flex-1 overflow-y-auto pb-20">
+        <div className="max-w-6xl mx-auto px-4 py-6">
         <Card className="overflow-hidden mb-6 shadow-elevated">
           <div className="relative h-32 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
             <div className="text-center z-10">
@@ -389,6 +390,7 @@ export default function ChallengeDetail() {
             )}
           </TabsContent>
         </Tabs>
+        </div>
       </main>
     </div>
   );
