@@ -52,36 +52,6 @@ export default function NearbySpots() {
     }
   }, [userLocation, radius]);
 
-  const generateSpotImage = async (spot: Spot) => {
-    try {
-      toast.info(`Generating image for ${spot.name}...`);
-      
-      const { data, error } = await supabase.functions.invoke('generate-spot-image', {
-        body: {
-          spotId: spot.id,
-          spotName: spot.name,
-          description: spot.description,
-          sceneTypes: spot.scene_types
-        }
-      });
-
-      if (error) throw error;
-
-      if (data?.success) {
-        toast.success(`Image generated for ${spot.name}!`);
-        // Refresh spots to show new image
-        if (userLocation) {
-          fetchNearbySpots();
-        } else {
-          fetchAllSpots();
-        }
-      }
-    } catch (error: any) {
-      console.error('Error generating image:', error);
-      toast.error(`Failed to generate image: ${error.message}`);
-    }
-  };
-
   const getUserLocation = () => {
     if (!navigator.geolocation) {
       setLocationStatus("unavailable");
@@ -445,60 +415,53 @@ export default function NearbySpots() {
             
             {spots.map((spot) => (
               <Card key={spot.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-card/80 backdrop-blur-sm border-border/50">
-                <div className="relative w-full h-48 overflow-hidden bg-accent/20">
-                  {spot.image_url ? (
-                    <img 
-                      src={spot.image_url} 
-                      alt={spot.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        console.error(`Failed to load image for ${spot.name}`);
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-accent/30 to-accent/10">
-                      <Camera className="w-12 h-12 text-muted-foreground/40" />
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => generateSpotImage(spot)}
-                        className="shadow-md"
-                      >
-                        <Sparkles className="w-3 h-3 mr-1.5" />
-                        Generate Image
-                      </Button>
-                    </div>
-                  )}
-                  
-                  {/* Scene Preview Badge */}
-                  <div className="absolute top-3 left-3">
-                    <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-lg">
+                {/* Photography Style Preview Header */}
+                <div className="relative bg-gradient-to-br from-accent/20 to-accent/5 p-4 border-b border-border/50">
+                  <div className="flex items-center gap-4">
+                    {/* Scene Preview Image */}
+                    <div className="relative">
                       <img 
                         src={getSceneImage(spot.best_time)} 
-                        alt="Scene style"
-                        className="w-8 h-8 rounded object-cover"
+                        alt={`${getTimeLabel(spot.best_time)} photography style`}
+                        className="w-24 h-24 rounded-lg object-cover shadow-lg ring-2 ring-primary/20"
                       />
-                      <div className="flex flex-col">
-                        <span className="text-xs font-semibold text-foreground">Best for</span>
-                        <span className="text-xs text-muted-foreground">{getTimeLabel(spot.best_time)}</span>
+                      <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/40 to-transparent flex items-end justify-center pb-1">
+                        <span className="text-xs font-bold text-white drop-shadow-lg">
+                          {getTimeIcon(spot.best_time)}
+                        </span>
                       </div>
                     </div>
-                  </div>
+                    
+                    {/* Photography Info */}
+                    <div className="flex-1 space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <Camera className="w-4 h-4 text-primary" />
+                        <span className="text-sm font-semibold text-foreground">Photography Style</span>
+                      </div>
+                      <p className="text-sm font-medium text-primary">
+                        {getTimeLabel(spot.best_time)}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {spot.scene_types.slice(0, 2).map((type) => (
+                          <Badge key={type} variant="secondary" className="text-xs capitalize">
+                            {type.replace(/_/g, ' ')}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
 
-                  {spot.matchScore && spot.matchScore >= 70 && spot.image_url && (
-                    <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground shadow-lg">
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      Perfect Match
-                    </Badge>
-                  )}
+                    {spot.matchScore && spot.matchScore >= 70 && (
+                      <Badge className="bg-primary text-primary-foreground shadow-lg">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Perfect Now
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="p-5 space-y-4">
                   <div className="space-y-2">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-bold text-xl text-foreground">{spot.name}</h3>
-                    </div>
+                    <h3 className="font-bold text-xl text-foreground">{spot.name}</h3>
                     
                     {/* Famous For */}
                     <div className="flex items-start gap-2 text-sm">
@@ -507,34 +470,27 @@ export default function NearbySpots() {
                     </div>
                     
                     <p className="text-sm text-muted-foreground leading-relaxed">{spot.description}</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 text-sm font-medium bg-accent/50 rounded-lg px-3 py-2 flex-1">
+                      <MapPin className="w-4 h-4 text-primary" />
+                      <span className="text-foreground">{spot.distance?.toFixed(1)}km away</span>
+                    </div>
                     
                     {/* Location Coordinates */}
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 rounded px-2 py-1.5">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 rounded-lg px-2 py-2">
                       <MapPin className="w-3 h-3" />
-                      <span className="font-mono">{Number(spot.latitude).toFixed(4)}°N, {Number(spot.longitude).toFixed(4)}°E</span>
+                      <span className="font-mono">{Number(spot.latitude).toFixed(2)}°N, {Number(spot.longitude).toFixed(2)}°E</span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 text-sm font-medium bg-accent/50 rounded-lg px-3 py-2">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    <span className="text-foreground">{spot.distance?.toFixed(1)}km away</span>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Clock className="w-4 h-4 text-muted-foreground" />
-                      <Badge variant="outline" className="font-medium">
-                        {getTimeIcon(spot.best_time)} {getTimeLabel(spot.best_time)}
+                  <div className="flex flex-wrap gap-2">
+                    {spot.scene_types.slice(2, 5).map((type) => (
+                      <Badge key={type} variant="outline" className="capitalize text-xs">
+                        {type.replace(/_/g, ' ')}
                       </Badge>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      {spot.scene_types.slice(0, 4).map((type) => (
-                        <Badge key={type} variant="secondary" className="capitalize">
-                          {type.replace(/_/g, ' ')}
-                        </Badge>
-                      ))}
-                    </div>
+                    ))}
                   </div>
                   
                   <div className="flex gap-2 pt-2">
