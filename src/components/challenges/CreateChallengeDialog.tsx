@@ -25,6 +25,7 @@ export default function CreateChallengeDialog({ children, onSuccess }: CreateCha
   const [challengePrompt, setChallengePrompt] = useState("");
   const [endDate, setEndDate] = useState<Date>();
   const [pointsReward, setPointsReward] = useState(100);
+  const [minParticipants] = useState(10); // Fixed at 10 minimum
   const [createdChallengeId, setCreatedChallengeId] = useState<string | null>(null);
   const [showInviteFriends, setShowInviteFriends] = useState(false);
 
@@ -53,6 +54,7 @@ export default function CreateChallengeDialog({ children, onSuccess }: CreateCha
           challenge_prompt: challengePrompt,
           end_date: endDate.toISOString(),
           points_reward: pointsReward,
+          min_participants: minParticipants,
           status: "active"
         })
         .select()
@@ -169,6 +171,16 @@ export default function CreateChallengeDialog({ children, onSuccess }: CreateCha
                 min={10}
                 max={1000}
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                🥇 1st: {pointsReward} pts | 🥈 2nd: {Math.round(pointsReward * 0.6)} pts | 🥉 3rd: {Math.round(pointsReward * 0.3)} pts
+              </p>
+            </div>
+
+            <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
+              <p className="text-sm font-medium mb-1">⚠️ Minimum Participants: 10 friends</p>
+              <p className="text-xs text-muted-foreground">
+                You'll need to invite at least 10 friends to compete in this challenge
+              </p>
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>

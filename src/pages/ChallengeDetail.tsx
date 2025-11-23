@@ -94,6 +94,11 @@ export default function ChallengeDetail() {
       return;
     }
 
+    if (submissions.length < challenge.min_participants) {
+      sonnerToast.error(`Need at least ${challenge.min_participants} participants to judge`);
+      return;
+    }
+
     setJudgingLoading(true);
     try {
       const { error } = await supabase.functions.invoke('judge-challenge', {
@@ -200,6 +205,15 @@ export default function ChallengeDetail() {
                 <h3 className="font-semibold">Challenge Prompt</h3>
               </div>
               <p className="text-sm">{challenge.challenge_prompt}</p>
+            </div>
+
+            <div className="bg-secondary/5 rounded-lg p-4 border border-secondary/10">
+              <h3 className="font-semibold mb-2">🏆 Point Distribution</h3>
+              <div className="space-y-1 text-sm">
+                <p>🥇 1st Place: <span className="font-bold text-primary">{challenge.points_reward} points</span></p>
+                <p>🥈 2nd Place: <span className="font-bold text-primary">{Math.round(challenge.points_reward * 0.6)} points</span></p>
+                <p>🥉 3rd Place: <span className="font-bold text-primary">{Math.round(challenge.points_reward * 0.3)} points</span></p>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

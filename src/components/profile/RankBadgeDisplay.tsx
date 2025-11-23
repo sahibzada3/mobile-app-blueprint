@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Trophy, Star, TrendingUp, Award } from "lucide-react";
+import { Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
+import BadgeProgressDisplay from "@/components/badges/BadgeProgressDisplay";
 
 interface RankData {
   rank_name: string;
@@ -80,90 +80,15 @@ export default function RankBadgeDisplay({ userId }: { userId: string }) {
 
   if (!rankData) return null;
 
-  const getRankColor = (level: number) => {
-    if (level >= 5) return "from-yellow-500/20 to-amber-500/20";
-    if (level >= 4) return "from-purple-500/20 to-pink-500/20";
-    if (level >= 3) return "from-blue-500/20 to-cyan-500/20";
-    if (level >= 2) return "from-green-500/20 to-emerald-500/20";
-    return "from-gray-500/20 to-slate-500/20";
-  };
-
-  const getRankIcon = (level: number) => {
-    if (level >= 5) return "👑";
-    if (level >= 4) return "💎";
-    if (level >= 3) return "🏆";
-    if (level >= 2) return "⭐";
-    return "🌱";
-  };
-
-  const getNextRankPoints = (level: number) => {
-    const thresholds = [0, 500, 2000, 5000, 10000];
-    return thresholds[level] || 10000;
-  };
-
-  const nextRankPoints = getNextRankPoints(rankData.rank_level);
-  const progress = (rankData.total_points / nextRankPoints) * 100;
-
   return (
     <div className="space-y-4">
-      {/* Rank Card */}
+      {/* Badge Progress Display */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <Card className={`border-0 shadow-lg bg-gradient-to-br ${getRankColor(rankData.rank_level)}`}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="text-5xl">{getRankIcon(rankData.rank_level)}</div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-2xl font-bold text-foreground">{rankData.rank_name}</h3>
-                  <Badge variant="secondary" className="text-xs">
-                    Level {rankData.rank_level}
-                  </Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {rankData.total_points.toLocaleString()} total points
-                </p>
-              </div>
-            </div>
-
-            {rankData.rank_level < 5 && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Progress to next rank</span>
-                  <span>{rankData.total_points} / {nextRankPoints}</span>
-                </div>
-                <Progress value={progress} className="h-2" />
-              </div>
-            )}
-
-            <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-border/50">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1 text-2xl font-bold mb-1">
-                  <Trophy className="w-5 h-5 text-primary" />
-                  {rankData.challenges_won}
-                </div>
-                <p className="text-xs text-muted-foreground">Challenges Won</p>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1 text-2xl font-bold mb-1">
-                  <Star className="w-5 h-5 text-primary" />
-                  {rankData.chains_created}
-                </div>
-                <p className="text-xs text-muted-foreground">Chains Created</p>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1 text-2xl font-bold mb-1">
-                  <TrendingUp className="w-5 h-5 text-primary" />
-                  {rankData.photos_count}
-                </div>
-                <p className="text-xs text-muted-foreground">Photos Posted</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <BadgeProgressDisplay currentPoints={rankData.total_points} />
       </motion.div>
 
       {/* Badges Grid */}
