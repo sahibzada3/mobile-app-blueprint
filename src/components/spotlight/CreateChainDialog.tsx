@@ -39,7 +39,7 @@ export default function CreateChainDialog({ open, onOpenChange, onSuccess }: Cre
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        toast.error("You must be logged in to create a chain");
+        toast.error("You must be logged in to create a flare");
         return;
       }
 
@@ -67,14 +67,14 @@ export default function CreateChainDialog({ open, onOpenChange, onSuccess }: Cre
 
       if (participantError) throw participantError;
 
-      toast.success("Chain created successfully!");
+      toast.success("Flare created successfully!");
       setTitle("");
       setDescription("");
       setMaxParticipants(10);
       onOpenChange(false);
       onSuccess();
     } catch (error: any) {
-      toast.error("Failed to create chain");
+      toast.error("Failed to create flare");
       console.error(error);
     } finally {
       setLoading(false);
@@ -85,7 +85,7 @@ export default function CreateChainDialog({ open, onOpenChange, onSuccess }: Cre
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Spotlight Chain</DialogTitle>
+          <DialogTitle>Create Spotlight Flare</DialogTitle>
           <DialogDescription>
             Start a collaborative photo story with your friends
           </DialogDescription>
@@ -93,7 +93,7 @@ export default function CreateChainDialog({ open, onOpenChange, onSuccess }: Cre
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="title">Chain Title *</Label>
+            <Label htmlFor="title">Flare Title *</Label>
             <Input
               id="title"
               value={title}
@@ -134,7 +134,7 @@ export default function CreateChainDialog({ open, onOpenChange, onSuccess }: Cre
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Create Chain"}
+              {loading ? "Creating..." : "Create Flare"}
             </Button>
           </DialogFooter>
         </form>

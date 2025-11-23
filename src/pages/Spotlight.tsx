@@ -13,7 +13,7 @@ import CreateChainDialog from "@/components/spotlight/CreateChainDialog";
 import FriendsList from "@/components/spotlight/FriendsList";
 import ChatInterface from "@/components/spotlight/ChatInterface";
 
-interface Chain {
+interface Flare {
   id: string;
   title: string;
   description: string | null;
@@ -31,7 +31,7 @@ interface Chain {
 
 export default function Spotlight() {
   const navigate = useNavigate();
-  const [chains, setChains] = useState<Chain[]>([]);
+  const [flares, setFlares] = useState<Flare[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -44,14 +44,14 @@ export default function Spotlight() {
 
   useEffect(() => {
     checkAuth();
-    loadChains();
+    loadFlares();
     loadFriends();
 
     const channel = supabase
       .channel('spotlight-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'spotlight_chains' }, loadChains)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'chain_participants' }, loadChains)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'chain_contributions' }, loadChains)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'spotlight_chains' }, loadFlares)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chain_participants' }, loadFlares)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chain_contributions' }, loadFlares)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'friendships' }, loadFriends)
       .subscribe();
 
@@ -88,9 +88,9 @@ export default function Spotlight() {
     }
   };
 
-  const loadChains = async () => {
+  const loadFlares = async () => {
     try {
-      const { data: chainsData, error } = await supabase
+      const { data: flaresData, error } = await supabase
         .from("spotlight_chains")
         .select("*")
         .order("created_at", { ascending: false });
@@ -98,16 +98,16 @@ export default function Spotlight() {
       if (error) throw error;
 
       // Load participant, contribution counts, and creator profiles
-      const chainsWithCounts = await Promise.all(
-        (chainsData || []).map(async (chain) => {
+      const flaresWithCounts = await Promise.all(
+        (flaresData || []).map(async (flare) => {
           const [participantResult, contributionResult, profileResult] = await Promise.all([
-            supabase.from("chain_participants").select("id", { count: "exact" }).eq("chain_id", chain.id),
-            supabase.from("chain_contributions").select("id", { count: "exact" }).eq("chain_id", chain.id),
-            supabase.from("profiles").select("username, avatar_url").eq("id", chain.creator_id).single(),
+            supabase.from("chain_participants").select("id", { count: "exact" }).eq("chain_id", flare.id),
+            supabase.from("chain_contributions").select("id", { count: "exact" }).eq("chain_id", flare.id),
+            supabase.from("profiles").select("username, avatar_url").eq("id", flare.creator_id).single(),
           ]);
 
           return {
-            ...chain,
+            ...flare,
             participant_count: participantResult.count || 0,
             contribution_count: contributionResult.count || 0,
             profiles: profileResult.data || undefined,
@@ -115,59 +115,59 @@ export default function Spotlight() {
         })
       );
 
-      setChains(chainsWithCounts);
+      setFlares(flaresWithCounts);
     } catch (error: any) {
-      toast.error("Failed to load chains");
+      toast.error("Failed to load flares");
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getTrendingChains = () => {
-    return [...chains]
-      .filter(chain => friendIds.includes(chain.creator_id) || chain.creator_id === user?.id)
+  const getTrendingFlares = () => {
+    return [...flares]
+      .filter(flare => friendIds.includes(flare.creator_id) || flare.creator_id === user?.id)
       .sort((a, b) => (b.contribution_count || 0) - (a.contribution_count || 0))
       .slice(0, 10);
   };
 
-  const ChainCard = ({ chain }: { chain: Chain }) => (
+  const FlareCard = ({ flare }: { flare: Flare }) => (
     <Card
       className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
-      onClick={() => navigate(`/spotlight/${chain.id}`)}
+      onClick={() => navigate(`/spotlight/${flare.id}`)}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <Avatar>
-            <AvatarImage src={chain.profiles?.avatar_url || ""} />
-            <AvatarFallback>{chain.profiles?.username?.[0]?.toUpperCase()}</AvatarFallback>
+            <AvatarImage src={flare.profiles?.avatar_url || ""} />
+            <AvatarFallback>{flare.profiles?.username?.[0]?.toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="font-semibold text-foreground">{chain.title}</h3>
-            <p className="text-sm text-muted-foreground">by {chain.profiles?.username}</p>
+            <h3 className="font-semibold text-foreground">{flare.title}</h3>
+            <p className="text-sm text-muted-foreground">by {flare.profiles?.username}</p>
           </div>
         </div>
-        <Badge variant={chain.status === "active" ? "default" : "secondary"}>
-          {chain.status}
+        <Badge variant={flare.status === "active" ? "default" : "secondary"}>
+          {flare.status}
         </Badge>
       </div>
 
-      {chain.description && (
-        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{chain.description}</p>
+      {flare.description && (
+        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{flare.description}</p>
       )}
 
       <div className="flex items-center gap-4 text-sm text-muted-foreground">
         <div className="flex items-center gap-1">
           <Users className="w-4 h-4" />
-          <span>{chain.participant_count}/{chain.max_participants}</span>
+          <span>{flare.participant_count}/{flare.max_participants}</span>
         </div>
         <div className="flex items-center gap-1">
           <TrendingUp className="w-4 h-4" />
-          <span>{chain.contribution_count} photos</span>
+          <span>{flare.contribution_count} photos</span>
         </div>
         <div className="flex items-center gap-1">
           <Clock className="w-4 h-4" />
-          <span>{new Date(chain.created_at).toLocaleDateString()}</span>
+          <span>{new Date(flare.created_at).toLocaleDateString()}</span>
         </div>
       </div>
     </Card>
@@ -176,7 +176,7 @@ export default function Spotlight() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Loading chains...</p>
+        <p className="text-muted-foreground">Loading flares...</p>
       </div>
     );
   }
@@ -186,18 +186,18 @@ export default function Spotlight() {
       <div className="max-w-4xl mx-auto p-4">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Spotlight Chains</h1>
+            <h1 className="text-3xl font-bold text-foreground">Spotlight Flares</h1>
             <p className="text-muted-foreground">Collaborative photo stories with friends</p>
           </div>
           <Button onClick={() => setShowCreateDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Create Chain
+            Create Flare
           </Button>
         </div>
 
         <Tabs defaultValue="all" className="space-y-4">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="all">All Chains</TabsTrigger>
+            <TabsTrigger value="all">All Flares</TabsTrigger>
             <TabsTrigger value="trending">Trending</TabsTrigger>
             <TabsTrigger value="chat">
               <MessageCircle className="w-4 h-4 mr-2" />
@@ -206,33 +206,33 @@ export default function Spotlight() {
           </TabsList>
 
           <TabsContent value="all" className="space-y-3">
-            {chains.length === 0 ? (
+            {flares.length === 0 ? (
               <Card className="p-8 text-center">
-                <p className="text-muted-foreground mb-4">No chains yet. Be the first to create one!</p>
+                <p className="text-muted-foreground mb-4">No flares yet. Be the first to create one!</p>
                 <Button onClick={() => setShowCreateDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Create First Chain
+                  Create First Flare
                 </Button>
               </Card>
             ) : (
-              chains.map((chain) => <ChainCard key={chain.id} chain={chain} />)
+              flares.map((flare) => <FlareCard key={flare.id} flare={flare} />)
             )}
           </TabsContent>
 
           <TabsContent value="trending" className="space-y-3">
-            {getTrendingChains().length === 0 ? (
+            {getTrendingFlares().length === 0 ? (
               <Card className="p-8 text-center">
-                <p className="text-muted-foreground">No trending chains yet</p>
+                <p className="text-muted-foreground">No trending flares yet</p>
               </Card>
             ) : (
-              getTrendingChains().map((chain, index) => (
-                <div key={chain.id} className="relative">
+              getTrendingFlares().map((flare, index) => (
+                <div key={flare.id} className="relative">
                   {index < 3 && (
                     <Badge className="absolute -left-2 -top-2 z-10" variant="secondary">
                       #{index + 1}
                     </Badge>
                   )}
-                  <ChainCard chain={chain} />
+                  <FlareCard flare={flare} />
                 </div>
               ))
             )}
@@ -276,10 +276,10 @@ export default function Spotlight() {
         </Tabs>
       </div>
 
-      <CreateChainDialog
+        <CreateChainDialog
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
-        onSuccess={loadChains}
+        onSuccess={loadFlares}
       />
 
       <BottomNav />

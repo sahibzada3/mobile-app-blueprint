@@ -14,7 +14,7 @@ import GroupChatInterface from "@/components/spotlight/GroupChatInterface";
 import ContributionSubmitDialog from "@/components/spotlight/ContributionSubmitDialog";
 import InviteFriendsDialog from "@/components/spotlight/InviteFriendsDialog";
 
-interface Chain {
+interface Flare {
   id: string;
   title: string;
   description: string | null;
@@ -57,7 +57,7 @@ export default function SpotlightChain() {
   const { chainId } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [chain, setChain] = useState<Chain | null>(null);
+  const [flare, setFlare] = useState<Flare | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,12 +72,12 @@ export default function SpotlightChain() {
 
   useEffect(() => {
     checkAuth();
-    loadChainData();
+    loadFlareData();
 
     const channel = supabase
       .channel(`chain-${chainId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'chain_participants', filter: `chain_id=eq.${chainId}` }, loadChainData)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'chain_contributions', filter: `chain_id=eq.${chainId}` }, loadChainData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chain_participants', filter: `chain_id=eq.${chainId}` }, loadFlareData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chain_contributions', filter: `chain_id=eq.${chainId}` }, loadFlareData)
       .subscribe();
 
     return () => {
@@ -94,25 +94,25 @@ export default function SpotlightChain() {
     setUser(session.user);
   };
 
-  const loadChainData = async () => {
+  const loadFlareData = async () => {
     try {
-      // Load chain details
-      const { data: chainData, error: chainError } = await supabase
+      // Load flare details
+      const { data: flareData, error: flareError } = await supabase
         .from("spotlight_chains")
         .select("*")
         .eq("id", chainId)
         .single();
 
-      if (chainError) throw chainError;
+      if (flareError) throw flareError;
 
       // Load creator profile
       const { data: creatorProfile } = await supabase
         .from("profiles")
         .select("username, avatar_url")
-        .eq("id", chainData.creator_id)
+        .eq("id", flareData.creator_id)
         .single();
 
-      setChain({ ...chainData, profiles: creatorProfile || undefined });
+      setFlare({ ...flareData, profiles: creatorProfile || undefined });
 
       // Load participants
       const { data: participantsData, error: participantsError } = await supabase
@@ -169,18 +169,18 @@ export default function SpotlightChain() {
 
       setContributions(contributionsWithProfiles);
     } catch (error: any) {
-      toast.error("Failed to load chain data");
+      toast.error("Failed to load flare data");
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleJoinChain = async () => {
+  const handleJoinFlare = async () => {
     if (!user) return;
 
-    if (participants.length >= (chain?.max_participants || 10)) {
-      toast.error("This chain is full");
+    if (participants.length >= (flare?.max_participants || 10)) {
+      toast.error("This flare is full");
       return;
     }
 
@@ -190,32 +190,32 @@ export default function SpotlightChain() {
         .insert({ chain_id: chainId, user_id: user.id });
 
       if (error) throw error;
-      toast.success("Joined chain successfully!");
-      loadChainData();
+      toast.success("Joined flare successfully!");
+      loadFlareData();
     } catch (error: any) {
-      toast.error("Failed to join chain");
+      toast.error("Failed to join flare");
       console.error(error);
     }
   };
 
   const handleAddContribution = () => {
-    // Navigate to camera with chain context
+    // Navigate to camera with flare context
     navigate(`/camera?chainId=${chainId}`);
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Loading chain...</p>
+        <p className="text-muted-foreground">Loading flare...</p>
       </div>
     );
   }
 
-  if (!chain) {
+  if (!flare) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <p className="text-muted-foreground mb-4">Chain not found</p>
+          <p className="text-muted-foreground mb-4">Flare not found</p>
           <Button onClick={() => navigate("/spotlight")}>Back to Spotlight</Button>
         </div>
       </div>
@@ -227,34 +227,34 @@ export default function SpotlightChain() {
       <div className="max-w-4xl mx-auto p-4">
         <Button variant="ghost" onClick={() => navigate("/spotlight")} className="mb-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Chains
+          Back to Flares
         </Button>
 
         <Card className="p-6 mb-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
               <Avatar className="w-12 h-12">
-                <AvatarImage src={chain.profiles?.avatar_url || ""} />
-                <AvatarFallback>{chain.profiles?.username?.[0]?.toUpperCase()}</AvatarFallback>
+                <AvatarImage src={flare.profiles?.avatar_url || ""} />
+                <AvatarFallback>{flare.profiles?.username?.[0]?.toUpperCase()}</AvatarFallback>
               </Avatar>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">{chain.title}</h1>
-                <p className="text-sm text-muted-foreground">Created by {chain.profiles?.username}</p>
+                <h1 className="text-2xl font-bold text-foreground">{flare.title}</h1>
+                <p className="text-sm text-muted-foreground">Created by {flare.profiles?.username}</p>
               </div>
             </div>
-            <Badge variant={chain.status === "active" ? "default" : "secondary"}>
-              {chain.status}
+            <Badge variant={flare.status === "active" ? "default" : "secondary"}>
+              {flare.status}
             </Badge>
           </div>
 
-          {chain.description && (
-            <p className="text-muted-foreground mb-4">{chain.description}</p>
+          {flare.description && (
+            <p className="text-muted-foreground mb-4">{flare.description}</p>
           )}
 
           <div className="flex items-center gap-4 mb-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Users className="w-4 h-4" />
-              <span>{participants.length}/{chain.max_participants} participants</span>
+              <span>{participants.length}/{flare.max_participants} participants</span>
             </div>
             <div className="flex -space-x-2">
               {participants.slice(0, 5).map((participant) => (
@@ -273,9 +273,9 @@ export default function SpotlightChain() {
 
           <div className="flex gap-2">
             {!isParticipant ? (
-              <Button onClick={handleJoinChain} className="flex-1">
+              <Button onClick={handleJoinFlare} className="flex-1">
                 <UserPlus className="w-4 h-4 mr-2" />
-                Join Chain
+                Join Flare
               </Button>
             ) : (
               <>
@@ -295,7 +295,7 @@ export default function SpotlightChain() {
           </div>
         </Card>
 
-        <h2 className="text-xl font-semibold mb-4">Chain Content</h2>
+        <h2 className="text-xl font-semibold mb-4">Flare Content</h2>
         
         <Tabs defaultValue="contributions" className="space-y-4">
           <TabsList className="grid w-full grid-cols-2">
@@ -370,16 +370,16 @@ export default function SpotlightChain() {
               <div className="h-[600px]">
                 <GroupChatInterface
                   chainId={chainId!}
-                  chainTitle={chain.title}
+                  chainTitle={flare.title}
                   currentUserId={user.id}
                 />
               </div>
             ) : (
               <Card className="p-8 text-center">
                 <MessageCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-muted-foreground mb-2">Join this chain to access the group chat</p>
+                <p className="text-muted-foreground mb-2">Join this flare to access the group chat</p>
                 <p className="text-sm text-muted-foreground">
-                  Chat with other participants and share your thoughts about the chain
+                  Chat with other participants and share your thoughts about the flare
                 </p>
               </Card>
             )}

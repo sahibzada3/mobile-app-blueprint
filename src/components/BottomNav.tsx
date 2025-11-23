@@ -12,7 +12,7 @@ export default function BottomNav() {
   
   const navItems = [
     { icon: Lightbulb, label: "Ideas", path: "/ideas" },
-    { icon: Link2, label: "Chains", path: "/spotlight" },
+    { icon: Link2, label: "Flares", path: "/spotlight" },
     { icon: Camera, label: "Camera", path: "/camera" },
     { icon: Trophy, label: "Challenges", path: "/challenges" },
     { icon: User, label: "Profile", path: "/profile" },

@@ -24,6 +24,9 @@ export default function Feed() {
   const [pullDistance, setPullDistance] = useState(0);
   const [startY, setStartY] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [hasSeenWelcome, setHasSeenWelcome] = useState(
+    localStorage.getItem('hasSeenWelcome') === 'true'
+  );
 
   useEffect(() => {
     // Check current session
@@ -229,57 +232,81 @@ export default function Feed() {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto py-4 space-y-4">
-        <div className="px-4">
+      <main className="max-w-2xl mx-auto py-4">
+        <div className="px-4 mb-4">
           <WeatherWidget />
         </div>
 
-        <div className="px-4">
-          <Card className="cursor-pointer hover-lift" onClick={() => navigate("/ideas")}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                  <Lightbulb className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium">Photography Ideas</h3>
-                  <p className="text-xs text-muted-foreground">Discover techniques</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {photos.length === 0 && (
-          <div className="px-4">
-            <Card>
-              <CardContent className="text-center py-12">
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                  <Camera className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <h2 className="text-lg font-semibold mb-2">Welcome to Frame</h2>
-                <p className="text-sm text-muted-foreground mb-6">
-                  Start capturing nature
+        {!hasSeenWelcome && photos.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="px-4 mb-6"
+          >
+            <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
+              <CardContent className="p-8 text-center">
+                <Camera className="w-16 h-16 mx-auto mb-4 text-primary" />
+                <h2 className="text-xl font-bold text-foreground mb-2">Welcome to NatureFrame</h2>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
+                  Capture stunning nature photography with cinematic filters and collaborate with friends
                 </p>
-                <div className="flex gap-3 justify-center">
-                  <Button onClick={() => navigate("/camera")}>
+                
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button 
+                    className="shadow-glow"
+                    onClick={() => {
+                      localStorage.setItem('hasSeenWelcome', 'true');
+                      setHasSeenWelcome(true);
+                      navigate('/camera');
+                    }}
+                  >
                     <Camera className="w-4 h-4 mr-2" />
-                    Camera
+                    Take Your First Photo
                   </Button>
-                  <Button onClick={() => navigate("/ideas")} variant="outline">
-                    Ideas
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      localStorage.setItem('hasSeenWelcome', 'true');
+                      setHasSeenWelcome(true);
+                      navigate('/ideas');
+                    }}
+                  >
+                    <Lightbulb className="w-4 h-4 mr-2" />
+                    Get Inspired
                   </Button>
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
         )}
 
+        {photos.length === 0 && hasSeenWelcome ? (
+          <div className="px-4">
+            <Card>
+              <CardContent className="text-center py-16">
+                <Camera className="w-20 h-20 mx-auto mb-4 text-muted-foreground/30" />
+                <p className="text-muted-foreground mb-6">No photos yet. Start capturing!</p>
+                <Button onClick={() => navigate('/camera')}>
+                  <Camera className="w-4 h-4 mr-2" />
+                  Open Camera
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        ) : null}
+
         {photos.length > 0 && (
-          <div className="space-y-6">
-            {photos.map((photo) => (
-              <PhotoCard key={photo.id} photo={photo} currentUserId={user?.id} />
+          <div className="space-y-4 sm:space-y-6">
+            {photos.map((photo, index) => (
+              <motion.div
+                key={photo.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <PhotoCard photo={photo} currentUserId={user?.id} />
+              </motion.div>
             ))}
           </div>
         )}
