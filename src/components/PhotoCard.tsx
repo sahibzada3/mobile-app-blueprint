@@ -147,12 +147,12 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
         <div className="p-5 space-y-4">
           {musicTrack && (
             <motion.div 
-              className="space-y-2"
+              className="relative bg-primary/5 rounded-xl px-4 py-3 border border-primary/10"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <div className="flex items-center gap-3 text-xs bg-primary/5 rounded-xl px-4 py-3 border border-primary/10">
+              <div className="flex items-center gap-3 text-xs">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -169,7 +169,7 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
                   <p className="font-semibold text-foreground truncate text-sm">{musicTrack.name}</p>
                   <p className="text-muted-foreground truncate">{musicTrack.artist}</p>
                 </div>
-                <Badge variant="outline" className="ml-auto text-xs border-primary/20 bg-primary/5 font-medium">
+                <Badge variant="outline" className="text-xs border-primary/20 bg-primary/5 font-medium">
                   {musicTrack.mood}
                 </Badge>
                 <Button
@@ -185,10 +185,10 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
               <AnimatePresence>
                 {showVolumeControl && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="flex items-center gap-3 px-4"
+                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                    animate={{ opacity: 1, height: "auto", marginTop: 12 }}
+                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                    className="flex items-center gap-3"
                   >
                     <Volume2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <Slider
@@ -198,7 +198,7 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
                       step={1}
                       className="flex-1"
                     />
-                    <span className="text-xs text-muted-foreground w-12 text-right">
+                    <span className="text-xs text-muted-foreground w-12 text-right font-medium">
                       {Math.round(volume * 100)}%
                     </span>
                   </motion.div>
