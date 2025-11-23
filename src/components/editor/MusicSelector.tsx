@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Music, Play, Check, VolumeX } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Music, Play, Check, VolumeX, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -15,10 +15,21 @@ interface MusicSelectorProps {
 export default function MusicSelector({ selectedTrack, onSelectTrack }: MusicSelectorProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [musicEnabled, setMusicEnabled] = useState(true);
+  const [previewingTrack, setPreviewingTrack] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const savedMusicEnabled = localStorage.getItem('musicEnabled');
     setMusicEnabled(savedMusicEnabled !== 'false');
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
   }, []);
 
   const handleTrackClick = (trackId: string) => {
@@ -26,6 +37,38 @@ export default function MusicSelector({ selectedTrack, onSelectTrack }: MusicSel
       onSelectTrack(null);
     } else {
       onSelectTrack(trackId);
+    }
+  };
+
+  const handlePreviewClick = (e: React.MouseEvent, track: MusicTrack) => {
+    e.stopPropagation();
+    
+    if (previewingTrack === track.id) {
+      // Stop preview
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      setPreviewingTrack(null);
+    } else {
+      // Start preview
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      
+      if (track.audioUrl) {
+        const audio = new Audio(track.audioUrl);
+        const savedVolume = localStorage.getItem('musicVolume');
+        audio.volume = savedVolume ? parseFloat(savedVolume) : 0.5;
+        audio.play().catch(console.error);
+        audioRef.current = audio;
+        setPreviewingTrack(track.id);
+        
+        audio.onended = () => {
+          setPreviewingTrack(null);
+          audioRef.current = null;
+        };
+      }
     }
   };
 
@@ -88,22 +131,30 @@ export default function MusicSelector({ selectedTrack, onSelectTrack }: MusicSel
                 onClick={() => handleTrackClick(track.id)}
               >
                 <div className="flex items-center gap-3 flex-1">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    selectedTrack === track.id ? "bg-primary" : "bg-muted"
-                  }`}>
-                    {selectedTrack === track.id ? (
-                      <Check className="w-4 h-4 text-primary-foreground" />
+                  <Button
+                    size="icon"
+                    variant={previewingTrack === track.id ? "default" : "ghost"}
+                    className="w-8 h-8 rounded-full flex-shrink-0"
+                    onClick={(e) => handlePreviewClick(e, track)}
+                  >
+                    {previewingTrack === track.id ? (
+                      <Pause className="w-4 h-4" />
                     ) : (
-                      <Play className="w-4 h-4 text-muted-foreground" />
+                      <Play className="w-4 h-4" />
                     )}
-                  </div>
+                  </Button>
                   <div className="flex-1">
                     <p className="text-sm font-medium">{track.name}</p>
                     <p className="text-xs text-muted-foreground">{track.artist} • {track.duration}</p>
                   </div>
-                  <Badge className={getMoodColor(track.mood)} variant="secondary">
-                    {track.mood}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    {selectedTrack === track.id && (
+                      <Check className="w-4 h-4 text-primary" />
+                    )}
+                    <Badge className={getMoodColor(track.mood)} variant="secondary">
+                      {track.mood}
+                    </Badge>
+                  </div>
                 </div>
               </div>
             ))}
