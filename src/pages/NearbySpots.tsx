@@ -227,14 +227,26 @@ export default function NearbySpots() {
   };
 
   const getTimeIcon = (time: string) => {
-    if (time === "golden_hour") return "🌅";
-    if (time === "blue_hour") return "🌆";
-    if (time === "night") return "🌙";
-    return "☀️";
+    switch(time) {
+      case "golden_hour": return "🌅";
+      case "blue_hour": return "🌆";
+      case "night": return "🌙";
+      case "sunrise": return "🌄";
+      case "sunset": return "🌇";
+      default: return "☀️";
+    }
   };
 
-  const openInMaps = (lat: number, lng: number) => {
-    window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
+  const getTimeLabel = (time: string) => {
+    return time.replace(/_/g, ' ').split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
+  const openInMaps = (lat: number, lng: number, name: string) => {
+    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    window.open(googleMapsUrl, '_blank');
+    toast.success(`Opening directions to ${name}...`);
   };
 
   return (
@@ -282,14 +294,14 @@ export default function NearbySpots() {
           )}
           
           <div className="space-y-3">
-            <div className="flex items-center gap-4 text-sm">
-              <Clock className="w-4 h-4 text-muted-foreground" />
-              <span className="font-medium">Best Time: {getTimeIcon(currentTime)} {currentTime.replace('_', ' ')}</span>
+            <div className="flex items-center gap-4 text-sm bg-accent/30 rounded-lg px-3 py-2">
+              <Clock className="w-4 h-4 text-primary" />
+              <span className="font-medium">Current: {getTimeIcon(currentTime)} {getTimeLabel(currentTime)}</span>
             </div>
             
-            <div className="flex items-center gap-4 text-sm">
-              <Cloud className="w-4 h-4 text-muted-foreground" />
-              <span className="font-medium">Weather: {currentWeather}</span>
+            <div className="flex items-center gap-4 text-sm bg-accent/30 rounded-lg px-3 py-2">
+              <Cloud className="w-4 h-4 text-primary" />
+              <span className="font-medium capitalize">Weather: {currentWeather}</span>
             </div>
             
             <div className="space-y-2">
@@ -343,50 +355,68 @@ export default function NearbySpots() {
             </div>
             
             {spots.map((spot) => (
-              <Card key={spot.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="p-4 space-y-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg mb-1">{spot.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">{spot.description}</p>
-                      
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                        <MapPin className="w-4 h-4" />
-                        <span>{spot.distance?.toFixed(1)}km away</span>
-                        {spot.matchScore && spot.matchScore >= 70 && (
-                          <Badge variant="default" className="ml-2">
-                            <Sparkles className="w-3 h-3 mr-1" />
-                            Perfect Match
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="outline">
-                          {getTimeIcon(spot.best_time)} {spot.best_time.replace('_', ' ')}
+              <Card key={spot.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-card/80 backdrop-blur-sm border-border/50">
+                {spot.image_url && (
+                  <div className="relative w-full h-48 overflow-hidden">
+                    <img 
+                      src={spot.image_url} 
+                      alt={spot.name}
+                      className="w-full h-full object-cover"
+                    />
+                    {spot.matchScore && spot.matchScore >= 70 && (
+                      <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground shadow-lg">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Perfect Match
+                      </Badge>
+                    )}
+                  </div>
+                )}
+                
+                <div className="p-5 space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="font-bold text-xl text-foreground">{spot.name}</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{spot.description}</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 text-sm font-medium bg-accent/50 rounded-lg px-3 py-2">
+                    <MapPin className="w-4 h-4 text-primary" />
+                    <span className="text-foreground">{spot.distance?.toFixed(1)}km away</span>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Clock className="w-4 h-4 text-muted-foreground" />
+                      <Badge variant="outline" className="font-medium">
+                        {getTimeIcon(spot.best_time)} {getTimeLabel(spot.best_time)}
+                      </Badge>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      {spot.scene_types.slice(0, 4).map((type) => (
+                        <Badge key={type} variant="secondary" className="capitalize">
+                          {type.replace(/_/g, ' ')}
                         </Badge>
-                        {spot.scene_types.slice(0, 3).map((type) => (
-                          <Badge key={type} variant="secondary">
-                            {type}
-                          </Badge>
-                        ))}
-                      </div>
+                      ))}
                     </div>
                   </div>
                   
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 pt-2">
                     <Button
-                      className="flex-1"
-                      onClick={() => openInMaps(Number(spot.latitude), Number(spot.longitude))}
+                      className="flex-1 h-11 font-semibold"
+                      onClick={() => openInMaps(Number(spot.latitude), Number(spot.longitude), spot.name)}
                     >
                       <Navigation className="w-4 h-4 mr-2" />
                       Get Directions
                     </Button>
                     <Button
                       variant="outline"
+                      size="icon"
+                      className="h-11 w-11"
                       onClick={() => navigate("/camera")}
                     >
-                      <Camera className="w-4 h-4" />
+                      <Camera className="w-5 h-5" />
                     </Button>
                   </div>
                 </div>
