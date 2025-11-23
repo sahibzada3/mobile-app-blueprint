@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
 Generate 3 diverse pieces:
 
 1. **Poetry Verse** - A short poetic verse (2-4 lines) from a famous poet, formatted with line breaks for poetic display. Include poet's name.
-   Example: "The woods are lovely, dark and deep,\nBut I have promises to keep"
+   Example: "The woods are lovely dark and deep\nBut I have promises to keep"
 
 2. **Famous Quote** - An inspiring quote from a notable person specifically relevant to this scene/mood (nature, time, light, emotion). Include person's name.
 
@@ -71,8 +71,10 @@ CRITICAL Requirements:
 - For ${scene} scenes, use imagery/metaphors/quotes that relate directly to that specific atmosphere
 - Use evocative, sensory language that matches the visual scene
 - In the specified language throughout
-- DO NOT start quotes with punctuation marks (commas, periods, etc.)
-- Begin each quote with actual words, not punctuation
+- ABSOLUTELY NO punctuation marks (commas, periods, semicolons, etc.) at the START of any line or quote
+- ABSOLUTELY NO punctuation marks immediately after line breaks (\n)
+- Each line must BEGIN with a letter or word, never with punctuation
+- Punctuation should only appear WITHIN or at the END of sentences, never at line beginnings
 
 Format as JSON array:
 [
