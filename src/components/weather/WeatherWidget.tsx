@@ -23,6 +23,13 @@ export default function WeatherWidget() {
 
   useEffect(() => {
     fetchWeatherData();
+    
+    // Auto-refresh weather every 30 minutes
+    const interval = setInterval(() => {
+      fetchWeatherData();
+    }, 30 * 60 * 1000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const fetchWeatherData = async () => {
