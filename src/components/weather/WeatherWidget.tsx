@@ -196,7 +196,7 @@ export default function WeatherWidget() {
   if (!weather) return null;
 
   const cardClassName = weather.isNight 
-    ? "shadow-lg border-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 cursor-pointer hover:shadow-2xl transition-all duration-300 overflow-hidden group relative text-white"
+    ? "shadow-2xl border border-white/10 bg-black cursor-pointer hover:shadow-[0_0_40px_rgba(255,255,255,0.2)] transition-all duration-500 overflow-hidden group relative text-white"
     : "shadow-lg border-0 bg-gradient-to-br from-primary/10 via-card to-accent/10 cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden group relative";
 
   return (
@@ -204,38 +204,70 @@ export default function WeatherWidget() {
       className={cardClassName}
       onClick={() => navigate("/weather")}
     >
-      {/* Night Sky with Stars */}
+      {/* Night Sky with White Stars */}
       {weather.isNight && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Animated stars */}
-          {[...Array(30)].map((_, i) => (
+          {/* Small twinkling stars */}
+          {[...Array(60)].map((_, i) => (
             <div
               key={i}
-              className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+              className="absolute bg-white rounded-full animate-pulse"
               style={{
+                width: `${1 + Math.random() * 1.5}px`,
+                height: `${1 + Math.random() * 1.5}px`,
                 top: `${Math.random() * 100}%`,
                 left: `${Math.random() * 100}%`,
                 animationDelay: `${Math.random() * 3}s`,
                 animationDuration: `${2 + Math.random() * 3}s`,
-                opacity: 0.3 + Math.random() * 0.7,
+                opacity: 0.5 + Math.random() * 0.5,
+                boxShadow: '0 0 2px rgba(255, 255, 255, 0.5)',
               }}
             />
           ))}
-          {/* Larger twinkling stars */}
-          {[...Array(10)].map((_, i) => (
+          {/* Medium bright stars */}
+          {[...Array(20)].map((_, i) => (
             <div
-              key={`star-${i}`}
-              className="absolute w-1.5 h-1.5 bg-white rounded-full animate-pulse"
+              key={`star-med-${i}`}
+              className="absolute bg-white rounded-full animate-pulse"
               style={{
+                width: `${2 + Math.random()}px`,
+                height: `${2 + Math.random()}px`,
                 top: `${Math.random() * 100}%`,
                 left: `${Math.random() * 100}%`,
                 animationDelay: `${Math.random() * 2}s`,
                 animationDuration: `${1.5 + Math.random() * 2}s`,
-                opacity: 0.5 + Math.random() * 0.5,
-                boxShadow: '0 0 4px rgba(255, 255, 255, 0.8)',
+                opacity: 0.7 + Math.random() * 0.3,
+                boxShadow: '0 0 6px rgba(255, 255, 255, 0.8), 0 0 3px rgba(255, 255, 255, 0.6)',
               }}
             />
           ))}
+          {/* Large prominent stars */}
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={`star-large-${i}`}
+              className="absolute bg-white rounded-full animate-pulse"
+              style={{
+                width: `${3 + Math.random() * 1}px`,
+                height: `${3 + Math.random() * 1}px`,
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 1.5}s`,
+                animationDuration: `${1 + Math.random() * 1.5}s`,
+                opacity: 0.9,
+                boxShadow: '0 0 10px rgba(255, 255, 255, 1), 0 0 5px rgba(255, 255, 255, 0.8), 0 0 15px rgba(255, 255, 255, 0.5)',
+              }}
+            />
+          ))}
+          {/* Shooting star effect */}
+          <div
+            className="absolute w-0.5 h-16 bg-gradient-to-b from-white to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"
+            style={{
+              top: '20%',
+              left: '80%',
+              transform: 'rotate(45deg)',
+              boxShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
+            }}
+          />
         </div>
       )}
       
@@ -251,15 +283,25 @@ export default function WeatherWidget() {
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-              weather.isNight ? 'bg-white/10' : 'bg-primary/10'
+              weather.isNight 
+                ? 'bg-white/15 shadow-[0_0_10px_rgba(255,255,255,0.2)]' 
+                : 'bg-primary/10'
             }`}>
-              <MapPin className={`w-4 h-4 ${weather.isNight ? 'text-white' : 'text-primary'}`} strokeWidth={2.5} />
+              <MapPin className={`w-4 h-4 ${
+                weather.isNight 
+                  ? 'text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]' 
+                  : 'text-primary'
+              }`} strokeWidth={2.5} />
             </div>
             <div>
-              <p className={`text-sm font-semibold ${weather.isNight ? 'text-white' : 'text-foreground'}`}>
+              <p className={`text-sm font-semibold ${
+                weather.isNight 
+                  ? 'text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]' 
+                  : 'text-foreground'
+              }`}>
                 {weather.location}
               </p>
-              <p className={`text-xs ${weather.isNight ? 'text-white/60' : 'text-muted-foreground'}`}>
+              <p className={`text-xs ${weather.isNight ? 'text-white/70' : 'text-muted-foreground'}`}>
                 Current Conditions
               </p>
             </div>
@@ -274,23 +316,31 @@ export default function WeatherWidget() {
         {/* Main Temperature Display */}
         <div className="flex items-start justify-between mb-5">
           <div className="flex items-start gap-3">
-            <div className="text-7xl leading-none filter drop-shadow-lg">{weather.icon}</div>
+            <div className={`text-7xl leading-none filter ${
+              weather.isNight 
+                ? 'drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]' 
+                : 'drop-shadow-lg'
+            }`}>
+              {weather.icon}
+            </div>
             <div className="pt-2">
               <div className="flex items-baseline gap-1">
                 <span className={`text-5xl font-bold tracking-tight ${
-                  weather.isNight ? 'text-white' : 'text-foreground'
+                  weather.isNight 
+                    ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]' 
+                    : 'text-foreground'
                 }`}>
                   {weather.temperature}
                 </span>
                 <span className={`text-2xl font-medium ${
-                  weather.isNight ? 'text-white/60' : 'text-muted-foreground'
+                  weather.isNight ? 'text-white/80' : 'text-muted-foreground'
                 }`}>
                   °C
                 </span>
               </div>
               <Badge variant="secondary" className={`mt-2 font-medium ${
                 weather.isNight 
-                  ? 'bg-white/10 text-white border-white/20' 
+                  ? 'bg-white/15 text-white border-white/30 shadow-[0_0_10px_rgba(255,255,255,0.2)]' 
                   : 'bg-primary/15 text-primary border-primary/30'
               }`}>
                 {weather.condition}
@@ -302,15 +352,19 @@ export default function WeatherWidget() {
         {/* Photography Tip */}
         <div className={`rounded-xl p-3 mb-4 ${
           weather.isNight 
-            ? 'bg-white/5 border border-white/10' 
+            ? 'bg-white/10 border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]' 
             : 'bg-accent/10 border border-accent/20'
         }`}>
           <div className="flex items-start gap-2">
             <Camera className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-              weather.isNight ? 'text-white' : 'text-accent'
+              weather.isNight 
+                ? 'text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]' 
+                : 'text-accent'
             }`} strokeWidth={2.5} />
             <p className={`text-sm font-medium leading-relaxed ${
-              weather.isNight ? 'text-white' : 'text-foreground'
+              weather.isNight 
+                ? 'text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.2)]' 
+                : 'text-foreground'
             }`}>
               {weather.photographyTip}
             </p>
@@ -321,42 +375,50 @@ export default function WeatherWidget() {
         <div className="flex items-center gap-4">
           <div className={`flex-1 rounded-lg p-3 border ${
             weather.isNight 
-              ? 'bg-white/5 border-white/10' 
+              ? 'bg-white/10 border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.1)]' 
               : 'bg-gradient-to-br from-accent/5 to-transparent border-border/50'
           }`}>
             <div className="flex items-center gap-2 mb-1">
               <Sunrise className={`w-4 h-4 ${
-                weather.isNight ? 'text-white/80' : 'text-accent'
+                weather.isNight 
+                  ? 'text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]' 
+                  : 'text-accent'
               }`} strokeWidth={2.5} />
               <span className={`text-xs font-semibold uppercase tracking-wide ${
-                weather.isNight ? 'text-white/60' : 'text-muted-foreground'
+                weather.isNight ? 'text-white/70' : 'text-muted-foreground'
               }`}>
                 Sunrise
               </span>
             </div>
             <p className={`text-base font-bold ${
-              weather.isNight ? 'text-white' : 'text-foreground'
+              weather.isNight 
+                ? 'text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]' 
+                : 'text-foreground'
             }`}>
               {weather.sunrise}
             </p>
           </div>
           <div className={`flex-1 rounded-lg p-3 border ${
             weather.isNight 
-              ? 'bg-white/5 border-white/10' 
+              ? 'bg-white/10 border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.1)]' 
               : 'bg-gradient-to-br from-primary/5 to-transparent border-border/50'
           }`}>
             <div className="flex items-center gap-2 mb-1">
               <Sunset className={`w-4 h-4 ${
-                weather.isNight ? 'text-white/80' : 'text-primary'
+                weather.isNight 
+                  ? 'text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]' 
+                  : 'text-primary'
               }`} strokeWidth={2.5} />
               <span className={`text-xs font-semibold uppercase tracking-wide ${
-                weather.isNight ? 'text-white/60' : 'text-muted-foreground'
+                weather.isNight ? 'text-white/70' : 'text-muted-foreground'
               }`}>
                 Sunset
               </span>
             </div>
             <p className={`text-base font-bold ${
-              weather.isNight ? 'text-white' : 'text-foreground'
+              weather.isNight 
+                ? 'text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]' 
+                : 'text-foreground'
             }`}>
               {weather.sunset}
             </p>
