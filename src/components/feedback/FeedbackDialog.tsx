@@ -68,7 +68,7 @@ export default function FeedbackDialog({ open, onOpenChange }: FeedbackDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <Send className="w-5 h-5 text-primary" />
@@ -87,7 +87,7 @@ export default function FeedbackDialog({ open, onOpenChange }: FeedbackDialogPro
                   htmlFor="bug"
                   className="flex items-center justify-center rounded-lg border-2 border-muted bg-card p-3 hover:bg-accent cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 transition-all"
                 >
-                  🐛 Bug Report
+                  Bug Report
                 </Label>
               </div>
               <div>
@@ -96,7 +96,7 @@ export default function FeedbackDialog({ open, onOpenChange }: FeedbackDialogPro
                   htmlFor="feature"
                   className="flex items-center justify-center rounded-lg border-2 border-muted bg-card p-3 hover:bg-accent cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 transition-all"
                 >
-                  💡 Feature Request
+                  Feature Request
                 </Label>
               </div>
               <div>
@@ -105,7 +105,7 @@ export default function FeedbackDialog({ open, onOpenChange }: FeedbackDialogPro
                   htmlFor="improvement"
                   className="flex items-center justify-center rounded-lg border-2 border-muted bg-card p-3 hover:bg-accent cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 transition-all"
                 >
-                  ⚡ Improvement
+                  Improvement
                 </Label>
               </div>
               <div>
@@ -114,7 +114,7 @@ export default function FeedbackDialog({ open, onOpenChange }: FeedbackDialogPro
                   htmlFor="other"
                   className="flex items-center justify-center rounded-lg border-2 border-muted bg-card p-3 hover:bg-accent cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 transition-all"
                 >
-                  📝 Other
+                  Other
                 </Label>
               </div>
             </RadioGroup>

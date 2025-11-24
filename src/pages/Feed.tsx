@@ -6,7 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Heart, LogOut, Camera, Lightbulb, ChevronRight, Sparkles, TrendingUp, Search, MessageSquare } from "lucide-react";
+import { Heart, LogOut, Camera, Lightbulb, ChevronRight, Sparkles, TrendingUp, Search, MessageSquare, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import PhotoCard from "@/components/PhotoCard";
@@ -296,7 +296,18 @@ export default function Feed() {
       <header className="sticky top-0 z-40 glass-strong border-b border-border/30 shadow-sm backdrop-blur-xl">
         <div className="max-w-2xl mx-auto px-5 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold tracking-tight">Frame</h1>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => navigate("/")} 
+                className="rounded-lg"
+                title="Back to Home"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <h1 className="text-xl font-bold tracking-tight">Frame</h1>
+            </div>
             <div className="flex items-center gap-1.5">
               <Button 
                 variant="ghost" 
