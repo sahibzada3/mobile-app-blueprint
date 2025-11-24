@@ -6,37 +6,100 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 
-// Daily inspirational scenes that rotate
-const inspirationalScenes = [
+// Import all filter scene images
+import goldenHour from "@/assets/filters/golden-hour.jpg";
+import fogMist from "@/assets/filters/fog-mist.jpg";
+import forest from "@/assets/filters/forest.jpg";
+import beachDesert from "@/assets/filters/beach-desert.jpg";
+import middaySun from "@/assets/filters/midday-sun.jpg";
+import night from "@/assets/filters/night.jpg";
+import oldArchitecture from "@/assets/filters/old-architecture.jpg";
+import rain from "@/assets/filters/rain.jpg";
+import silhouette from "@/assets/filters/silhouette.jpg";
+import skyClouds from "@/assets/filters/sky-clouds.jpg";
+import urban from "@/assets/filters/urban.jpg";
+import water from "@/assets/filters/water.jpg";
+import indoorGolden from "@/assets/filters/indoor-golden.jpg";
+
+// All filter scenes for daily inspiration
+const filterScenes = [
   {
     id: 1,
     name: "Golden Hour Magic",
-    image: "/scenes/golden-hour.jpg",
-    description: "Capture the warm, golden light during the magic hour"
+    image: goldenHour,
+    description: "Warm, cinematic light at sunrise and sunset"
   },
   {
     id: 2,
-    name: "Blue Hour Serenity",
-    image: "/scenes/blue-hour.jpg",
-    description: "The peaceful twilight moments when the sky turns deep blue"
+    name: "Midday Sun",
+    image: middaySun,
+    description: "Bright, high-contrast daylight scenes"
   },
   {
     id: 3,
-    name: "Majestic Landscapes",
-    image: "/scenes/landscape.jpg",
-    description: "Vast, breathtaking views of nature's grandeur"
+    name: "Night Sky",
+    image: night,
+    description: "Stars, city lights, and nighttime beauty"
   },
   {
     id: 4,
-    name: "Urban Geometry",
-    image: "/scenes/architecture.jpg",
-    description: "Modern architecture and city lines that inspire"
+    name: "Fog & Mist",
+    image: fogMist,
+    description: "Ethereal, mysterious atmospheric conditions"
   },
   {
     id: 5,
-    name: "Night Photography",
-    image: "/scenes/night-photography.jpg",
-    description: "Capture the mystery and beauty of nighttime scenes"
+    name: "Silhouette",
+    image: silhouette,
+    description: "Dramatic backlit subjects and shapes"
+  },
+  {
+    id: 6,
+    name: "Urban",
+    image: urban,
+    description: "City streets, architecture, and urban life"
+  },
+  {
+    id: 7,
+    name: "Water",
+    image: water,
+    description: "Lakes, rivers, oceans, and reflections"
+  },
+  {
+    id: 8,
+    name: "Forest",
+    image: forest,
+    description: "Woodland light, trees, and natural paths"
+  },
+  {
+    id: 9,
+    name: "Beach & Desert",
+    image: beachDesert,
+    description: "Coastal waves and sandy landscapes"
+  },
+  {
+    id: 10,
+    name: "Sky & Clouds",
+    image: skyClouds,
+    description: "Dramatic skies, cloud formations, and weather"
+  },
+  {
+    id: 11,
+    name: "Rain",
+    image: rain,
+    description: "Wet streets, droplets, and moody weather"
+  },
+  {
+    id: 12,
+    name: "Indoor Golden",
+    image: indoorGolden,
+    description: "Warm indoor light through windows"
+  },
+  {
+    id: 13,
+    name: "Old Architecture",
+    image: oldArchitecture,
+    description: "Historic buildings, textures, and vintage charm"
   }
 ];
 
@@ -48,7 +111,7 @@ export default function Ideas() {
     checkAuth();
     // Set daily scene based on day of year
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-    setCurrentSceneIndex(dayOfYear % inspirationalScenes.length);
+    setCurrentSceneIndex(dayOfYear % filterScenes.length);
   }, []);
 
   const checkAuth = async () => {
@@ -59,7 +122,7 @@ export default function Ideas() {
     }
   };
 
-  const todaysScene = inspirationalScenes[currentSceneIndex];
+  const todaysScene = filterScenes[currentSceneIndex];
 
   return (
     <div className="min-h-screen gradient-soft pb-20">
@@ -95,13 +158,13 @@ export default function Ideas() {
           </div>
         </Card>
 
-        {/* All Scenes Grid */}
+        {/* All Filter Scenes Grid */}
         <div className="mb-4">
-          <h3 className="text-lg font-bold tracking-tight mb-3">Explore All Scenes</h3>
+          <h3 className="text-lg font-bold tracking-tight mb-3">Explore All Filter Scenes</h3>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
-          {inspirationalScenes.map((scene, index) => (
+        <div className="grid grid-cols-2 gap-3">
+          {filterScenes.map((scene, index) => (
             <Card 
               key={scene.id} 
               className={`glass-card border-border/50 overflow-hidden cursor-pointer hover:shadow-card-hover transition-all duration-300 hover-lift ${
@@ -130,14 +193,14 @@ export default function Ideas() {
           ))}
         </div>
 
-        {/* Tip */}
-        <Card className="glass-card border-primary/20 mt-6">
+        {/* Daily Tip */}
+        <Card className="glass-card border-primary/20 mt-6 mb-4">
           <CardContent className="p-5 flex items-start gap-3">
             <Sparkles className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-medium mb-1">Daily Inspiration Tip</p>
+              <p className="text-sm font-medium mb-1">Daily Scene Inspiration</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Each day brings a new featured scene to inspire your photography. Visit daily to discover fresh creative ideas and capture stunning moments!
+                Each day showcases a different filter scene to inspire your photography. Tap any scene to open the camera and start capturing with that style!
               </p>
             </div>
           </CardContent>
