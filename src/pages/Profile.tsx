@@ -96,7 +96,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Clean Header */}
-      <header className="sticky top-0 bg-card/95 backdrop-blur-xl border-b border-border/50 z-40 shadow-sm">
+      <header className="sticky top-0 glass-strong border-b border-border/30 z-40 shadow-sm">
         <div className="max-w-2xl mx-auto px-5 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold tracking-tight">Profile</h1>
           <div className="flex items-center gap-1.5">
