@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { LogOut, User as UserIcon, Camera, Heart, Moon, Sun, Settings, Eye } from "lucide-react";
+import { LogOut, User as UserIcon, Camera, Heart, Settings, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
 import NotificationBell from "@/components/notifications/NotificationBell";
@@ -15,7 +15,7 @@ import RankBadgeDisplay from "@/components/profile/RankBadgeDisplay";
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
+  
   const [profile, setProfile] = useState<any>(null);
   const [photos, setPhotos] = useState<any[]>([]);
   const [stats, setStats] = useState({ photoCount: 0, totalLikes: 0, followers: 0, following: 0 });
@@ -103,9 +103,6 @@ export default function Profile() {
             <NotificationBell />
             <Button variant="ghost" size="icon" onClick={() => navigate("/profile/settings")} className="rounded-lg">
               <Settings className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-lg">
-              {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </Button>
             <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-lg">
               <LogOut className="w-5 h-5" />

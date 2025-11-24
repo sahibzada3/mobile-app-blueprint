@@ -4,8 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Moon, Sun, Plus } from "lucide-react";
-import { useTheme } from "@/hooks/useTheme";
+import { Target, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +14,7 @@ import CreateChallengeDialog from "@/components/challenges/CreateChallengeDialog
 
 export default function Challenges() {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
+  
   const { toast } = useToast();
   const [challenges, setChallenges] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -127,54 +126,56 @@ export default function Challenges() {
 
   return (
     <div className="min-h-screen bg-gradient-soft pb-20">
-      <header className="sticky top-0 bg-card/95 backdrop-blur-lg border-b border-border z-40 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Trophy className="w-6 h-6 text-primary" />
-              <h1 className="text-2xl font-display font-bold">Friend Challenges</h1>
+      <header className="sticky top-0 glass-strong border-b border-border/30 z-40 shadow-elevated backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto px-5 py-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Target className="w-7 h-7 text-primary" />
+              <div>
+                <h1 className="text-2xl font-display font-bold tracking-tight">Battles</h1>
+                <p className="text-xs text-muted-foreground mt-0.5">Compete with friends</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <NotificationBell />
-              <Button variant="ghost" size="icon" onClick={toggleTheme}>
-                {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-              </Button>
-            </div>
+            <NotificationBell />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
-              <p className="text-2xl font-bold text-primary">{activeChallenges.length}</p>
-              <p className="text-xs text-muted-foreground">Active</p>
+            <div className="p-4 rounded-xl glass border-primary/20 shadow-soft">
+              <p className="text-2xl font-bold text-primary tracking-tight">{activeChallenges.length}</p>
+              <p className="text-xs text-muted-foreground mt-1">Active</p>
             </div>
-            <div className="p-3 rounded-lg bg-secondary/5 border border-secondary/10">
-              <p className="text-2xl font-bold text-secondary">{completedChallenges.length}</p>
-              <p className="text-xs text-muted-foreground">Completed</p>
+            <div className="p-4 rounded-xl glass border-border/30 shadow-soft">
+              <p className="text-2xl font-bold tracking-tight">{completedChallenges.length}</p>
+              <p className="text-xs text-muted-foreground mt-1">Completed</p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      <main className="max-w-6xl mx-auto px-5 py-6">
         <CreateChallengeDialog onSuccess={fetchChallenges}>
-          <Button size="lg" className="w-full mb-6 shadow-glow">
+          <Button size="lg" className="w-full mb-6 shadow-card hover:shadow-card-hover h-14">
             <Plus className="w-5 h-5 mr-2" />
-            Create New Challenge
+            Create New Battle
           </Button>
         </CreateChallengeDialog>
 
         <Tabs defaultValue="active" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="active">Active ({activeChallenges.length})</TabsTrigger>
-            <TabsTrigger value="completed">Completed ({completedChallenges.length})</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-6 glass h-12 p-1.5">
+            <TabsTrigger value="active" className="text-sm font-medium">
+              Active ({activeChallenges.length})
+            </TabsTrigger>
+            <TabsTrigger value="completed" className="text-sm font-medium">
+              Completed ({completedChallenges.length})
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="active" className="space-y-4">
             {activeChallenges.length === 0 ? (
               <div className="text-center py-12">
-                <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-lg font-medium text-muted-foreground">No active challenges</p>
-                <p className="text-sm text-muted-foreground">Create a challenge to compete with friends!</p>
+                <Target className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <p className="text-lg font-medium text-muted-foreground">No active battles</p>
+                <p className="text-sm text-muted-foreground">Create a battle to compete with friends!</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -215,8 +216,8 @@ export default function Challenges() {
           <TabsContent value="completed" className="space-y-4">
             {completedChallenges.length === 0 ? (
               <div className="text-center py-12">
-                <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-lg font-medium text-muted-foreground">No completed challenges</p>
+                <Target className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <p className="text-lg font-medium text-muted-foreground">No completed battles</p>
               </div>
             ) : (
               <div className="space-y-4">
