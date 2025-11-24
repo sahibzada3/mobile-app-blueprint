@@ -6,7 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Heart, LogOut, Camera, Moon, Sun, Lightbulb, ChevronRight, Sparkles, TrendingUp, Search } from "lucide-react";
+import { Heart, LogOut, Camera, Lightbulb, ChevronRight, Sparkles, TrendingUp, Search } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import PhotoCard from "@/components/PhotoCard";
@@ -16,7 +16,7 @@ import NotificationBell from "@/components/notifications/NotificationBell";
 
 export default function Feed() {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
+  
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [photos, setPhotos] = useState<any[]>([]);
@@ -63,6 +63,30 @@ export default function Feed() {
           table: 'photos'
         },
         () => {
+          loadPhotos();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'votes'
+        },
+        () => {
+          // Refresh photos to update vote counts
+          loadPhotos();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'comments'
+        },
+        () => {
+          // Refresh photos to update comment counts
           loadPhotos();
         }
       )
@@ -163,11 +187,76 @@ export default function Feed() {
 
   return (
     <div 
-      className="min-h-screen pb-24 bg-background relative"
+      className="min-h-screen pb-24 bg-background relative overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
+      {/* Animated Wave Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-[0.03]">
+        {/* Flowing waves */}
+        <motion.div
+          className="absolute w-[200%] h-32 bg-gradient-to-r from-transparent via-primary to-transparent"
+          style={{ top: '10%', left: '-50%' }}
+          animate={{
+            x: ['0%', '50%'],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
+        <motion.div
+          className="absolute w-[200%] h-24 bg-gradient-to-r from-transparent via-accent to-transparent"
+          style={{ top: '30%', left: '-50%' }}
+          animate={{
+            x: ['0%', '50%'],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear",
+            delay: 2
+          }}
+        />
+        <motion.div
+          className="absolute w-[200%] h-40 bg-gradient-to-r from-transparent via-secondary to-transparent"
+          style={{ top: '60%', left: '-50%' }}
+          animate={{
+            x: ['0%', '50%'],
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "linear",
+            delay: 4
+          }}
+        />
+        
+        {/* Flowing strips */}
+        {[...Array(5)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute h-px w-[150%] bg-gradient-to-r from-transparent via-primary/50 to-transparent"
+            style={{ 
+              top: `${15 + i * 20}%`,
+              left: '-25%',
+              transform: `rotate(-${5 + i * 2}deg)`
+            }}
+            animate={{
+              x: ['0%', '50%'],
+              opacity: [0.1, 0.3, 0.1]
+            }}
+            transition={{
+              duration: 15 + i * 5,
+              repeat: Infinity,
+              ease: "linear",
+              delay: i * 1.5
+            }}
+          />
+        ))}
+      </div>
       {/* Pull to Refresh Indicator */}
       <motion.div
         className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none"
@@ -203,15 +292,12 @@ export default function Feed() {
           )}
         </div>
       </motion.div>
-      <header className="sticky top-0 z-40 glass-strong border-b border-border/30 shadow-sm">
+      <header className="sticky top-0 z-40 glass-strong border-b border-border/30 shadow-sm backdrop-blur-xl">
         <div className="max-w-2xl mx-auto px-5 py-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-xl font-bold tracking-tight">Frame</h1>
             <div className="flex items-center gap-1.5">
               <NotificationBell />
-              <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-lg">
-                {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-              </Button>
               <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-lg">
                 <LogOut className="w-5 h-5" />
               </Button>

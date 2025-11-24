@@ -52,5 +52,39 @@ export const useConfetti = () => {
     });
   }, []);
 
-  return { celebrateTopThree, celebrateNewSubmission };
+  const celebrate = useCallback((intensity: 'low' | 'medium' | 'high' = 'medium') => {
+    const configs = {
+      low: { particleCount: 50, spread: 50, colors: ['#FF6B6B', '#FFD93D', '#6BCF7F'] },
+      medium: { particleCount: 100, spread: 70, colors: ['#FF6B6B', '#FFD93D', '#6BCF7F', '#4D96FF'] },
+      high: { particleCount: 150, spread: 100, colors: ['#FFD700', '#FF6B6B', '#FFD93D', '#6BCF7F', '#4D96FF', '#FF00FF'] }
+    };
+
+    const config = configs[intensity];
+    
+    confetti({
+      particleCount: config.particleCount,
+      spread: config.spread,
+      origin: { y: 0.6 },
+      colors: config.colors,
+      startVelocity: 45,
+      gravity: 1,
+      ticks: 400,
+      scalar: 1.2,
+    });
+
+    // Add a second burst for high intensity
+    if (intensity === 'high') {
+      setTimeout(() => {
+        confetti({
+          particleCount: 100,
+          spread: 120,
+          origin: { y: 0.5 },
+          colors: config.colors,
+          startVelocity: 35,
+        });
+      }, 250);
+    }
+  }, []);
+
+  return { celebrateTopThree, celebrateNewSubmission, celebrate };
 };
