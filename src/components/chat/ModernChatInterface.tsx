@@ -99,47 +99,31 @@ export default function ModernChatInterface({ friend, onBack }: ModernChatInterf
 
   const setupRealtimeSubscription = () => {
     const channel = supabase
-      .channel(`chat-${currentUserId}-${friend.id}`)
+      .channel(`chat-realtime-${currentUserId}-${friend.id}`)
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "messages",
           filter: `or(and(sender_id=eq.${currentUserId},recipient_id=eq.${friend.id}),and(sender_id=eq.${friend.id},recipient_id=eq.${currentUserId}))`,
         },
         (payload) => {
-          const newMsg = payload.new as Message;
-          setMessages((prev) => [...prev, newMsg]);
-          if (newMsg.sender_id === friend.id) {
-            markMessagesAsRead();
+          if (payload.eventType === "INSERT") {
+            const newMsg = payload.new as Message;
+            setMessages((prev) => [...prev, newMsg]);
+            if (newMsg.sender_id === friend.id) {
+              markMessagesAsRead();
+            }
+            scrollToBottom();
+          } else if (payload.eventType === "UPDATE") {
+            const updatedMsg = payload.new as Message;
+            setMessages((prev) =>
+              prev.map((msg) => (msg.id === updatedMsg.id ? updatedMsg : msg))
+            );
+          } else if (payload.eventType === "DELETE") {
+            setMessages((prev) => prev.filter((msg) => msg.id !== payload.old.id));
           }
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "messages",
-        },
-        (payload) => {
-          const updatedMsg = payload.new as Message;
-          setMessages((prev) =>
-            prev.map((msg) => (msg.id === updatedMsg.id ? updatedMsg : msg))
-          );
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "DELETE",
-          schema: "public",
-          table: "messages",
-        },
-        (payload) => {
-          const deletedId = payload.old.id;
-          setMessages((prev) => prev.filter((msg) => msg.id !== deletedId));
         }
       )
       .subscribe();

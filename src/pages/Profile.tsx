@@ -4,14 +4,22 @@ import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { LogOut, User as UserIcon, Camera, Heart, Settings, Eye } from "lucide-react";
+import { LogOut, Camera, Heart, Settings, Trash2, Edit } from "lucide-react";
 import { toast } from "sonner";
-import { useTheme } from "@/hooks/useTheme";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import RankBadgeDisplay from "@/components/profile/RankBadgeDisplay";
+import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -20,6 +28,7 @@ export default function Profile() {
   const [photos, setPhotos] = useState<any[]>([]);
   const [stats, setStats] = useState({ photoCount: 0, totalLikes: 0, followers: 0, following: 0 });
   const [loading, setLoading] = useState(true);
+  const [deletePhotoId, setDeletePhotoId] = useState<string | null>(null);
 
   useEffect(() => {
     loadProfile();
@@ -82,6 +91,30 @@ export default function Profile() {
     navigate("/login");
   };
 
+  const handleDeletePhoto = async () => {
+    if (!deletePhotoId) return;
+
+    try {
+      const { error } = await supabase
+        .from("photos")
+        .delete()
+        .eq("id", deletePhotoId);
+
+      if (error) throw error;
+
+      setPhotos(photos.filter(p => p.id !== deletePhotoId));
+      toast.success("Photo deleted");
+      setDeletePhotoId(null);
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast.error("Failed to delete photo");
+    }
+  };
+
+  const handleAvatarUpdate = (newUrl: string) => {
+    setProfile({ ...profile, avatar_url: newUrl });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -117,16 +150,13 @@ export default function Profile() {
           <CardContent className="p-7">
             {/* Centered Profile Picture */}
             <div className="flex flex-col items-center mb-6">
-              <Avatar className="w-28 h-28 mb-4 shadow-soft ring-2 ring-primary/10">
-                {profile?.avatar_url ? (
-                  <AvatarImage src={profile.avatar_url} />
-                ) : (
-                  <AvatarFallback className="bg-muted text-foreground text-2xl font-semibold">
-                    {profile?.username?.charAt(0).toUpperCase() || <UserIcon />}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-              <h2 className="text-2xl font-bold mb-2">
+              <ProfilePictureUpload
+                currentAvatarUrl={profile?.avatar_url}
+                userId={profile?.id}
+                username={profile?.username || "User"}
+                onUploadComplete={handleAvatarUpdate}
+              />
+              <h2 className="text-2xl font-bold mb-2 mt-4">
                 {profile?.username || "Unknown User"}
               </h2>
               {profile?.bio && (
@@ -192,13 +222,36 @@ export default function Profile() {
                 {photos.map((photo) => (
                   <div
                     key={photo.id}
-                    className="aspect-square relative overflow-hidden bg-muted cursor-pointer hover-lift rounded-lg"
+                    className="aspect-square relative overflow-hidden bg-muted rounded-lg group"
                   >
                     <img
                       src={photo.image_url}
                       alt={photo.caption || ""}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover cursor-pointer hover-lift"
+                      onClick={() => navigate("/feed")}
                     />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/editor", { state: { photoId: photo.id } });
+                        }}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeletePhotoId(photo.id);
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -236,6 +289,23 @@ export default function Profile() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <AlertDialog open={!!deletePhotoId} onOpenChange={() => setDeletePhotoId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Photo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your photo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeletePhoto} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <BottomNav />
     </div>
