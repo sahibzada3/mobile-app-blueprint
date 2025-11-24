@@ -35,7 +35,48 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   // Load flare count and user's flare status
   useEffect(() => {
     loadFlareData();
-    setupRealtimeSubscription();
+    
+    const channel = supabase
+      .channel(`votes-realtime-${photo.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "votes",
+          filter: `photo_id=eq.${photo.id}`,
+        },
+        (payload) => {
+          if (payload.new.vote_type === "upvote") {
+            setFlareCount((prev) => prev + 1);
+            if (payload.new.user_id === currentUserId) {
+              setHasFlared(true);
+            }
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "votes",
+          filter: `photo_id=eq.${photo.id}`,
+        },
+        (payload) => {
+          if (payload.old.vote_type === "upvote") {
+            setFlareCount((prev) => Math.max(0, prev - 1));
+            if (payload.old.user_id === currentUserId) {
+              setHasFlared(false);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [photo.id, currentUserId]);
 
   const loadFlareData = async () => {
@@ -60,28 +101,6 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
       .single();
 
     setHasFlared(!!userFlare);
-  };
-
-  const setupRealtimeSubscription = () => {
-    const channel = supabase
-      .channel(`votes-${photo.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "votes",
-          filter: `photo_id=eq.${photo.id}`,
-        },
-        () => {
-          loadFlareData();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   };
 
   const handleDoubleTap = async () => {

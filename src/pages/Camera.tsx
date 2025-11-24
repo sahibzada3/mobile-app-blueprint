@@ -75,15 +75,17 @@ export default function Camera() {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { 
-          facingMode, 
-          width: { ideal: 3840 }, 
-          height: { ideal: 2160 }
+          facingMode,
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
         },
         audio: false,
       });
       setStream(mediaStream);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        videoRef.current.setAttribute('playsinline', '');
+        videoRef.current.setAttribute('webkit-playsinline', '');
       }
     } catch (error) {
       toast.error("Camera access denied");
@@ -203,15 +205,13 @@ export default function Camera() {
   const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current) return;
 
-    // Removed capture sound as requested
-
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
+    const context = canvas.getContext("2d", { willReadFrequently: false });
 
     if (!context) return;
 
-    // Apply cinematic 21:9 crop if in cinematic mode
+    // Optimize canvas size
     if (mode === "cinematic") {
       const aspectRatio = 21 / 9;
       canvas.width = video.videoWidth;
@@ -226,28 +226,23 @@ export default function Camera() {
       context.filter = getFilterStyle();
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
     }
-
-    // Apply AI enhancements based on mode and scene (silent processing)
-    await new Promise(resolve => setTimeout(resolve, 500)); // Quick processing
     
-    canvas.toBlob((blob) => {
-      if (blob) {
-        sessionStorage.setItem("capturedPhoto", canvas.toDataURL("image/jpeg", 0.98));
-        sessionStorage.setItem("photoFilters", JSON.stringify({ 
-          mode, 
-          filter: selectedFilter, 
-          settings: advancedSettings
-        }));
-        
-        if (challengeId) {
-          navigate("/editor", { state: { challengeId } });
-        } else if (chainId) {
-          navigate("/editor", { state: { chainId } });
-        } else {
-          navigate("/editor");
-        }
-      }
-    }, "image/jpeg", 0.98);
+    // Fast encode
+    const imageData = canvas.toDataURL("image/jpeg", 0.92);
+    sessionStorage.setItem("capturedPhoto", imageData);
+    sessionStorage.setItem("photoFilters", JSON.stringify({ 
+      mode, 
+      filter: selectedFilter, 
+      settings: advancedSettings
+    }));
+    
+    if (challengeId) {
+      navigate("/editor", { state: { challengeId } });
+    } else if (chainId) {
+      navigate("/editor", { state: { chainId } });
+    } else {
+      navigate("/editor");
+    }
   };
 
   // Listen for capture event from nav bar
