@@ -178,7 +178,7 @@ export default function Feed() {
         }}
         transition={{ duration: 0.2 }}
       >
-        <div className="bg-card/95 backdrop-blur-xl rounded-2xl px-6 py-3 shadow-card border border-primary/20 flex items-center gap-3">
+        <div className="bg-card/95 backdrop-blur-xl rounded-2xl px-6 py-3 shadow-card border border-primary/20 flex items-center gap-3 glass">
           {isRefreshing ? (
             <>
               <motion.div
@@ -203,7 +203,7 @@ export default function Feed() {
           )}
         </div>
       </motion.div>
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-card/95 border-b border-border/50 shadow-sm">
+      <header className="sticky top-0 z-40 glass-strong border-b border-border/30 shadow-sm">
         <div className="max-w-2xl mx-auto px-5 py-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-xl font-bold tracking-tight">Frame</h1>
@@ -226,7 +226,7 @@ export default function Feed() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => navigate("/search")}
-              className="pl-10 h-11 bg-muted/40 border-border/50 rounded-xl focus:bg-muted/60 transition-colors"
+              className="pl-10 h-11 glass border-border/30 rounded-xl focus-visible:ring-primary/20 transition-all duration-200"
             />
           </div>
         </div>

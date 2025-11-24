@@ -27,9 +27,9 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   return (
-    <Card className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 border-border/50">
+    <Card className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 border-border/30 glass-card">
       {/* Professional Header */}
-      <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-card/80 to-card">
+      <div className="flex items-center justify-between px-5 py-4 glass">
         <div className="flex items-center gap-3">
           <Avatar className="w-11 h-11 ring-2 ring-primary/10 shadow-sm">
             <AvatarFallback className="bg-gradient-to-br from-primary/20 to-secondary/20 text-foreground text-sm font-semibold">
