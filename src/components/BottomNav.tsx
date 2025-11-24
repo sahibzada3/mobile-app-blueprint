@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Camera, Target, User, Lightbulb, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
