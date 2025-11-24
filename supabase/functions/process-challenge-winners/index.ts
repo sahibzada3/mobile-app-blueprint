@@ -26,13 +26,13 @@ Deno.serve(async (req) => {
 
     console.log('Starting challenge winner processing...')
 
-    // Find challenges that have ended but badges haven't been awarded
+    // Find challenges that have ended and haven't been judged yet
     const now = new Date().toISOString()
     const { data: endedChallenges, error: challengesError } = await supabase
-      .from('challenges')
+      .from('friend_challenges')
       .select('*')
       .lt('end_date', now)
-      .eq('badges_awarded', false)
+      .is('judging_completed_at', null)
       .eq('status', 'active')
 
     if (challengesError) {
@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
         .from('challenge_submissions')
         .select('*, profile:profiles(username)')
         .eq('challenge_id', challenge.id)
-        .order('score', { ascending: false })
+        .order('ai_score', { ascending: false })
         .order('submitted_at', { ascending: true })
         .limit(3)
 
@@ -73,8 +73,8 @@ Deno.serve(async (req) => {
         console.log(`No submissions found for challenge ${challenge.id}`)
         // Mark as processed even with no submissions
         await supabase
-          .from('challenges')
-          .update({ badges_awarded: true, status: 'completed' })
+          .from('friend_challenges')
+          .update({ status: 'completed', judging_completed_at: now })
           .eq('id', challenge.id)
         continue
       }
@@ -103,12 +103,12 @@ Deno.serve(async (req) => {
         const rank = i + 1
         const badge = badges[i] || badges[0] // Use first badge if not enough badges
 
-        // Mark submission as winner if rank 1
+        // Mark challenge winner if rank 1
         if (rank === 1) {
           await supabase
-            .from('challenge_submissions')
-            .update({ is_winner: true })
-            .eq('id', submission.id)
+            .from('friend_challenges')
+            .update({ winner_id: submission.user_id })
+            .eq('id', challenge.id)
         }
 
         // Award badge - using service role to bypass RLS
@@ -161,8 +161,8 @@ Deno.serve(async (req) => {
 
       // Mark challenge as processed
       const { error: updateError } = await supabase
-        .from('challenges')
-        .update({ badges_awarded: true, status: 'completed' })
+        .from('friend_challenges')
+        .update({ status: 'completed', judging_completed_at: now })
         .eq('id', challenge.id)
 
       if (updateError) {
