@@ -27,11 +27,11 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   return (
-    <Card className="overflow-hidden shadow-soft hover:shadow-elevated transition-all duration-300 border-border/50 bg-card">
+    <Card className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 border-border/50">
       {/* Professional Header */}
-      <div className="flex items-center justify-between px-4 py-3.5 bg-gradient-to-r from-card to-card/95">
+      <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-card/80 to-card">
         <div className="flex items-center gap-3">
-          <Avatar className="w-10 h-10 ring-2 ring-primary/10">
+          <Avatar className="w-11 h-11 ring-2 ring-primary/10 shadow-sm">
             <AvatarFallback className="bg-gradient-to-br from-primary/20 to-secondary/20 text-foreground text-sm font-semibold">
               {photo.profiles?.username?.charAt(0).toUpperCase() || <User className="w-4 h-4" />}
             </AvatarFallback>
@@ -49,7 +49,7 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
             </p>
           </div>
         </div>
-        <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-muted/50">
+        <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-muted/60 rounded-lg">
           <MoreHorizontal className="w-5 h-5 text-muted-foreground" />
         </Button>
       </div>
@@ -63,14 +63,14 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
           loading="lazy"
         />
         {photo.music_track && (
-          <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded-full">
+          <div className="absolute top-4 right-4 glass px-3 py-1.5 rounded-full shadow-sm">
             <p className="text-xs text-white font-medium">♫ {photo.music_track}</p>
           </div>
         )}
       </div>
 
       {/* Professional Action Bar */}
-      <div className="px-4 py-3.5 border-t border-border/50">
+      <div className="px-5 py-4 border-t border-border/30">
         <div className="flex items-center justify-between mb-3">
           <VoteButtons photoId={photo.id} currentUserId={currentUserId} />
           
@@ -78,21 +78,21 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 hover:bg-muted/50 transition-colors"
+              className="h-9 w-9 hover:bg-muted/60 rounded-lg transition-all duration-200"
               onClick={() => {
                 setIsBookmarked(!isBookmarked);
                 toast.success(isBookmarked ? "Removed from saved" : "Saved");
               }}
             >
               <Bookmark 
-                className={`w-5 h-5 transition-all ${isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
+                className={`w-5 h-5 transition-all duration-200 ${isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
               />
             </Button>
             
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 hover:bg-muted/50 transition-colors"
+              className="h-9 w-9 hover:bg-muted/60 rounded-lg transition-all duration-200"
               onClick={() => {
                 if (navigator.share) {
                   navigator.share({
@@ -113,7 +113,7 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
         {photo.caption && (
           <div className="mb-3">
             <p className="text-sm leading-relaxed">
-              <span className="font-semibold mr-1.5">{photo.profiles?.username}</span>
+              <span className="font-semibold mr-2">{photo.profiles?.username}</span>
               <span className="text-foreground/90">{photo.caption}</span>
             </p>
           </div>

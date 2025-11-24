@@ -203,37 +203,37 @@ export default function Feed() {
           )}
         </div>
       </motion.div>
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-card/95 border-b border-border">
-        <div className="max-w-2xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between mb-3">
-            <h1 className="text-xl font-semibold tracking-tight">Frame</h1>
-            <div className="flex items-center gap-1">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-card/95 border-b border-border/50 shadow-sm">
+        <div className="max-w-2xl mx-auto px-5 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-xl font-bold tracking-tight">Frame</h1>
+            <div className="flex items-center gap-1.5">
               <NotificationBell />
-              <Button variant="ghost" size="icon" onClick={toggleTheme}>
+              <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-lg">
                 {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
               </Button>
-              <Button variant="ghost" size="icon" onClick={handleLogout}>
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-lg">
                 <LogOut className="w-5 h-5" />
               </Button>
             </div>
           </div>
           
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => navigate("/search")}
-              className="pl-10 h-10 bg-muted/50"
+              className="pl-10 h-11 bg-muted/40 border-border/50 rounded-xl focus:bg-muted/60 transition-colors"
             />
           </div>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto py-4">
-        <div className="px-4 mb-4">
+      <main className="max-w-2xl mx-auto py-5">
+        <div className="px-5 mb-5">
           <WeatherWidget />
         </div>
 
@@ -297,13 +297,13 @@ export default function Feed() {
         ) : null}
 
         {photos.length > 0 && (
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-5 px-5">
             {photos.map((photo, index) => (
               <motion.div
                 key={photo.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
+                transition={{ delay: index * 0.05, duration: 0.4 }}
               >
                 <PhotoCard photo={photo} currentUserId={user?.id} />
               </motion.div>
