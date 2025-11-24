@@ -6,7 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Heart, LogOut, Camera, Lightbulb, ChevronRight, Sparkles, TrendingUp, Search } from "lucide-react";
+import { Heart, LogOut, Camera, Lightbulb, ChevronRight, Sparkles, TrendingUp, Search, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import PhotoCard from "@/components/PhotoCard";
@@ -14,6 +14,7 @@ import WeatherWidget from "@/components/weather/WeatherWidget";
 import { useTheme } from "@/hooks/useTheme";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import { useDebounce } from "@/hooks/useDebounce";
+import FeedbackDialog from "@/components/feedback/FeedbackDialog";
 
 export default function Feed() {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ export default function Feed() {
   const [startY, setStartY] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 300);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   useEffect(() => {
     // Check current session
@@ -296,6 +298,15 @@ export default function Feed() {
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-xl font-bold tracking-tight">Frame</h1>
             <div className="flex items-center gap-1.5">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setFeedbackOpen(true)} 
+                className="rounded-lg"
+                title="Send Feedback"
+              >
+                <MessageSquare className="w-5 h-5" />
+              </Button>
               <NotificationBell />
               <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-lg">
                 <LogOut className="w-5 h-5" />
@@ -351,6 +362,7 @@ export default function Feed() {
         )}
       </main>
 
+      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       <BottomNav />
     </div>
   );
