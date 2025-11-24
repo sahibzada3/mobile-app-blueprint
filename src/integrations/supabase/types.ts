@@ -851,6 +851,10 @@ export type Database = {
     }
     Functions: {
       auto_judge_ended_challenges: { Args: never; Returns: undefined }
+      is_challenge_member: {
+        Args: { _challenge_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
