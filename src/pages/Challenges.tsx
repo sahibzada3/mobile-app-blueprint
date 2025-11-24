@@ -126,47 +126,54 @@ export default function Challenges() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-soft pb-20">
-      <header className="sticky top-0 bg-card/95 backdrop-blur-lg border-b border-border z-40 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Trophy className="w-6 h-6 text-primary" />
-              <h1 className="text-2xl font-display font-bold">Friend Challenges</h1>
+    <div className="min-h-screen gradient-soft pb-20">
+      <header className="sticky top-0 glass-strong border-b border-border/30 z-40 shadow-elevated backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto px-5 py-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Trophy className="w-7 h-7 text-primary" />
+              <div>
+                <h1 className="text-2xl font-display font-bold tracking-tight">Challenges</h1>
+                <p className="text-xs text-muted-foreground mt-0.5">Compete with friends</p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <NotificationBell />
-              <Button variant="ghost" size="icon" onClick={toggleTheme}>
+              <Button variant="ghost" size="icon" onClick={toggleTheme} className="hover:bg-background/10">
                 {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
               </Button>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
-              <p className="text-2xl font-bold text-primary">{activeChallenges.length}</p>
-              <p className="text-xs text-muted-foreground">Active</p>
+            <div className="p-4 rounded-xl glass border-primary/20 shadow-soft">
+              <p className="text-2xl font-bold text-primary tracking-tight">{activeChallenges.length}</p>
+              <p className="text-xs text-muted-foreground mt-1">Active</p>
             </div>
-            <div className="p-3 rounded-lg bg-secondary/5 border border-secondary/10">
-              <p className="text-2xl font-bold text-secondary">{completedChallenges.length}</p>
-              <p className="text-xs text-muted-foreground">Completed</p>
+            <div className="p-4 rounded-xl glass border-border/30 shadow-soft">
+              <p className="text-2xl font-bold tracking-tight">{completedChallenges.length}</p>
+              <p className="text-xs text-muted-foreground mt-1">Completed</p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      <main className="max-w-6xl mx-auto px-5 py-6">
         <CreateChallengeDialog onSuccess={fetchChallenges}>
-          <Button size="lg" className="w-full mb-6 shadow-glow">
+          <Button size="lg" className="w-full mb-6 shadow-card hover:shadow-card-hover h-14">
             <Plus className="w-5 h-5 mr-2" />
             Create New Challenge
           </Button>
         </CreateChallengeDialog>
 
         <Tabs defaultValue="active" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="active">Active ({activeChallenges.length})</TabsTrigger>
-            <TabsTrigger value="completed">Completed ({completedChallenges.length})</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-6 glass h-12 p-1.5">
+            <TabsTrigger value="active" className="text-sm font-medium">
+              Active ({activeChallenges.length})
+            </TabsTrigger>
+            <TabsTrigger value="completed" className="text-sm font-medium">
+              Completed ({completedChallenges.length})
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="active" className="space-y-4">
@@ -185,23 +192,23 @@ export default function Challenges() {
                     animate={{ opacity: 1, y: 0 }}
                   >
                      <Card
-                      className="cursor-pointer hover:shadow-elevated transition-all"
+                      className="group glass-card border-border/50 cursor-pointer hover:shadow-card-hover transition-all duration-300 hover-lift"
                       onClick={() => navigate(`/challenges/${challenge.id}`)}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-2">
+                      <CardContent className="p-5">
+                        <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
-                            <h3 className="text-base font-bold mb-1">{challenge.title}</h3>
-                            <p className="text-xs text-muted-foreground mb-1 line-clamp-1">{challenge.description}</p>
-                            <p className="text-xs text-primary font-medium line-clamp-1">{challenge.challenge_prompt}</p>
+                            <h3 className="text-base font-bold mb-1.5 tracking-tight group-hover:text-primary transition-colors">{challenge.title}</h3>
+                            <p className="text-xs text-muted-foreground mb-2 line-clamp-1 leading-relaxed">{challenge.description}</p>
+                            <p className="text-xs text-primary font-semibold line-clamp-1">{challenge.challenge_prompt}</p>
                           </div>
-                          <Badge variant="outline" className="text-xs">{challenge.points_reward} pts</Badge>
+                          <Badge variant="outline" className="text-xs shadow-sm font-semibold">{challenge.points_reward} pts</Badge>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium">
                           <span>{challenge.creator.username}</span>
-                          <span>•</span>
+                          <span className="text-border">•</span>
                           <span>{challenge.participants?.[0]?.count || 0} joined</span>
-                          <span>•</span>
+                          <span className="text-border">•</span>
                           <span>{new Date(challenge.end_date).toLocaleDateString()}</span>
                         </div>
                       </CardContent>
@@ -227,22 +234,27 @@ export default function Challenges() {
                     animate={{ opacity: 1, y: 0 }}
                   >
                     <Card
-                      className="cursor-pointer hover:shadow-elevated transition-all opacity-75"
+                      className="glass-card border-border/40 cursor-pointer hover:shadow-card-hover transition-all duration-300 opacity-75 hover:opacity-100"
                       onClick={() => navigate(`/challenges/${challenge.id}`)}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-2">
+                      <CardContent className="p-5">
+                        <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="text-base font-bold">{challenge.title}</h3>
-                              <Badge variant="secondary" className="text-xs">Completed</Badge>
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <h3 className="text-base font-bold tracking-tight">{challenge.title}</h3>
+                              <Badge variant="secondary" className="text-xs shadow-sm">Completed</Badge>
                             </div>
-                            <p className="text-xs text-muted-foreground line-clamp-1">{challenge.description}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-1 leading-relaxed">{challenge.description}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium">
                           <span>{challenge.creator.username}</span>
-                          {challenge.winner_id && <><span>•</span><span className="text-primary">Winner!</span></>}
+                          {challenge.winner_id && (
+                            <>
+                              <span className="text-border">•</span>
+                              <span className="text-primary font-semibold">Winner!</span>
+                            </>
+                          )}
                         </div>
                       </CardContent>
                     </Card>

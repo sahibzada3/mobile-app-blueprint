@@ -133,41 +133,46 @@ export default function Spotlight() {
 
   const FlareCard = ({ flare }: { flare: Flare }) => (
     <Card
-      className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
+      className="group glass-card hover:shadow-card-hover transition-all duration-300 cursor-pointer hover-lift border-border/50"
       onClick={() => navigate(`/spotlight/${flare.id}`)}
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarImage src={flare.profiles?.avatar_url || ""} />
-            <AvatarFallback>{flare.profiles?.username?.[0]?.toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h3 className="font-semibold text-foreground">{flare.title}</h3>
-            <p className="text-sm text-muted-foreground">by {flare.profiles?.username}</p>
+      <div className="p-5">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Avatar className="ring-2 ring-primary/10 shadow-sm">
+              <AvatarImage src={flare.profiles?.avatar_url || ""} />
+              <AvatarFallback className="text-xs font-semibold">{flare.profiles?.username?.[0]?.toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="font-bold text-base tracking-tight group-hover:text-primary transition-colors">{flare.title}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">by {flare.profiles?.username}</p>
+            </div>
           </div>
+          <Badge 
+            variant={flare.status === "active" ? "default" : "secondary"} 
+            className="shadow-sm"
+          >
+            {flare.status}
+          </Badge>
         </div>
-        <Badge variant={flare.status === "active" ? "default" : "secondary"}>
-          {flare.status}
-        </Badge>
-      </div>
 
-      {flare.description && (
-        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{flare.description}</p>
-      )}
+        {flare.description && (
+          <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">{flare.description}</p>
+        )}
 
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-        <div className="flex items-center gap-1">
-          <Users className="w-4 h-4" />
-          <span>{flare.participant_count}/{flare.max_participants}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <TrendingUp className="w-4 h-4" />
-          <span>{flare.contribution_count} photos</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Clock className="w-4 h-4" />
-          <span>{new Date(flare.created_at).toLocaleDateString()}</span>
+        <div className="flex items-center gap-5 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <Users className="w-4 h-4 text-primary/70" />
+            <span className="font-medium">{flare.participant_count}/{flare.max_participants}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <TrendingUp className="w-4 h-4 text-primary/70" />
+            <span className="font-medium">{flare.contribution_count} photos</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Clock className="w-4 h-4 text-primary/70" />
+            <span className="font-medium">{new Date(flare.created_at).toLocaleDateString()}</span>
+          </div>
         </div>
       </div>
     </Card>
@@ -182,53 +187,63 @@ export default function Spotlight() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="max-w-4xl mx-auto p-4">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Flares</h1>
-            <p className="text-muted-foreground">Collaborative photo stories with friends</p>
+    <div className="min-h-screen gradient-soft pb-20">
+      {/* Premium Header */}
+      <header className="sticky top-0 glass-strong border-b border-border/30 z-40 shadow-elevated backdrop-blur-xl">
+        <div className="max-w-4xl mx-auto px-5 py-5">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h1 className="text-2xl font-display font-bold tracking-tight">Flares</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">Collaborative photo stories</p>
+            </div>
+            <Button onClick={() => setShowCreateDialog(true)} size="lg" className="shadow-card hover:shadow-card-hover">
+              <Plus className="w-4 h-4 mr-2" />
+              Create
+            </Button>
           </div>
-          <Button onClick={() => setShowCreateDialog(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Flare
-          </Button>
         </div>
+      </header>
 
-        <Tabs defaultValue="all" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="all">All Flares</TabsTrigger>
-            <TabsTrigger value="trending">Trending</TabsTrigger>
-            <TabsTrigger value="chat">
-              <MessageCircle className="w-4 h-4 mr-2" />
+      <div className="max-w-4xl mx-auto px-5 pt-6">
+
+        <Tabs defaultValue="all" className="space-y-5">
+          <TabsList className="grid w-full grid-cols-3 glass h-12 p-1.5">
+            <TabsTrigger value="all" className="text-sm font-medium">All Flares</TabsTrigger>
+            <TabsTrigger value="trending" className="text-sm font-medium">Trending</TabsTrigger>
+            <TabsTrigger value="chat" className="text-sm font-medium">
+              <MessageCircle className="w-4 h-4 mr-1.5" />
               Chat
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="all" className="space-y-3">
+          <TabsContent value="all" className="space-y-4">
             {flares.length === 0 ? (
-              <Card className="p-8 text-center">
-                <p className="text-muted-foreground mb-4">No flares yet. Be the first to create one!</p>
-                <Button onClick={() => setShowCreateDialog(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create First Flare
-                </Button>
+              <Card className="glass-card border-border/50">
+                <div className="p-10 text-center">
+                  <p className="text-muted-foreground mb-5 text-sm">No flares yet. Be the first to create one!</p>
+                  <Button onClick={() => setShowCreateDialog(true)} size="lg" className="shadow-card">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create First Flare
+                  </Button>
+                </div>
               </Card>
             ) : (
               flares.map((flare) => <FlareCard key={flare.id} flare={flare} />)
             )}
           </TabsContent>
 
-          <TabsContent value="trending" className="space-y-3">
+          <TabsContent value="trending" className="space-y-4">
             {getTrendingFlares().length === 0 ? (
-              <Card className="p-8 text-center">
-                <p className="text-muted-foreground">No trending flares yet</p>
+              <Card className="glass-card border-border/50">
+                <div className="p-10 text-center">
+                  <p className="text-muted-foreground text-sm">No trending flares yet</p>
+                </div>
               </Card>
             ) : (
               getTrendingFlares().map((flare, index) => (
                 <div key={flare.id} className="relative">
                   {index < 3 && (
-                    <Badge className="absolute -left-2 -top-2 z-10" variant="secondary">
+                    <Badge className="absolute -left-2 -top-2 z-10 shadow-card" variant="secondary">
                       #{index + 1}
                     </Badge>
                   )}
