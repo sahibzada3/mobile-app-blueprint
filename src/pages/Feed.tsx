@@ -13,6 +13,7 @@ import PhotoCard from "@/components/PhotoCard";
 import WeatherWidget from "@/components/weather/WeatherWidget";
 import { useTheme } from "@/hooks/useTheme";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function Feed() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ export default function Feed() {
   const [pullDistance, setPullDistance] = useState(0);
   const [startY, setStartY] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 300);
 
   useEffect(() => {
     // Check current session
