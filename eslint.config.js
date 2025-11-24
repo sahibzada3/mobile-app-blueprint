@@ -21,6 +21,18 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["react"],
+              importNamePattern: "^(useState|useEffect|useContext|useCallback|useMemo|useRef|forwardRef|memo|createContext)$",
+              message: "Use 'import * as React from \"react\"' and access hooks via React.useState, React.useEffect, etc. to maintain consistent React context.",
+            },
+          ],
+        },
+      ],
     },
   },
 );
