@@ -1,4 +1,4 @@
-import { useState } from "react";
+import * as React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,7 +28,7 @@ import Search from "./pages/Search";
 import NearbySpots from "./pages/NearbySpots";
 
 const App = () => {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = React.useState(() => new QueryClient());
   
   return (
     <ThemeProvider>
