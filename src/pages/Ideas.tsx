@@ -20,6 +20,8 @@ import skyClouds from "@/assets/filters/sky-clouds.jpg";
 import urban from "@/assets/filters/urban.jpg";
 import water from "@/assets/filters/water.jpg";
 import indoorGolden from "@/assets/filters/indoor-golden.jpg";
+import street from "@/assets/filters/street.jpg";
+import animal from "@/assets/filters/animal.jpg";
 
 // All filter scenes for daily inspiration
 const filterScenes = [
@@ -100,6 +102,18 @@ const filterScenes = [
     name: "Old Architecture",
     image: oldArchitecture,
     description: "Historic buildings, textures, and vintage charm"
+  },
+  {
+    id: 14,
+    name: "Street Photography",
+    image: street,
+    description: "Urban life, candid moments, and city stories"
+  },
+  {
+    id: 15,
+    name: "Animal Wildlife",
+    image: animal,
+    description: "Wildlife, pets, and creatures in their habitat"
   }
 ];
 
