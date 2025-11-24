@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { VoteButtons } from "@/components/feed/VoteButtons";
 import { CommentSection } from "@/components/feed/CommentSection";
+import { LazyImage } from "@/components/ui/lazy-image";
 
 interface PhotoCardProps {
   photo: {
@@ -185,11 +186,10 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
           }
         }}
       >
-        <img
+        <LazyImage
           src={photo.image_url}
           alt={photo.caption || "Photo"}
           className="w-full h-full object-cover pointer-events-none"
-          loading="lazy"
           draggable={false}
         />
         

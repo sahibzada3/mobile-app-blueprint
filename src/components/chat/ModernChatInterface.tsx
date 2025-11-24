@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import AudioPlayer from "./AudioPlayer";
 import VoiceRecorder from "./VoiceRecorder";
 import { formatDistanceToNow } from "date-fns";
+import { useKeyboard } from "@/hooks/useKeyboard";
 
 interface Message {
   id: string;
@@ -41,6 +42,7 @@ export default function ModernChatInterface({ friend, onBack }: ModernChatInterf
   const [friendTyping, setFriendTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { keyboardHeight, isKeyboardOpen } = useKeyboard();
 
   useEffect(() => {
     checkAuth();
@@ -255,7 +257,10 @@ export default function ModernChatInterface({ friend, onBack }: ModernChatInterf
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div 
+      className="flex flex-col h-screen bg-background"
+      style={{ paddingBottom: isKeyboardOpen ? `${keyboardHeight}px` : '0px' }}
+    >
       {/* Modern Header */}
       <div className="flex items-center gap-3 px-4 py-3 bg-card border-b border-border shadow-sm">
         <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0">

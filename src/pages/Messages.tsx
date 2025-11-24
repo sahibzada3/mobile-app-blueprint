@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import ModernChatInterface from "@/components/chat/ModernChatInterface";
 import FriendsList from "@/components/spotlight/FriendsList";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface Conversation {
   friendId: string;
@@ -30,6 +31,7 @@ export default function Messages() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedFriend, setSelectedFriend] = useState<SelectedFriend | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -121,7 +123,7 @@ export default function Messages() {
   };
 
   const filteredConversations = conversations.filter((conv) =>
-    conv.friendUsername.toLowerCase().includes(searchQuery.toLowerCase())
+    conv.friendUsername.toLowerCase().includes(debouncedSearch.toLowerCase())
   );
 
   return (
