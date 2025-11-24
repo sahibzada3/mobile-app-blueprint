@@ -96,66 +96,66 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Clean Header */}
-      <header className="sticky top-0 bg-card border-b border-border z-40">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Profile</h1>
-          <div className="flex items-center gap-1">
+      <header className="sticky top-0 bg-card/95 backdrop-blur-xl border-b border-border/50 z-40 shadow-sm">
+        <div className="max-w-2xl mx-auto px-5 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-bold tracking-tight">Profile</h1>
+          <div className="flex items-center gap-1.5">
             <NotificationBell />
-            <Button variant="ghost" size="icon" onClick={() => navigate("/profile/settings")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate("/profile/settings")} className="rounded-lg">
               <Settings className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={toggleTheme}>
+            <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-lg">
               {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </Button>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-lg">
               <LogOut className="w-5 h-5" />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-2xl mx-auto px-5 py-6 space-y-6">
         {/* Profile Info Card */}
-        <Card className="shadow-elevated">
-          <CardContent className="p-6">
+        <Card className="shadow-card">
+          <CardContent className="p-7">
             {/* Centered Profile Picture */}
             <div className="flex flex-col items-center mb-6">
-              <Avatar className="w-24 h-24 mb-4">
+              <Avatar className="w-28 h-28 mb-4 shadow-soft ring-2 ring-primary/10">
                 {profile?.avatar_url ? (
                   <AvatarImage src={profile.avatar_url} />
                 ) : (
-                  <AvatarFallback className="bg-muted text-foreground text-2xl">
+                  <AvatarFallback className="bg-muted text-foreground text-2xl font-semibold">
                     {profile?.username?.charAt(0).toUpperCase() || <UserIcon />}
                   </AvatarFallback>
                 )}
               </Avatar>
-              <h2 className="text-xl font-semibold mb-1">
+              <h2 className="text-2xl font-bold mb-2">
                 {profile?.username || "Unknown User"}
               </h2>
               {profile?.bio && (
-                <p className="text-sm text-muted-foreground text-center max-w-sm">
+                <p className="text-sm text-muted-foreground text-center max-w-sm leading-relaxed">
                   {profile.bio}
                 </p>
               )}
             </div>
 
             {/* Clean Stats Row */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-4 gap-5 mb-6">
               <div className="text-center">
-                <p className="text-xl font-semibold">{stats.photoCount}</p>
-                <p className="text-xs text-muted-foreground">Posts</p>
+                <p className="text-2xl font-bold mb-0.5">{stats.photoCount}</p>
+                <p className="text-xs text-muted-foreground font-medium">Posts</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-semibold">{stats.followers}</p>
-                <p className="text-xs text-muted-foreground">Followers</p>
+                <p className="text-2xl font-bold mb-0.5">{stats.followers}</p>
+                <p className="text-xs text-muted-foreground font-medium">Followers</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-semibold">{stats.following}</p>
-                <p className="text-xs text-muted-foreground">Following</p>
+                <p className="text-2xl font-bold mb-0.5">{stats.following}</p>
+                <p className="text-xs text-muted-foreground font-medium">Following</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-semibold">{stats.totalLikes}</p>
-                <p className="text-xs text-muted-foreground">Likes</p>
+                <p className="text-2xl font-bold mb-0.5">{stats.totalLikes}</p>
+                <p className="text-xs text-muted-foreground font-medium">Likes</p>
               </div>
             </div>
 
@@ -189,13 +189,13 @@ export default function Profile() {
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="photos" className="mt-4">
+          <TabsContent value="photos" className="mt-5">
             {photos.length > 0 ? (
               <div className="photo-grid">
                 {photos.map((photo) => (
                   <div
                     key={photo.id}
-                    className="aspect-square relative overflow-hidden bg-muted cursor-pointer hover-lift"
+                    className="aspect-square relative overflow-hidden bg-muted cursor-pointer hover-lift rounded-lg"
                   >
                     <img
                       src={photo.image_url}
@@ -207,12 +207,12 @@ export default function Profile() {
               </div>
             ) : (
               <Card>
-                <CardContent className="text-center py-12">
-                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                <CardContent className="text-center py-16">
+                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4 shadow-sm">
                     <Camera className="w-8 h-8 text-muted-foreground" />
                   </div>
-                  <h3 className="font-semibold mb-2">No photos yet</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
+                  <h3 className="font-semibold mb-2 text-lg">No photos yet</h3>
+                  <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                     Start capturing moments
                   </p>
                   <Button onClick={() => navigate("/camera")}>
@@ -224,14 +224,14 @@ export default function Profile() {
             )}
           </TabsContent>
           
-          <TabsContent value="saved" className="mt-4">
+          <TabsContent value="saved" className="mt-5">
             <Card>
-              <CardContent className="text-center py-12">
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+              <CardContent className="text-center py-16">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4 shadow-sm">
                   <Heart className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <h3 className="font-semibold mb-2">No saved photos</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-semibold mb-2 text-lg">No saved photos</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   Save photos you love
                 </p>
               </CardContent>
