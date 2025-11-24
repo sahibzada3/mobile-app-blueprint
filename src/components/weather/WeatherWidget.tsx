@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,10 +18,10 @@ interface WeatherWidgetData {
 
 export default function WeatherWidget() {
   const navigate = useNavigate();
-  const [weather, setWeather] = useState<WeatherWidgetData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [weather, setWeather] = React.useState<WeatherWidgetData | null>(null);
+  const [loading, setLoading] = React.useState(true);
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchWeatherData();
     
     // Auto-refresh weather every 30 minutes

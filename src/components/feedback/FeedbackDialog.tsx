@@ -1,4 +1,4 @@
-import { useState } from "react";
+import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,12 +16,12 @@ interface FeedbackDialogProps {
 }
 
 export default function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
-  const [type, setType] = useState<string>("improvement");
-  const [title, setTitle] = useState("");
-  const [message, setMessage] = useState("");
-  const [rating, setRating] = useState<number>(0);
-  const [hoveredRating, setHoveredRating] = useState<number>(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [type, setType] = React.useState<string>("improvement");
+  const [title, setTitle] = React.useState("");
+  const [message, setMessage] = React.useState("");
+  const [rating, setRating] = React.useState<number>(0);
+  const [hoveredRating, setHoveredRating] = React.useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
