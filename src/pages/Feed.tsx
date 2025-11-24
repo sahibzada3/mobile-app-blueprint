@@ -24,9 +24,6 @@ export default function Feed() {
   const [pullDistance, setPullDistance] = useState(0);
   const [startY, setStartY] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [hasSeenWelcome, setHasSeenWelcome] = useState(
-    localStorage.getItem('hasSeenWelcome') === 'true'
-  );
 
   useEffect(() => {
     // Check current session
@@ -323,51 +320,7 @@ export default function Feed() {
           <WeatherWidget />
         </div>
 
-        {!hasSeenWelcome && photos.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="px-4 mb-6"
-          >
-            <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
-              <CardContent className="p-8 text-center">
-                <Camera className="w-16 h-16 mx-auto mb-4 text-primary" />
-                <h2 className="text-xl font-bold text-foreground mb-2">Welcome to NatureFrame</h2>
-                <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
-                  Capture stunning nature photography with cinematic filters and collaborate with friends
-                </p>
-                
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button 
-                    className="shadow-glow"
-                    onClick={() => {
-                      localStorage.setItem('hasSeenWelcome', 'true');
-                      setHasSeenWelcome(true);
-                      navigate('/camera');
-                    }}
-                  >
-                    <Camera className="w-4 h-4 mr-2" />
-                    Take Your First Photo
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      localStorage.setItem('hasSeenWelcome', 'true');
-                      setHasSeenWelcome(true);
-                      navigate('/ideas');
-                    }}
-                  >
-                    <Lightbulb className="w-4 h-4 mr-2" />
-                    Get Inspired
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
-        {photos.length === 0 && hasSeenWelcome ? (
+        {photos.length === 0 ? (
           <div className="px-4">
             <Card>
               <CardContent className="text-center py-16">
@@ -380,9 +333,7 @@ export default function Feed() {
               </CardContent>
             </Card>
           </div>
-        ) : null}
-
-        {photos.length > 0 && (
+        ) : (
           <div className="space-y-5 px-5">
             {photos.map((photo, index) => (
               <motion.div
