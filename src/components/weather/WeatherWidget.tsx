@@ -196,7 +196,7 @@ export default function WeatherWidget() {
   if (!weather) return null;
 
   const cardClassName = weather.isNight 
-    ? "shadow-lg border-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 cursor-pointer hover:shadow-2xl transition-all duration-300 overflow-hidden group relative text-white"
+    ? "shadow-2xl border-0 bg-black cursor-pointer hover:shadow-[0_0_40px_rgba(59,130,246,0.5)] transition-all duration-500 overflow-hidden group relative text-white"
     : "shadow-lg border-0 bg-gradient-to-br from-primary/10 via-card to-accent/10 cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden group relative";
 
   return (
@@ -206,33 +206,52 @@ export default function WeatherWidget() {
     >
       {/* Night Sky with Stars */}
       {weather.isNight && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Animated stars */}
-          {[...Array(30)].map((_, i) => (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden bg-gradient-to-b from-black via-blue-950/20 to-black">
+          {/* Small twinkling stars */}
+          {[...Array(80)].map((_, i) => (
             <div
               key={i}
-              className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+              className="absolute bg-white rounded-full animate-pulse"
               style={{
+                width: `${1 + Math.random() * 2}px`,
+                height: `${1 + Math.random() * 2}px`,
                 top: `${Math.random() * 100}%`,
                 left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${2 + Math.random() * 3}s`,
-                opacity: 0.3 + Math.random() * 0.7,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${2 + Math.random() * 4}s`,
+                opacity: 0.4 + Math.random() * 0.6,
+                boxShadow: '0 0 2px rgba(255, 255, 255, 0.6)',
               }}
             />
           ))}
-          {/* Larger twinkling stars */}
-          {[...Array(10)].map((_, i) => (
+          {/* Bright stars */}
+          {[...Array(30)].map((_, i) => (
             <div
-              key={`star-${i}`}
-              className="absolute w-1.5 h-1.5 bg-white rounded-full animate-pulse"
+              key={`bright-${i}`}
+              className="absolute bg-white rounded-full animate-pulse"
               style={{
+                width: `${2 + Math.random() * 3}px`,
+                height: `${2 + Math.random() * 3}px`,
                 top: `${Math.random() * 100}%`,
                 left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${1.5 + Math.random() * 2}s`,
-                opacity: 0.5 + Math.random() * 0.5,
-                boxShadow: '0 0 4px rgba(255, 255, 255, 0.8)',
+                animationDelay: `${Math.random() * 4}s`,
+                animationDuration: `${1.5 + Math.random() * 3}s`,
+                opacity: 0.6 + Math.random() * 0.4,
+                boxShadow: '0 0 6px rgba(255, 255, 255, 0.9), 0 0 12px rgba(255, 255, 255, 0.5)',
+              }}
+            />
+          ))}
+          {/* Shooting stars */}
+          {[...Array(3)].map((_, i) => (
+            <div
+              key={`shooting-${i}`}
+              className="absolute h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-0"
+              style={{
+                width: '100px',
+                top: `${20 + Math.random() * 60}%`,
+                left: '-100px',
+                animation: `shooting-star ${8 + Math.random() * 12}s ${Math.random() * 10}s infinite`,
+                transform: 'rotate(-45deg)',
               }}
             />
           ))}

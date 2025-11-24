@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Camera, Trophy, User, Lightbulb, Link2 } from "lucide-react";
+import { Camera, Target, User, Lightbulb, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function BottomNav() {
@@ -14,7 +14,7 @@ export default function BottomNav() {
     { icon: Lightbulb, label: "Ideas", path: "/ideas" },
     { icon: Link2, label: "Flares", path: "/spotlight" },
     { icon: Camera, label: "Camera", path: "/camera" },
-    { icon: Trophy, label: "Challenges", path: "/challenges" },
+    { icon: Target, label: "Battles", path: "/challenges" },
     { icon: User, label: "Profile", path: "/profile" },
   ];
 
@@ -47,7 +47,7 @@ export default function BottomNav() {
               }`}
             >
               <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-xs font-medium">{label}</span>
+              <span className="text-[10px] font-medium">{label}</span>
             </Link>
           );
         })}
