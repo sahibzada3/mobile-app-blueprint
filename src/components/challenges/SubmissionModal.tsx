@@ -205,15 +205,6 @@ export default function SubmissionModal({
                   </div>
                 )}
 
-                {submission.photo?.music_track && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Music Track</span>
-                    <Badge variant="outline" className="text-xs">
-                      {submission.photo.music_track}
-                    </Badge>
-                  </div>
-                )}
-
                 {submission.photo?.typography_data && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Typography</span>

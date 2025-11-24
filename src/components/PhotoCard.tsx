@@ -12,7 +12,6 @@ interface PhotoCardProps {
     id: string;
     image_url: string;
     caption: string | null;
-    music_track: string | null;
     created_at: string;
     user_id: string;
     profiles?: {
@@ -62,11 +61,6 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
           className="w-full h-full object-cover"
           loading="lazy"
         />
-        {photo.music_track && (
-          <div className="absolute top-4 right-4 glass px-3 py-1.5 rounded-full shadow-sm">
-            <p className="text-xs text-white font-medium">♫ {photo.music_track}</p>
-          </div>
-        )}
       </div>
 
       {/* Professional Action Bar */}
