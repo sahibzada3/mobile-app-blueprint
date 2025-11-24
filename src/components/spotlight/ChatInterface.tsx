@@ -97,6 +97,8 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
   }, [messages, friendTyping]);
 
   const fetchMessages = async () => {
+    if (!currentUserId || !friendId) return;
+    
     const { data, error } = await supabase
       .from("messages")
       .select(`
@@ -240,7 +242,7 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
   };
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !currentUserId || !friendId) return;
 
     // Clear typing status when sending
     if (typingTimeoutRef.current) {
@@ -249,22 +251,23 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
     setIsTyping(false);
     updateTypingStatus(false);
 
+    const messageContent = newMessage.trim();
+    setNewMessage(""); // Clear input immediately for better UX
+
     const { error } = await supabase
       .from("messages")
       .insert({
         sender_id: currentUserId,
         recipient_id: friendId,
-        content: newMessage.trim()
+        content: messageContent
       });
 
     if (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to send message");
+      setNewMessage(messageContent); // Restore message on error
       return;
     }
-
-    setNewMessage("");
-    fetchMessages();
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -298,7 +301,6 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
 
       if (messageError) throw messageError;
 
-      fetchMessages();
       toast.success("Image sent!");
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -309,6 +311,8 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
   };
 
   const handleReaction = async (messageId: string, emoji: string) => {
+    if (!currentUserId) return;
+    
     // Check if user already reacted with this emoji
     const message = messages.find(m => m.id === messageId);
     const existingReaction = message?.reactions?.find(
@@ -317,22 +321,39 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
 
     if (existingReaction) {
       // Remove reaction
-      await supabase
+      const { error } = await supabase
         .from("message_reactions")
         .delete()
         .eq("id", existingReaction.id);
+      
+      if (!error) {
+        setMessages(prev => prev.map(m => 
+          m.id === messageId 
+            ? { ...m, reactions: m.reactions?.filter(r => r.id !== existingReaction.id) }
+            : m
+        ));
+      }
     } else {
       // Add reaction
-      await supabase
+      const { data, error } = await supabase
         .from("message_reactions")
         .insert({
           message_id: messageId,
           user_id: currentUserId,
           emoji
-        });
+        })
+        .select()
+        .single();
+      
+      if (!error && data) {
+        setMessages(prev => prev.map(m => 
+          m.id === messageId 
+            ? { ...m, reactions: [...(m.reactions || []), data] }
+            : m
+        ));
+      }
     }
 
-    fetchMessages();
     setShowReactions(null);
   };
 
@@ -348,14 +369,19 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
       .eq("id", editingMessage.id);
 
     if (error) {
-      toast.error("Failed to edit message");
+      toast.error("Failed to update message");
       return;
     }
 
+    // Update local state immediately
+    setMessages(prev => prev.map(m => 
+      m.id === editingMessage.id 
+        ? { ...m, content: editedContent.trim(), edited_at: new Date().toISOString() }
+        : m
+    ));
     setEditingMessage(null);
     setEditedContent("");
-    fetchMessages();
-    toast.success("Message edited");
+    toast.success("Message updated");
   };
 
   const handleDeleteMessage = async (messageId: string) => {
@@ -369,7 +395,8 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
       return;
     }
 
-    fetchMessages();
+    // Update local state immediately
+    setMessages(prev => prev.filter(m => m.id !== messageId));
     toast.success("Message deleted");
   };
 
@@ -412,7 +439,6 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
 
       if (messageError) throw messageError;
 
-      fetchMessages();
       setIsRecordingVoice(false);
       toast.success("Voice message sent!");
     } catch (error) {

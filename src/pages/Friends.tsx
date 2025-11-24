@@ -98,60 +98,78 @@ export default function Friends() {
   const loadFriends = async () => {
     if (!currentUserId) return;
 
-    const { data } = await supabase
-      .from("friendships")
-      .select(`
-        id,
-        user_id,
-        friend_id,
-        status,
-        profiles!friendships_friend_id_fkey(id, username, avatar_url, bio)
-      `)
-      .eq("user_id", currentUserId)
-      .eq("status", "accepted");
+    try {
+      const { data, error } = await supabase
+        .from("friendships")
+        .select(`
+          id,
+          user_id,
+          friend_id,
+          status,
+          profiles!friendships_friend_id_fkey(id, username, avatar_url, bio)
+        `)
+        .eq("user_id", currentUserId)
+        .eq("status", "accepted");
 
-    if (data) {
-      setFriends(
-        data.map((f: any) => ({
-          friendship_id: f.id,
-          id: f.profiles.id,
-          username: f.profiles.username,
-          avatar_url: f.profiles.avatar_url,
-          bio: f.profiles.bio,
-          status: f.status,
-          is_requester: true,
-        }))
-      );
+      if (error) {
+        console.error("Error fetching friends:", error);
+        return;
+      }
+
+      if (data) {
+        setFriends(
+          data.map((f: any) => ({
+            friendship_id: f.id,
+            id: f.profiles.id,
+            username: f.profiles.username,
+            avatar_url: f.profiles.avatar_url,
+            bio: f.profiles.bio,
+            status: f.status,
+            is_requester: true,
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Error loading friends:", error);
     }
   };
 
   const loadPendingRequests = async () => {
     if (!currentUserId) return;
 
-    const { data } = await supabase
-      .from("friendships")
-      .select(`
-        id,
-        user_id,
-        friend_id,
-        status,
-        profiles!friendships_user_id_fkey(id, username, avatar_url, bio)
-      `)
-      .eq("friend_id", currentUserId)
-      .eq("status", "pending");
+    try {
+      const { data, error } = await supabase
+        .from("friendships")
+        .select(`
+          id,
+          user_id,
+          friend_id,
+          status,
+          profiles!friendships_user_id_fkey(id, username, avatar_url, bio)
+        `)
+        .eq("friend_id", currentUserId)
+        .eq("status", "pending");
 
-    if (data) {
-      setPendingRequests(
-        data.map((f: any) => ({
-          friendship_id: f.id,
-          id: f.profiles.id,
-          username: f.profiles.username,
-          avatar_url: f.profiles.avatar_url,
-          bio: f.profiles.bio,
-          status: f.status,
-          is_requester: false,
-        }))
-      );
+      if (error) {
+        console.error("Error fetching pending requests:", error);
+        return;
+      }
+
+      if (data) {
+        setPendingRequests(
+          data.map((f: any) => ({
+            friendship_id: f.id,
+            id: f.profiles.id,
+            username: f.profiles.username,
+            avatar_url: f.profiles.avatar_url,
+            bio: f.profiles.bio,
+            status: f.status,
+            is_requester: false,
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Error loading pending requests:", error);
     }
   };
 
