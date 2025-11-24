@@ -1,5 +1,5 @@
+import * as React from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Mountain, Sparkles, Sun, Cloud } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 export default function Index() {
   const navigate = useNavigate();
 
-  useEffect(() => {
+  React.useEffect(() => {
     // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
