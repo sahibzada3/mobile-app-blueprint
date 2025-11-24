@@ -645,7 +645,6 @@ export type Database = {
           filters: Json | null
           id: string
           image_url: string
-          music_track: string | null
           typography_data: Json | null
           user_id: string
         }
@@ -655,7 +654,6 @@ export type Database = {
           filters?: Json | null
           id?: string
           image_url: string
-          music_track?: string | null
           typography_data?: Json | null
           user_id: string
         }
@@ -665,7 +663,6 @@ export type Database = {
           filters?: Json | null
           id?: string
           image_url?: string
-          music_track?: string | null
           typography_data?: Json | null
           user_id?: string
         }
