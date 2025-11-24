@@ -1,25 +1,22 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, MessageCircle, ArrowLeft } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import BottomNav from "@/components/BottomNav";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
+import { formatDistanceToNow } from "date-fns";
+import ModernChatInterface from "@/components/chat/ModernChatInterface";
 import FriendsList from "@/components/spotlight/FriendsList";
-import ChatInterface from "@/components/spotlight/ChatInterface";
 
 interface Conversation {
-  friend_id: string;
-  username: string;
-  avatar_url: string | null;
-  last_message: string;
-  last_message_time: string;
-  unread_count: number;
+  friendId: string;
+  friendUsername: string;
+  friendAvatar: string | null;
+  lastMessage: string;
+  lastMessageTime: string;
+  unreadCount: number;
 }
 
 interface SelectedFriend {
@@ -42,6 +39,7 @@ export default function Messages() {
   useEffect(() => {
     if (currentUserId) {
       loadConversations();
+      setupRealtimeSubscription();
     }
   }, [currentUserId]);
 
@@ -59,182 +57,179 @@ export default function Messages() {
 
     const { data: messages } = await supabase
       .from("messages")
-      .select(`
-        *,
-        sender:profiles!messages_sender_id_fkey(id, username, avatar_url),
-        recipient:profiles!messages_recipient_id_fkey(id, username, avatar_url)
-      `)
+      .select("*")
       .or(`sender_id.eq.${currentUserId},recipient_id.eq.${currentUserId}`)
       .order("created_at", { ascending: false });
 
     if (messages) {
       const convMap = new Map<string, Conversation>();
       
-      messages.forEach((msg: any) => {
+      for (const msg of messages) {
         const isSender = msg.sender_id === currentUserId;
         const friendId = isSender ? msg.recipient_id : msg.sender_id;
-        const friend = isSender ? msg.recipient : msg.sender;
         
         if (!convMap.has(friendId)) {
-          convMap.set(friendId, {
-            friend_id: friendId,
-            username: friend.username,
-            avatar_url: friend.avatar_url,
-            last_message: msg.content || "Media",
-            last_message_time: msg.created_at,
-            unread_count: !msg.read && !isSender ? 1 : 0,
-          });
+          // Load friend profile
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("username, avatar_url")
+            .eq("id", friendId)
+            .single();
+
+          if (profile) {
+            convMap.set(friendId, {
+              friendId,
+              friendUsername: profile.username,
+              friendAvatar: profile.avatar_url,
+              lastMessage: msg.content || msg.audio_url ? "🎵 Voice message" : "📷 Image",
+              lastMessageTime: msg.created_at,
+              unreadCount: !msg.read && !isSender ? 1 : 0,
+            });
+          }
         } else if (!msg.read && !isSender) {
           const conv = convMap.get(friendId)!;
-          conv.unread_count++;
+          conv.unreadCount++;
         }
-      });
+      }
 
       setConversations(Array.from(convMap.values()));
     }
   };
 
-  const filteredConversations = conversations.filter(conv =>
-    conv.username.toLowerCase().includes(searchQuery.toLowerCase())
+  const setupRealtimeSubscription = () => {
+    if (!currentUserId) return;
+
+    const channel = supabase
+      .channel("messages-updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "messages",
+          filter: `or(sender_id=eq.${currentUserId},recipient_id=eq.${currentUserId})`,
+        },
+        () => {
+          loadConversations();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
+  const filteredConversations = conversations.filter((conv) =>
+    conv.friendUsername.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (selectedFriend) {
-    return (
-      <div className="min-h-screen bg-background pb-20">
-        <div className="container mx-auto px-4 py-6 max-w-4xl">
-          <Button
-            variant="ghost"
-            onClick={() => setSelectedFriend(null)}
-            className="mb-4 gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Button>
-          <ChatInterface
-            friendId={selectedFriend.id}
-            friendName={selectedFriend.username}
-            friendAvatar={selectedFriend.avatar_url || undefined}
-            currentUserId={currentUserId!}
-          />
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Messages</h1>
-          <MessageCircle className="w-6 h-6 text-primary" />
-        </div>
+    <>
+      {selectedFriend ? (
+        <ModernChatInterface
+          friend={selectedFriend}
+          onBack={() => {
+            setSelectedFriend(null);
+            loadConversations();
+          }}
+        />
+      ) : (
+        <div className="min-h-screen bg-background pb-20">
+          <header className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b px-5 py-4 shadow-sm">
+            <h1 className="text-xl font-bold">Messages</h1>
+          </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-1">
-            <FriendsList
-              currentUserId={currentUserId!}
-              onSelectFriend={(friendId) => {
-                const conv = conversations.find(c => c.friend_id === friendId);
-                if (conv) {
-                  setSelectedFriend({
-                    id: friendId,
-                    username: conv.username,
-                    avatar_url: conv.avatar_url
-                  });
-                } else {
-                  // Load friend info if not in conversations
-                  supabase
-                    .from("profiles")
-                    .select("id, username, avatar_url")
-                    .eq("id", friendId)
-                    .single()
-                    .then(({ data }) => {
-                      if (data) {
-                        setSelectedFriend({
-                          id: data.id,
-                          username: data.username,
-                          avatar_url: data.avatar_url
-                        });
-                      }
-                    });
-                }
-              }}
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <Card className="p-4">
-              <div className="mb-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search conversations..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+          <div className="max-w-2xl mx-auto">
+            {currentUserId && (
+              <div className="p-5">
+                <FriendsList 
+                  currentUserId={currentUserId}
+                  onSelectFriend={(friendId, friendName, friendAvatar) => 
+                    setSelectedFriend({
+                      id: friendId,
+                      username: friendName,
+                      avatar_url: friendAvatar
+                    })
+                  }
+                />
               </div>
+            )}
 
-              <ScrollArea className="h-[600px]">
-                <div className="space-y-2">
-                  {filteredConversations.map((conv) => (
-                    <motion.div
-                      key={conv.friend_id}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+            <div className="px-5 mb-6">
+              <Input
+                type="text"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+              />
+            </div>
+
+            {filteredConversations.length === 0 ? (
+              <div className="px-5">
+                <Card>
+                  <CardContent className="text-center py-16">
+                    <p className="text-muted-foreground">No conversations yet</p>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              <div className="px-5 space-y-2">
+                {filteredConversations.map((conversation) => (
+                  <motion.div
+                    key={conversation.friendId}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Card
+                      className="overflow-hidden cursor-pointer transition-all hover:shadow-md"
+                      onClick={() => setSelectedFriend({
+                        id: conversation.friendId,
+                        username: conversation.friendUsername,
+                        avatar_url: conversation.friendAvatar
+                      })}
                     >
-                      <Card
-                        className="p-4 cursor-pointer hover:bg-accent/50 transition-colors"
-                        onClick={() => setSelectedFriend({
-                          id: conv.friend_id,
-                          username: conv.username,
-                          avatar_url: conv.avatar_url
-                        })}
-                      >
+                      <CardContent className="p-4">
                         <div className="flex items-center gap-3">
-                          <Avatar className="w-12 h-12">
-                            <AvatarImage src={conv.avatar_url || undefined} />
-                            <AvatarFallback>
-                              {conv.username[0].toUpperCase()}
+                          <Avatar className="w-12 h-12 shrink-0">
+                            <AvatarFallback className="bg-primary/10">
+                              {conversation.friendUsername.charAt(0).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1">
-                              <p className="font-semibold truncate">
-                                {conv.username}
+                              <p className="font-semibold text-sm truncate">
+                                {conversation.friendUsername}
                               </p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(conv.last_message_time), { addSuffix: true })}
-                              </p>
+                              <span className="text-xs text-muted-foreground shrink-0 ml-2">
+                                {formatDistanceToNow(new Date(conversation.lastMessageTime), { 
+                                  addSuffix: false 
+                                })}
+                              </span>
                             </div>
                             <p className="text-sm text-muted-foreground truncate">
-                              {conv.last_message}
+                              {conversation.lastMessage}
                             </p>
                           </div>
-                          {conv.unread_count > 0 && (
-                            <Badge variant="default" className="ml-2">
-                              {conv.unread_count}
-                            </Badge>
+                          {conversation.unreadCount > 0 && (
+                            <div className="flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full bg-primary text-primary-foreground text-xs font-semibold shrink-0">
+                              {conversation.unreadCount}
+                            </div>
                           )}
                         </div>
-                      </Card>
-                    </motion.div>
-                  ))}
-
-                  {filteredConversations.length === 0 && (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                      <p>No conversations yet</p>
-                      <p className="text-sm">Start chatting with your friends!</p>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-            </Card>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </div>
+
+          <BottomNav />
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }
