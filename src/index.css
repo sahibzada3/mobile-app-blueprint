@@ -48,44 +48,44 @@
   }
 
   .dark {
-    /* Dark theme with cyan accents */
-    --background: 0 0% 4%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 100%;
+    /* Premium dark palette - Rich blacks with refined contrast */
+    --background: 0 0% 9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 11%;
+    --popover-foreground: 0 0% 98%;
     
-    /* Bright cyan primary */
-    --primary: 191 100% 50%;
-    --primary-foreground: 0 0% 4%;
+    /* Sophisticated teal accent for dark mode */
+    --primary: 180 35% 55%;
+    --primary-foreground: 0 0% 9%;
     
-    /* Dark surfaces */
-    --secondary: 0 0% 7%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 7%;
-    --muted-foreground: 0 0% 70%;
+    /* Refined neutral surfaces */
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 65%;
     
-    /* Cyan accent */
-    --accent: 191 100% 50%;
-    --accent-foreground: 0 0% 4%;
+    /* Accent */
+    --accent: 180 35% 55%;
+    --accent-foreground: 0 0% 9%;
     
     /* System colors */
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 191 100% 50%;
-    --input: 0 0% 7%;
-    --ring: 191 100% 50%;
+    --border: 0 0% 22%;
+    --input: 0 0% 22%;
+    --ring: 180 35% 55%;
     
     /* Sidebar */
-    --sidebar-background: 0 0% 4%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 191 100% 50%;
-    --sidebar-primary-foreground: 0 0% 4%;
-    --sidebar-accent: 0 0% 7%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 191 100% 50%;
-    --sidebar-ring: 191 100% 50%;
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 180 35% 55%;
+    --sidebar-primary-foreground: 0 0% 9%;
+    --sidebar-accent: 0 0% 18%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 22%;
+    --sidebar-ring: 180 35% 55%;
   }
 }
 
