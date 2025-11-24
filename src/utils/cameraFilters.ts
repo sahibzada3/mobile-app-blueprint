@@ -13,7 +13,9 @@ export type FilterType =
   | "sky-clouds"
   | "rain"
   | "indoor-golden"
-  | "old-architecture";
+  | "old-architecture"
+  | "street"
+  | "animal";
 
 export const filterPresets: Record<FilterType, Partial<AdvancedSettings>> = {
   "golden-hour": {
@@ -132,6 +134,26 @@ export const filterPresets: Record<FilterType, Partial<AdvancedSettings>> = {
     clarity: 10,
     vignette: 15,
     tint: -3,
+  },
+  "street": {
+    brightness: 103,
+    contrast: 112,
+    saturation: 100,
+    clarity: 18,
+    texture: 12,
+    shadows: 8,
+    vignette: 8,
+    temperature: 5,
+  },
+  "animal": {
+    brightness: 105,
+    contrast: 108,
+    saturation: 115,
+    clarity: 20,
+    texture: 15,
+    greenBoost: 10,
+    shadows: 5,
+    highlights: -5,
   },
 };
 
