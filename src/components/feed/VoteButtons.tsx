@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import * as React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle } from "lucide-react";
@@ -13,13 +13,13 @@ interface VoteButtonsProps {
 }
 
 export function VoteButtons({ photoId, currentUserId }: VoteButtonsProps) {
-  const [likeCount, setLikeCount] = useState(0);
-  const [commentCount, setCommentCount] = useState(0);
-  const [hasLiked, setHasLiked] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [likeCount, setLikeCount] = React.useState(0);
+  const [commentCount, setCommentCount] = React.useState(0);
+  const [hasLiked, setHasLiked] = React.useState(false);
+  const [isAnimating, setIsAnimating] = React.useState(false);
   const { celebrate } = useConfetti();
 
-  useEffect(() => {
+  React.useEffect(() => {
     loadVotesAndComments();
     checkUserVote();
 
