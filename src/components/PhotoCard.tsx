@@ -178,7 +178,7 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
 
       {/* High-Quality Image Display with Double-Tap Flare */}
       <div 
-        className="relative w-full aspect-square bg-gradient-to-br from-muted/30 to-muted/10 select-none"
+        className="relative w-full bg-gradient-to-br from-muted/30 to-muted/10 select-none"
         onTouchEnd={handleDoubleTap}
         onClick={(e) => {
           if (e.detail === 2) {
