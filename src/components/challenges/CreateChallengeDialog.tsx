@@ -1,4 +1,4 @@
-import { useState } from "react";
+import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,17 +18,17 @@ interface CreateChallengeDialogProps {
 }
 
 export default function CreateChallengeDialog({ children, onSuccess }: CreateChallengeDialogProps) {
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [challengePrompt, setChallengePrompt] = useState("");
-  const [endDate, setEndDate] = useState<Date>();
-  const [pointsReward, setPointsReward] = useState(150);
-  const [minParticipants] = useState(3); // Fixed at 3 minimum
-  const [maxParticipants] = useState(10); // Fixed at 10 maximum
-  const [createdChallengeId, setCreatedChallengeId] = useState<string | null>(null);
-  const [showInviteFriends, setShowInviteFriends] = useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [title, setTitle] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const [challengePrompt, setChallengePrompt] = React.useState("");
+  const [endDate, setEndDate] = React.useState<Date>();
+  const [pointsReward, setPointsReward] = React.useState(150);
+  const [minParticipants] = React.useState(3); // Fixed at 3 minimum
+  const [maxParticipants] = React.useState(10); // Fixed at 10 maximum
+  const [createdChallengeId, setCreatedChallengeId] = React.useState<string | null>(null);
+  const [showInviteFriends, setShowInviteFriends] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

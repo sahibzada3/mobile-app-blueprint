@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import * as React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,21 +34,21 @@ interface ModernChatInterfaceProps {
 }
 
 export default function ModernChatInterface({ friend, onBack }: ModernChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const [friendTyping, setFriendTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [messages, setMessages] = React.useState<Message[]>([]);
+  const [newMessage, setNewMessage] = React.useState("");
+  const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
+  const [isRecording, setIsRecording] = React.useState(false);
+  const [isTyping, setIsTyping] = React.useState(false);
+  const [friendTyping, setFriendTyping] = React.useState(false);
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const { keyboardHeight, isKeyboardOpen } = useKeyboard();
 
-  useEffect(() => {
+  React.useEffect(() => {
     checkAuth();
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (currentUserId && friend.id) {
       fetchMessages();
       markMessagesAsRead();
@@ -56,7 +56,7 @@ export default function ModernChatInterface({ friend, onBack }: ModernChatInterf
     }
   }, [currentUserId, friend.id]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     scrollToBottom();
   }, [messages]);
 

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, Square, Send, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,18 +9,18 @@ interface VoiceRecorderProps {
 }
 
 export default function VoiceRecorder({ onSend, onCancel }: VoiceRecorderProps) {
-  const [isRecording, setIsRecording] = useState(false);
-  const [duration, setDuration] = useState(0);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [waveformData, setWaveformData] = useState<number[]>([]);
+  const [isRecording, setIsRecording] = React.useState(false);
+  const [duration, setDuration] = React.useState(0);
+  const [audioBlob, setAudioBlob] = React.useState<Blob | null>(null);
+  const [waveformData, setWaveformData] = React.useState<number[]>([]);
   
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
+  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
+  const audioChunksRef = React.useRef<Blob[]>([]);
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const analyserRef = React.useRef<AnalyserNode | null>(null);
+  const animationFrameRef = React.useRef<number | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     startRecording();
     return () => {
       stopRecording();

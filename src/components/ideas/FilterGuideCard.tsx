@@ -13,7 +13,7 @@ import {
   Gauge
 } from "lucide-react";
 import { FilterGuide } from "@/data/filterGuides";
-import { useState } from "react";
+import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface FilterGuideCardProps {

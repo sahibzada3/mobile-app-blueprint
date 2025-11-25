@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import * as React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

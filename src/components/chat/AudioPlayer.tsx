@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Play, Pause } from "lucide-react";
 import { motion } from "framer-motion";
@@ -9,17 +9,17 @@ interface AudioPlayerProps {
 }
 
 export default function AudioPlayer({ audioUrl, duration }: AudioPlayerProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [audioDuration, setAudioDuration] = useState(duration || 0);
-  const [waveformData, setWaveformData] = useState<number[]>([]);
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const [currentTime, setCurrentTime] = React.useState(0);
+  const [audioDuration, setAudioDuration] = React.useState(duration || 0);
+  const [waveformData, setWaveformData] = React.useState<number[]>([]);
   
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
+  const audioRef = React.useRef<HTMLAudioElement>(null);
+  const audioContextRef = React.useRef<AudioContext | null>(null);
+  const analyserRef = React.useRef<AnalyserNode | null>(null);
+  const animationFrameRef = React.useRef<number | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
@@ -30,7 +30,7 @@ export default function AudioPlayer({ audioUrl, duration }: AudioPlayerProps) {
     };
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 

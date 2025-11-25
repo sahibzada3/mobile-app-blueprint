@@ -1,4 +1,4 @@
-import { useState } from "react";
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +31,7 @@ export default function SubmissionModal({
   currentUserId,
   rank,
 }: SubmissionModalProps) {
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = React.useState(false);
 
   const isOwnSubmission = currentUserId === submission.user_id;
 

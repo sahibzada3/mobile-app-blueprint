@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState } from "react";
+import * as React from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -108,8 +108,8 @@ export default function TypographyControls({
   onStrokeColorChange,
   onLanguageChange,
 }: TypographyControlsProps) {
-  const [generatedQuotes, setGeneratedQuotes] = useState<string[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedQuotes, setGeneratedQuotes] = React.useState<string[]>([]);
+  const [isGenerating, setIsGenerating] = React.useState(false);
 
   const detectScene = () => {
     const filters = sessionStorage.getItem("photoFilters");

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -23,12 +23,12 @@ interface SubmitDialogProps {
 
 export default function SubmitDialog({ challengeId, onSuccess, children }: SubmitDialogProps) {
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [caption, setCaption] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [open, setOpen] = React.useState(false);
+  const [uploading, setUploading] = React.useState(false);
+  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+  const [caption, setCaption] = React.useState("");
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

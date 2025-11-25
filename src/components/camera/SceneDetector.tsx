@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import * as React from "react";
 import { type CameraMode } from "@/types/camera";
 import { Sparkles } from "lucide-react";
 
@@ -21,9 +21,9 @@ const sceneKeywords = {
 };
 
 export function SceneDetector({ videoRef, onSceneDetected, mode }: SceneDetectorProps) {
-  const [currentScene, setCurrentScene] = useState<string | null>(null);
+  const [currentScene, setCurrentScene] = React.useState<string | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     // Simulate scene detection based on mode
     // In a real implementation, this would use ML models like TensorFlow.js
     const detectScene = () => {
