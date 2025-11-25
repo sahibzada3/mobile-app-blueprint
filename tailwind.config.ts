@@ -39,6 +39,16 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        cyan: {
+          DEFAULT: "hsl(190 85% 55%)",
+          light: "hsl(190 85% 65%)",
+          dark: "hsl(190 85% 45%)",
+        },
+        orange: {
+          DEFAULT: "hsl(25 95% 60%)",
+          light: "hsl(25 95% 70%)",
+          dark: "hsl(25 95% 50%)",
+        },
       },
       fontFamily: {
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
