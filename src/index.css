@@ -12,8 +12,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 9%;
     
-    /* Premium accent - Sophisticated teal */
-    --primary: 180 25% 35%;
+    /* Vibrant cyan primary */
+    --primary: 190 85% 50%;
     --primary-foreground: 0 0% 100%;
     
     /* Soft neutral backgrounds */
@@ -22,8 +22,8 @@
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
     
-    /* Accent */
-    --accent: 180 25% 35%;
+    /* Orange glow accent */
+    --accent: 25 95% 58%;
     --accent-foreground: 0 0% 100%;
     
     /* System colors */
@@ -31,7 +31,7 @@
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 92%;
     --input: 0 0% 94%;
-    --ring: 180 25% 35%;
+    --ring: 190 85% 50%;
     
     /* Premium rounded corners */
     --radius: 0.75rem;
@@ -39,12 +39,12 @@
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 9%;
-    --sidebar-primary: 180 25% 35%;
+    --sidebar-primary: 190 85% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 97%;
     --sidebar-accent-foreground: 0 0% 9%;
     --sidebar-border: 0 0% 92%;
-    --sidebar-ring: 180 25% 35%;
+    --sidebar-ring: 190 85% 50%;
   }
 
   .dark {
@@ -56,8 +56,8 @@
     --popover: 0 0% 11%;
     --popover-foreground: 0 0% 98%;
     
-    /* Sophisticated teal accent for dark mode */
-    --primary: 180 35% 55%;
+    /* Vibrant cyan primary for dark mode */
+    --primary: 190 85% 55%;
     --primary-foreground: 0 0% 8%;
     
     /* Refined neutral surfaces */
@@ -66,8 +66,8 @@
     --muted: 0 0% 16%;
     --muted-foreground: 0 0% 64%;
     
-    /* Accent */
-    --accent: 180 35% 55%;
+    /* Orange glow accent */
+    --accent: 25 95% 60%;
     --accent-foreground: 0 0% 8%;
     
     /* System colors */
@@ -75,17 +75,17 @@
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 20%;
     --input: 0 0% 18%;
-    --ring: 180 35% 55%;
+    --ring: 190 85% 55%;
     
     /* Sidebar */
     --sidebar-background: 0 0% 9%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 180 35% 55%;
+    --sidebar-primary: 190 85% 55%;
     --sidebar-primary-foreground: 0 0% 8%;
     --sidebar-accent: 0 0% 16%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 180 35% 55%;
+    --sidebar-ring: 190 85% 55%;
   }
 }
 
@@ -136,7 +136,7 @@
     background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
   }
 
-  /* Premium shadow system */
+  /* Premium shadow system with cyan and orange glow */
   .shadow-elevated {
     box-shadow: 
       0 1px 2px 0 rgba(0, 0, 0, 0.03),
@@ -154,14 +154,25 @@
     box-shadow: 
       0 0 0 1px rgba(0, 0, 0, 0.02),
       0 2px 4px -1px rgba(0, 0, 0, 0.04),
-      0 4px 8px -2px rgba(0, 0, 0, 0.06);
+      0 4px 8px -2px rgba(0, 0, 0, 0.06),
+      0 0 20px -8px rgba(0, 200, 220, 0.15);
   }
 
   .shadow-card-hover {
     box-shadow: 
       0 0 0 1px rgba(0, 0, 0, 0.02),
       0 4px 8px -2px rgba(0, 0, 0, 0.06),
-      0 8px 16px -4px rgba(0, 0, 0, 0.08);
+      0 8px 16px -4px rgba(0, 0, 0, 0.08),
+      0 0 30px -10px rgba(0, 200, 220, 0.3),
+      0 0 20px -8px rgba(255, 120, 40, 0.15);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(0, 200, 220, 0.4), 0 0 40px rgba(0, 200, 220, 0.2);
+  }
+
+  .glow-orange {
+    box-shadow: 0 0 15px rgba(255, 120, 40, 0.4), 0 0 30px rgba(255, 120, 40, 0.2);
   }
 
   /* Smooth micro-interactions */
