@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -14,11 +14,11 @@ export const LazyImage = ({
   placeholderClassName,
   ...props 
 }: LazyImageProps) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isInView, setIsInView] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const [isLoaded, setIsLoaded] = React.useState(false);
+  const [isInView, setIsInView] = React.useState(false);
+  const imgRef = React.useRef<HTMLImageElement>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!imgRef.current) return;
 
     const observer = new IntersectionObserver(
