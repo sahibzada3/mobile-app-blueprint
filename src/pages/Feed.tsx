@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -19,17 +19,17 @@ import FeedbackDialog from "@/components/feedback/FeedbackDialog";
 export default function Feed() {
   const navigate = useNavigate();
   
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [photos, setPhotos] = useState<any[]>([]);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [pullDistance, setPullDistance] = useState(0);
-  const [startY, setStartY] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [user, setUser] = React.useState<User | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [photos, setPhotos] = React.useState<any[]>([]);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const [pullDistance, setPullDistance] = React.useState(0);
+  const [startY, setStartY] = React.useState(0);
+  const [searchQuery, setSearchQuery] = React.useState("");
   const debouncedSearch = useDebounce(searchQuery, 300);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);

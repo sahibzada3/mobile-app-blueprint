@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import * as React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
@@ -17,22 +17,22 @@ export default function Camera() {
   const searchParams = new URLSearchParams(location.search);
   const challengeId = location.state?.challengeId;
   const chainId = searchParams.get("chainId");
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
-  const [mode, setMode] = useState<CameraMode>("auto");
-  const [selectedFilter, setSelectedFilter] = useState<FilterType | null>(null);
-  const [showAdvancedControls, setShowAdvancedControls] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [showZoomSlider, setShowZoomSlider] = useState(true);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
-  const [captureMode, setCaptureMode] = useState<"photo" | "video">("photo");
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const recordedChunksRef = useRef<Blob[]>([]);
-  const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [stream, setStream] = React.useState<MediaStream | null>(null);
+  const [facingMode, setFacingMode] = React.useState<"user" | "environment">("environment");
+  const [mode, setMode] = React.useState<CameraMode>("auto");
+  const [selectedFilter, setSelectedFilter] = React.useState<FilterType | null>(null);
+  const [showAdvancedControls, setShowAdvancedControls] = React.useState(false);
+  const [zoomLevel, setZoomLevel] = React.useState(1);
+  const [showZoomSlider, setShowZoomSlider] = React.useState(true);
+  const [soundEnabled, setSoundEnabled] = React.useState(true);
+  const [isRecording, setIsRecording] = React.useState(false);
+  const [recordingTime, setRecordingTime] = React.useState(0);
+  const [captureMode, setCaptureMode] = React.useState<"photo" | "video">("photo");
+  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = React.useRef<Blob[]>([]);
+  const [advancedSettings, setAdvancedSettings] = React.useState<AdvancedSettings>({
     brightness: 100,
     contrast: 100,
     saturation: 100,
@@ -48,7 +48,7 @@ export default function Camera() {
     texture: 0,
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         navigate("/login");
@@ -120,7 +120,7 @@ export default function Camera() {
   };
 
   // Recording timer
-  useEffect(() => {
+  React.useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isRecording) {
       interval = setInterval(() => {
@@ -246,7 +246,7 @@ export default function Camera() {
   };
 
   // Listen for capture event from nav bar
-  useEffect(() => {
+  React.useEffect(() => {
     const handleCaptureEvent = () => {
       handleCaptureClick();
     };
