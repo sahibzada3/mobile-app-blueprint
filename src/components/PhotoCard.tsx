@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { VoteButtons } from "@/components/feed/VoteButtons";
 import { CommentSection } from "@/components/feed/CommentSection";
 import { LazyImage } from "@/components/ui/lazy-image";
+import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
 
 interface PhotoCardProps {
   photo: {
@@ -30,6 +31,7 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
   const [flareCount, setFlareCount] = React.useState(0);
   const [hasFlared, setHasFlared] = React.useState(false);
   const [showFlareAnimation, setShowFlareAnimation] = React.useState(false);
+  const [isFullscreenOpen, setIsFullscreenOpen] = React.useState(false);
   const lastTapRef = React.useRef(0);
   const tapTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
@@ -178,11 +180,18 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
 
       {/* High-Quality Image Display with Double-Tap Flare */}
       <div 
-        className="relative w-full aspect-square bg-gradient-to-br from-muted/30 to-muted/10 select-none"
+        className="relative w-full aspect-square bg-gradient-to-br from-muted/30 to-muted/10 select-none cursor-pointer"
         onTouchEnd={handleDoubleTap}
         onClick={(e) => {
           if (e.detail === 2) {
             handleDoubleTap();
+          } else if (e.detail === 1) {
+            // Single click opens fullscreen
+            setTimeout(() => {
+              if (e.detail === 1) {
+                setIsFullscreenOpen(true);
+              }
+            }, 200);
           }
         }}
       >
@@ -273,6 +282,15 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
 
         <CommentSection photoId={photo.id} currentUserId={currentUserId} />
       </div>
+
+      {/* Fullscreen Image Viewer */}
+      <FullscreenImageViewer
+        isOpen={isFullscreenOpen}
+        onClose={() => setIsFullscreenOpen(false)}
+        imageUrl={photo.image_url}
+        caption={photo.caption}
+        username={photo.profiles?.username}
+      />
     </Card>
   );
 }
