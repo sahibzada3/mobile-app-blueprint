@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import * as React from "react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -26,15 +26,15 @@ interface PhotoCardProps {
 }
 
 export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [flareCount, setFlareCount] = useState(0);
-  const [hasFlared, setHasFlared] = useState(false);
-  const [showFlareAnimation, setShowFlareAnimation] = useState(false);
-  const lastTapRef = useRef(0);
-  const tapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isBookmarked, setIsBookmarked] = React.useState(false);
+  const [flareCount, setFlareCount] = React.useState(0);
+  const [hasFlared, setHasFlared] = React.useState(false);
+  const [showFlareAnimation, setShowFlareAnimation] = React.useState(false);
+  const lastTapRef = React.useRef(0);
+  const tapTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Load flare count and user's flare status
-  useEffect(() => {
+  React.useEffect(() => {
     loadFlareData();
     
     const channel = supabase

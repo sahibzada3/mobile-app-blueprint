@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
@@ -119,9 +119,9 @@ const filterScenes = [
 
 export default function Ideas() {
   const navigate = useNavigate();
-  const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
+  const [currentSceneIndex, setCurrentSceneIndex] = React.useState(0);
 
-  useEffect(() => {
+  React.useEffect(() => {
     checkAuth();
     // Set daily scene based on day of year
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);

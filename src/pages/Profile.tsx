@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
@@ -24,13 +24,13 @@ import {
 export default function Profile() {
   const navigate = useNavigate();
   
-  const [profile, setProfile] = useState<any>(null);
-  const [photos, setPhotos] = useState<any[]>([]);
-  const [stats, setStats] = useState({ photoCount: 0, totalLikes: 0, followers: 0, following: 0 });
-  const [loading, setLoading] = useState(true);
-  const [deletePhotoId, setDeletePhotoId] = useState<string | null>(null);
+  const [profile, setProfile] = React.useState<any>(null);
+  const [photos, setPhotos] = React.useState<any[]>([]);
+  const [stats, setStats] = React.useState({ photoCount: 0, totalLikes: 0, followers: 0, following: 0 });
+  const [loading, setLoading] = React.useState(true);
+  const [deletePhotoId, setDeletePhotoId] = React.useState<string | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     loadProfile();
   }, []);
 
