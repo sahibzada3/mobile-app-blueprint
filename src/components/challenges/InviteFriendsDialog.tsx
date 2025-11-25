@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,12 +13,12 @@ interface InviteFriendsDialogProps {
 }
 
 export default function InviteFriendsDialog({ challengeId, open, onOpenChange }: InviteFriendsDialogProps) {
-  const [friends, setFriends] = useState<any[]>([]);
-  const [invited, setInvited] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
-  const [challenge, setChallenge] = useState<any>(null);
+  const [friends, setFriends] = React.useState<any[]>([]);
+  const [invited, setInvited] = React.useState<Set<string>>(new Set());
+  const [loading, setLoading] = React.useState(true);
+  const [challenge, setChallenge] = React.useState<any>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (open) {
       fetchChallengeAndFriends();
     }

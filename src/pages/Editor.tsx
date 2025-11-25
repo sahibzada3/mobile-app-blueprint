@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import * as React from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";

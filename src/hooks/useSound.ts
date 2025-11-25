@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import * as React from 'react';
 
 type SoundType = 'positionUp' | 'positionDown' | 'newSubmission';
 
