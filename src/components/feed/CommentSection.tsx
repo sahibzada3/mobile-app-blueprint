@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -26,14 +26,14 @@ interface CommentSectionProps {
 }
 
 export const CommentSection = ({ photoId, currentUserId }: CommentSectionProps) => {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editContent, setEditContent] = useState("");
-  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = React.useState<Comment[]>([]);
+  const [newComment, setNewComment] = React.useState("");
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editContent, setEditContent] = React.useState("");
+  const [showComments, setShowComments] = React.useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
+  React.useEffect(() => {
     loadComments();
     
     const channel = supabase
