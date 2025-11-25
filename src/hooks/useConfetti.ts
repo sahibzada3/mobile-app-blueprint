@@ -1,8 +1,8 @@
-import { useCallback } from 'react';
+import * as React from 'react';
 import confetti from 'canvas-confetti';
 
 export const useConfetti = () => {
-  const celebrateTopThree = useCallback((rank: number) => {
+  const celebrateTopThree = React.useCallback((rank: number) => {
     const duration = rank === 1 ? 3000 : 2000;
     const particleCount = rank === 1 ? 200 : rank === 2 ? 150 : 100;
     
@@ -43,7 +43,7 @@ export const useConfetti = () => {
     }, 250);
   }, []);
 
-  const celebrateNewSubmission = useCallback(() => {
+  const celebrateNewSubmission = React.useCallback(() => {
     confetti({
       particleCount: 50,
       spread: 60,
@@ -52,7 +52,7 @@ export const useConfetti = () => {
     });
   }, []);
 
-  const celebrate = useCallback((intensity: 'low' | 'medium' | 'high' = 'medium') => {
+  const celebrate = React.useCallback((intensity: 'low' | 'medium' | 'high' = 'medium') => {
     const configs = {
       low: { particleCount: 50, spread: 50, colors: ['#FF6B6B', '#FFD93D', '#6BCF7F'] },
       medium: { particleCount: 100, spread: 70, colors: ['#FF6B6B', '#FFD93D', '#6BCF7F', '#4D96FF'] },
