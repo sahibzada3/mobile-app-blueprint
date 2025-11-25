@@ -178,7 +178,7 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
 
       {/* High-Quality Image Display with Double-Tap Flare */}
       <div 
-        className="relative w-full bg-gradient-to-br from-muted/30 to-muted/10 select-none"
+        className="relative w-full aspect-square bg-gradient-to-br from-muted/30 to-muted/10 select-none"
         onTouchEnd={handleDoubleTap}
         onClick={(e) => {
           if (e.detail === 2) {
@@ -222,29 +222,29 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
       </div>
 
       {/* Professional Action Bar */}
-      <div className="px-5 py-4 border-t border-border/30">
-        <div className="flex items-center justify-between mb-3">
+      <div className="px-4 py-2.5 border-t border-border/30">
+        <div className="flex items-center justify-between mb-2">
           <VoteButtons photoId={photo.id} currentUserId={currentUserId} />
           
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 hover:bg-muted/60 rounded-lg transition-all duration-200"
+              className="h-8 w-8 hover:bg-muted/60 rounded-lg transition-all duration-200"
               onClick={() => {
                 setIsBookmarked(!isBookmarked);
                 toast.success(isBookmarked ? "Removed from saved" : "Saved");
               }}
             >
               <Bookmark 
-                className={`w-5 h-5 transition-all duration-200 ${isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
+                className={`w-4 h-4 transition-all duration-200 ${isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
               />
             </Button>
             
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 hover:bg-muted/60 rounded-lg transition-all duration-200"
+              className="h-8 w-8 hover:bg-muted/60 rounded-lg transition-all duration-200"
               onClick={() => {
                 if (navigator.share) {
                   navigator.share({
@@ -257,14 +257,14 @@ export default function PhotoCard({ photo, currentUserId }: PhotoCardProps) {
                 }
               }}
             >
-              <Share2 className="w-5 h-5 text-muted-foreground" />
+              <Share2 className="w-4 h-4 text-muted-foreground" />
             </Button>
           </div>
         </div>
 
         {photo.caption && (
-          <div className="mb-3">
-            <p className="text-sm leading-relaxed">
+          <div className="mb-2">
+            <p className="text-xs leading-relaxed">
               <span className="font-semibold mr-2">{photo.profiles?.username}</span>
               <span className="text-foreground/90">{photo.caption}</span>
             </p>
