@@ -26,7 +26,7 @@ export default function Profile() {
   
   const [profile, setProfile] = React.useState<any>(null);
   const [photos, setPhotos] = React.useState<any[]>([]);
-  const [stats, setStats] = React.useState({ photoCount: 0, totalLikes: 0, followers: 0, following: 0 });
+  const [stats, setStats] = React.useState({ photoCount: 0, totalLikes: 0, friends: 0 });
   const [loading, setLoading] = React.useState(true);
   const [deletePhotoId, setDeletePhotoId] = React.useState<string | null>(null);
 
@@ -75,8 +75,7 @@ export default function Profile() {
       setStats({
         photoCount: photosData?.length || 0,
         totalLikes: votesData?.length || 0,
-        followers: Math.floor((friendsData?.length || 0) / 2),
-        following: Math.ceil((friendsData?.length || 0) / 2),
+        friends: friendsData?.length || 0,
       });
     } catch (error: any) {
       console.error("Profile error:", error);
@@ -159,6 +158,12 @@ export default function Profile() {
               <h2 className="text-2xl font-bold mb-2 mt-4">
                 {profile?.username || "Unknown User"}
               </h2>
+              {/* Rank & Badges below name */}
+              {profile?.id && (
+                <div className="mb-3">
+                  <RankBadgeDisplay userId={profile.id} />
+                </div>
+              )}
               {profile?.bio && (
                 <p className="text-sm text-muted-foreground text-center max-w-sm leading-relaxed">
                   {profile.bio}
@@ -167,18 +172,24 @@ export default function Profile() {
             </div>
 
             {/* Clean Stats Row */}
-            <div className="grid grid-cols-4 gap-5 mb-6">
+            <div className="grid grid-cols-3 gap-5 mb-6">
               <div className="text-center">
                 <p className="text-2xl font-bold mb-0.5">{stats.photoCount}</p>
                 <p className="text-xs text-muted-foreground font-medium">Posts</p>
               </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold mb-0.5">{stats.followers}</p>
-                <p className="text-xs text-muted-foreground font-medium">Followers</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold mb-0.5">{stats.following}</p>
-                <p className="text-xs text-muted-foreground font-medium">Following</p>
+              <div 
+                className="text-center cursor-pointer hover:opacity-70 transition-opacity"
+                onClick={() => {
+                  const showFriends = profile?.privacy_settings?.profile_visibility !== "private";
+                  if (showFriends) {
+                    navigate("/friends");
+                  } else {
+                    toast.info("Friends list is private");
+                  }
+                }}
+              >
+                <p className="text-2xl font-bold mb-0.5">{stats.friends}</p>
+                <p className="text-xs text-muted-foreground font-medium">Friends</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold mb-0.5">{stats.totalLikes}</p>
@@ -199,9 +210,6 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Rank & Badges */}
-        {profile?.id && <RankBadgeDisplay userId={profile.id} />}
 
         {/* Clean Photo Gallery */}
         <Tabs defaultValue="photos" className="w-full">
