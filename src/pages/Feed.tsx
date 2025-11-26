@@ -105,9 +105,36 @@ export default function Feed() {
         setIsRefreshing(true);
       }
 
+      if (!user?.id) return;
+
+      // Get accepted friends
+      const { data: friendshipsData, error: friendsError } = await supabase
+        .from("friendships")
+        .select("user_id, friend_id")
+        .eq("status", "accepted")
+        .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`);
+
+      if (friendsError) throw friendsError;
+
+      // Extract friend IDs
+      const friendIds = (friendshipsData || []).map(f => 
+        f.user_id === user.id ? f.friend_id : f.user_id
+      );
+
+      if (friendIds.length === 0) {
+        setPhotos([]);
+        if (showRefreshFeedback) {
+          toast.success("Feed refreshed!");
+          setTimeout(() => setIsRefreshing(false), 500);
+        }
+        return;
+      }
+
+      // Get photos only from friends
       const { data, error } = await supabase
         .from("photos")
         .select("*")
+        .in("user_id", friendIds)
         .order("created_at", { ascending: false })
         .limit(20);
 
@@ -348,11 +375,11 @@ export default function Feed() {
           <div className="px-4">
             <Card>
               <CardContent className="text-center py-16">
-                <Camera className="w-20 h-20 mx-auto mb-4 text-muted-foreground/30" />
-                <p className="text-muted-foreground mb-6">No photos yet. Start capturing!</p>
-                <Button onClick={() => navigate('/camera')}>
-                  <Camera className="w-4 h-4 mr-2" />
-                  Open Camera
+                <Heart className="w-20 h-20 mx-auto mb-4 text-muted-foreground/30" />
+                <p className="text-muted-foreground mb-6">No posts from friends yet. Add friends to see their photos!</p>
+                <Button onClick={() => navigate('/friends')}>
+                  <Heart className="w-4 h-4 mr-2" />
+                  Find Friends
                 </Button>
               </CardContent>
             </Card>
