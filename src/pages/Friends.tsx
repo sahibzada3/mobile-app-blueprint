@@ -26,20 +26,20 @@ interface FriendWithProfile extends Profile {
 }
 
 export default function Friends() {
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [friends, setFriends] = useState<FriendWithProfile[]>([]);
-  const [pendingRequests, setPendingRequests] = useState<FriendWithProfile[]>([]);
-  const [sentRequests, setSentRequests] = useState<FriendWithProfile[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Profile[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
+  const [friends, setFriends] = React.useState<FriendWithProfile[]>([]);
+  const [pendingRequests, setPendingRequests] = React.useState<FriendWithProfile[]>([]);
+  const [sentRequests, setSentRequests] = React.useState<FriendWithProfile[]>([]);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchResults, setSearchResults] = React.useState<Profile[]>([]);
+  const [loading, setLoading] = React.useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  React.useEffect(() => {
     checkAuth();
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (currentUserId) {
       loadFriends();
       loadPendingRequests();

@@ -34,12 +34,12 @@ export default function InviteFriendsDialog({
   chainId,
   currentParticipants,
 }: InviteFriendsDialogProps) {
-  const [friends, setFriends] = useState<Friend[]>([]);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [friends, setFriends] = React.useState<Friend[]>([]);
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
+  const [loading, setLoading] = React.useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (open) {
       loadFriends();
     }

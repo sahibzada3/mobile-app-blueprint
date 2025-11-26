@@ -27,18 +27,18 @@ interface SelectedFriend {
 }
 
 export default function Messages() {
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedFriend, setSelectedFriend] = useState<SelectedFriend | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
+  const [conversations, setConversations] = React.useState<Conversation[]>([]);
+  const [selectedFriend, setSelectedFriend] = React.useState<SelectedFriend | null>(null);
+  const [searchQuery, setSearchQuery] = React.useState("");
   const debouncedSearch = useDebounce(searchQuery, 300);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  React.useEffect(() => {
     checkAuth();
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (currentUserId) {
       loadConversations();
       setupRealtimeSubscription();

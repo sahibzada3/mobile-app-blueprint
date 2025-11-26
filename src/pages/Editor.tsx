@@ -17,30 +17,30 @@ export default function Editor() {
   const location = useLocation();
   const chainId = searchParams.get("chainId");
   const challengeId = location.state?.challengeId;
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [user, setUser] = useState<any>(null);
-  const [photoData, setPhotoData] = useState<string | null>(null);
-  const [caption, setCaption] = useState("");
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [user, setUser] = React.useState<any>(null);
+  const [photoData, setPhotoData] = React.useState<string | null>(null);
+  const [caption, setCaption] = React.useState("");
   
   // Typography states
-  const [overlayText, setOverlayText] = useState("");
-  const [fontFamily, setFontFamily] = useState("Playfair Display");
-  const [fontSize, setFontSize] = useState(48);
-  const [textColor, setTextColor] = useState("#FFFFFF");
-  const [textOpacity, setTextOpacity] = useState(100);
-  const [textAlign, setTextAlign] = useState<"left" | "center" | "right">("center");
-  const [textPositionY, setTextPositionY] = useState(50);
-  const [textPositionX, setTextPositionX] = useState(50);
-  const [textRotation, setTextRotation] = useState(0);
-  const [textSkewX, setTextSkewX] = useState(0);
-  const [textPerspective, setTextPerspective] = useState(0);
-  const [textStrokeWidth, setTextStrokeWidth] = useState(0);
-  const [textStrokeColor, setTextStrokeColor] = useState("#000000");
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const [overlayText, setOverlayText] = React.useState("");
+  const [fontFamily, setFontFamily] = React.useState("Playfair Display");
+  const [fontSize, setFontSize] = React.useState(48);
+  const [textColor, setTextColor] = React.useState("#FFFFFF");
+  const [textOpacity, setTextOpacity] = React.useState(100);
+  const [textAlign, setTextAlign] = React.useState<"left" | "center" | "right">("center");
+  const [textPositionY, setTextPositionY] = React.useState(50);
+  const [textPositionX, setTextPositionX] = React.useState(50);
+  const [textRotation, setTextRotation] = React.useState(0);
+  const [textSkewX, setTextSkewX] = React.useState(0);
+  const [textPerspective, setTextPerspective] = React.useState(0);
+  const [textStrokeWidth, setTextStrokeWidth] = React.useState(0);
+  const [textStrokeColor, setTextStrokeColor] = React.useState("#000000");
+  const [selectedLanguage, setSelectedLanguage] = React.useState("en");
   
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         navigate("/login");
@@ -58,7 +58,7 @@ export default function Editor() {
     });
   }, [navigate]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (photoData && canvasRef.current) {
       drawCanvas();
     }

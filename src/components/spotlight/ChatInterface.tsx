@@ -65,23 +65,23 @@ interface ChatInterfaceProps {
 }
 
 export default function ChatInterface({ friendId, friendName, friendAvatar, currentUserId }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const [friendTyping, setFriendTyping] = useState(false);
-  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
-  const [editedContent, setEditedContent] = useState("");
-  const [showReactions, setShowReactions] = useState<string | null>(null);
-  const [isRecordingVoice, setIsRecordingVoice] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const presenceChannelRef = useRef<any>(null);
+  const [messages, setMessages] = React.useState<Message[]>([]);
+  const [newMessage, setNewMessage] = React.useState("");
+  const [uploadingImage, setUploadingImage] = React.useState(false);
+  const [isTyping, setIsTyping] = React.useState(false);
+  const [friendTyping, setFriendTyping] = React.useState(false);
+  const [editingMessage, setEditingMessage] = React.useState<Message | null>(null);
+  const [editedContent, setEditedContent] = React.useState("");
+  const [showReactions, setShowReactions] = React.useState<string | null>(null);
+  const [isRecordingVoice, setIsRecordingVoice] = React.useState(false);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const presenceChannelRef = React.useRef<any>(null);
 
   const commonEmojis = ["❤️", "👍", "😂", "😮", "😢", "🙏"];
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchMessages();
     const unsubscribe = subscribeToMessages();
     setupTypingPresence();
@@ -92,7 +92,7 @@ export default function ChatInterface({ friendId, friendName, friendAvatar, curr
     };
   }, [friendId]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     scrollToBottom();
   }, [messages, friendTyping]);
 

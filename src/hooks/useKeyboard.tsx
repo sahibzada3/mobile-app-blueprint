@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 export const useKeyboard = () => {
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = React.useState(0);
+  const [isKeyboardOpen, setIsKeyboardOpen] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleResize = () => {
       const visualViewport = window.visualViewport;
       if (!visualViewport) return;

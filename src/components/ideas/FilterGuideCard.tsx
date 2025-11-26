@@ -21,7 +21,7 @@ interface FilterGuideCardProps {
 }
 
 export default function FilterGuideCard({ guide }: FilterGuideCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(false);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {

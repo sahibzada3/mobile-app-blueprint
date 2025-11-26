@@ -18,14 +18,14 @@ export default function ChallengeDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { celebrateTopThree } = useConfetti();
-  const [challenge, setChallenge] = useState<any>(null);
-  const [submissions, setSubmissions] = useState<any[]>([]);
-  const [userSubmission, setUserSubmission] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [judgingLoading, setJudgingLoading] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [challenge, setChallenge] = React.useState<any>(null);
+  const [submissions, setSubmissions] = React.useState<any[]>([]);
+  const [userSubmission, setUserSubmission] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [judgingLoading, setJudgingLoading] = React.useState(false);
+  const [user, setUser] = React.useState<any>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     checkAuth();
     if (challengeId) {
       fetchChallengeData();

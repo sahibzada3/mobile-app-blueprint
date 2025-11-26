@@ -31,18 +31,18 @@ interface Flare {
 
 export default function Spotlight() {
   const navigate = useNavigate();
-  const [flares, setFlares] = useState<Flare[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [friendIds, setFriendIds] = useState<string[]>([]);
-  const [selectedFriend, setSelectedFriend] = useState<{
+  const [flares, setFlares] = React.useState<Flare[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [showCreateDialog, setShowCreateDialog] = React.useState(false);
+  const [user, setUser] = React.useState<any>(null);
+  const [friendIds, setFriendIds] = React.useState<string[]>([]);
+  const [selectedFriend, setSelectedFriend] = React.useState<{
     id: string;
     name: string;
     avatar: string | null;
   } | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     checkAuth();
     loadFlares();
     loadFriends();

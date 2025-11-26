@@ -3,16 +3,16 @@ import * as React from 'react';
 type SoundType = 'positionUp' | 'positionDown' | 'newSubmission';
 
 export const useSound = () => {
-  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioContextRef = React.useRef<AudioContext | null>(null);
 
-  const getAudioContext = useCallback(() => {
+  const getAudioContext = React.useCallback(() => {
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
     return audioContextRef.current;
   }, []);
 
-  const playSound = useCallback((type: SoundType) => {
+  const playSound = React.useCallback((type: SoundType) => {
     const audioContext = getAudioContext();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();

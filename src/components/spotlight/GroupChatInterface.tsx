@@ -74,27 +74,27 @@ interface GroupChatInterfaceProps {
 
 export default function GroupChatInterface({ chainId, chainTitle, currentUserId }: GroupChatInterfaceProps) {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
-  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
-  const [editedContent, setEditedContent] = useState("");
-  const [showReactions, setShowReactions] = useState<string | null>(null);
-  const [isRecordingVoice, setIsRecordingVoice] = useState(false);
-  const [showMentions, setShowMentions] = useState(false);
-  const [mentionSearch, setMentionSearch] = useState("");
-  const [cursorPosition, setCursorPosition] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const presenceChannelRef = useRef<any>(null);
+  const [messages, setMessages] = React.useState<Message[]>([]);
+  const [participants, setParticipants] = React.useState<Participant[]>([]);
+  const [newMessage, setNewMessage] = React.useState("");
+  const [uploadingImage, setUploadingImage] = React.useState(false);
+  const [typingUsers, setTypingUsers] = React.useState<TypingUser[]>([]);
+  const [editingMessage, setEditingMessage] = React.useState<Message | null>(null);
+  const [editedContent, setEditedContent] = React.useState("");
+  const [showReactions, setShowReactions] = React.useState<string | null>(null);
+  const [isRecordingVoice, setIsRecordingVoice] = React.useState(false);
+  const [showMentions, setShowMentions] = React.useState(false);
+  const [mentionSearch, setMentionSearch] = React.useState("");
+  const [cursorPosition, setCursorPosition] = React.useState(0);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const presenceChannelRef = React.useRef<any>(null);
 
   const commonEmojis = ["❤️", "👍", "😂", "😮", "😢", "🙏"];
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchParticipants();
     fetchMessages();
     const unsubscribe = subscribeToMessages();
@@ -106,7 +106,7 @@ export default function GroupChatInterface({ chainId, chainTitle, currentUserId 
     };
   }, [chainId]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     scrollToBottom();
   }, [messages, typingUsers]);
 
