@@ -43,6 +43,24 @@ export default function CreateChainDialog({ open, onOpenChange, onSuccess }: Cre
         return;
       }
 
+      // Check if user already created a flare today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const { data: todayFlares, error: checkError } = await supabase
+        .from("spotlight_chains")
+        .select("id")
+        .eq("creator_id", session.user.id)
+        .gte("created_at", today.toISOString());
+
+      if (checkError) throw checkError;
+
+      if (todayFlares && todayFlares.length >= 1) {
+        toast.error("You can only create 1 flare per day. Try again tomorrow!");
+        setLoading(false);
+        return;
+      }
+
       // Create the chain
       const { data: chainData, error: chainError } = await supabase
         .from("spotlight_chains")
