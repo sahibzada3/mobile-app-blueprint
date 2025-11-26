@@ -1,6 +1,6 @@
-const CACHE_NAME = 'frame-v1';
-const PHOTO_CACHE = 'frame-photos-v1';
-const RUNTIME_CACHE = 'frame-runtime-v1';
+const CACHE_NAME = 'frame-v2';
+const PHOTO_CACHE = 'frame-photos-v2';
+const RUNTIME_CACHE = 'frame-runtime-v2';
 
 // Assets to cache on install
 const STATIC_ASSETS = [
