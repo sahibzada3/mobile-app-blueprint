@@ -21,11 +21,11 @@ interface Spot {
 
 export default function NearbySpots() {
   const navigate = useNavigate();
-  const [spots, setSpots] = useState<Spot[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [spots, setSpots] = React.useState<Spot[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [userLocation, setUserLocation] = React.useState<{ lat: number; lng: number } | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         navigate("/login");
@@ -35,7 +35,7 @@ export default function NearbySpots() {
     });
   }, [navigate]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (userLocation) {
       fetchNearbySpots();
     }

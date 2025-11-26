@@ -67,11 +67,11 @@ interface WeatherRecommendation {
 
 export default function WeatherRecommendations() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [weatherData, setWeatherData] = useState<WeatherRecommendation | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [weatherData, setWeatherData] = React.useState<WeatherRecommendation | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchWeatherRecommendations();
   }, []);
 

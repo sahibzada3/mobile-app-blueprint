@@ -26,7 +26,7 @@ interface IdeaCardProps {
 }
 
 export default function IdeaCard({ idea, isBookmarked, onBookmark }: IdeaCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(false);
   const CategoryIcon = iconMap[getCategoryIcon(idea.category)] || Camera;
 
   return (

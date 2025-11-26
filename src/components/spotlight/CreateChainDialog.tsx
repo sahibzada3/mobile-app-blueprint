@@ -21,10 +21,10 @@ interface CreateChainDialogProps {
 }
 
 export default function CreateChainDialog({ open, onOpenChange, onSuccess }: CreateChainDialogProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [maxParticipants, setMaxParticipants] = useState(10);
-  const [loading, setLoading] = useState(false);
+  const [title, setTitle] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const [maxParticipants, setMaxParticipants] = React.useState(10);
+  const [loading, setLoading] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

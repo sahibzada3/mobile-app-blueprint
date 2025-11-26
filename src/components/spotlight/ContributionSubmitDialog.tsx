@@ -30,8 +30,8 @@ export default function ContributionSubmitDialog({
   photoId,
   photoUrl,
 }: ContributionSubmitDialogProps) {
-  const [caption, setCaption] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [caption, setCaption] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async () => {

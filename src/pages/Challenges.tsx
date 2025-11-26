@@ -16,11 +16,11 @@ export default function Challenges() {
   const navigate = useNavigate();
   
   const { toast } = useToast();
-  const [challenges, setChallenges] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [challenges, setChallenges] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [userId, setUserId] = React.useState<string | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     checkAuth();
     fetchChallenges();
   }, []);

@@ -27,11 +27,11 @@ interface BadgeData {
 }
 
 export default function RankBadgeDisplay({ userId }: { userId: string }) {
-  const [rankData, setRankData] = useState<RankData | null>(null);
-  const [badges, setBadges] = useState<BadgeData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [rankData, setRankData] = React.useState<RankData | null>(null);
+  const [badges, setBadges] = React.useState<BadgeData[]>([]);
+  const [loading, setLoading] = React.useState(true);
 
-  useEffect(() => {
+  React.useEffect(() => {
     loadData();
   }, [userId]);
 

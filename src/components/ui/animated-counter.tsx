@@ -7,10 +7,10 @@ interface AnimatedCounterProps {
 }
 
 export function AnimatedCounter({ value, className = "" }: AnimatedCounterProps) {
-  const [prevValue, setPrevValue] = useState(value);
-  const [displayValue, setDisplayValue] = useState(value);
+  const [prevValue, setPrevValue] = React.useState(value);
+  const [displayValue, setDisplayValue] = React.useState(value);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (value !== prevValue) {
       // Animate from previous to new value
       const diff = value - prevValue;

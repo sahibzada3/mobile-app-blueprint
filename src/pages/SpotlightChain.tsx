@@ -57,20 +57,20 @@ export default function SpotlightChain() {
   const { chainId } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [flare, setFlare] = useState<Flare | null>(null);
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [contributions, setContributions] = useState<Contribution[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
-  const [isParticipant, setIsParticipant] = useState(false);
-  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [flare, setFlare] = React.useState<Flare | null>(null);
+  const [participants, setParticipants] = React.useState<Participant[]>([]);
+  const [contributions, setContributions] = React.useState<Contribution[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [user, setUser] = React.useState<any>(null);
+  const [isParticipant, setIsParticipant] = React.useState(false);
+  const [showInviteDialog, setShowInviteDialog] = React.useState(false);
   
   // Check if we have a new photo to submit
   const photoIdToSubmit = searchParams.get("photoId");
   const photoUrlToSubmit = searchParams.get("photoUrl");
-  const [showSubmitDialog, setShowSubmitDialog] = useState(!!photoIdToSubmit);
+  const [showSubmitDialog, setShowSubmitDialog] = React.useState(!!photoIdToSubmit);
 
-  useEffect(() => {
+  React.useEffect(() => {
     checkAuth();
     loadFlareData();
 

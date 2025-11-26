@@ -18,8 +18,8 @@ export default function ProfilePictureUpload({
   username,
   onUploadComplete,
 }: ProfilePictureUploadProps) {
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {

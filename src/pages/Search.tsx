@@ -40,12 +40,12 @@ interface SearchChain {
 
 export default function Search() {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [users, setUsers] = useState<SearchUser[]>([]);
-  const [photos, setPhotos] = useState<SearchPhoto[]>([]);
-  const [chains, setChains] = useState<SearchChain[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [trending, setTrending] = useState<string[]>([
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [users, setUsers] = React.useState<SearchUser[]>([]);
+  const [photos, setPhotos] = React.useState<SearchPhoto[]>([]);
+  const [chains, setChains] = React.useState<SearchChain[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const [trending, setTrending] = React.useState<string[]>([
     "Golden Hour",
     "Landscape",
     "Wildlife",
@@ -53,7 +53,7 @@ export default function Search() {
     "Minimalist",
   ]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (searchQuery.trim().length >= 2) {
       performSearch();
     } else {

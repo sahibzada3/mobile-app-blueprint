@@ -25,11 +25,11 @@ interface Notification {
 
 export default function Notifications() {
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [filter, setFilter] = useState<string>("all");
-  const [loading, setLoading] = useState(true);
+  const [notifications, setNotifications] = React.useState<Notification[]>([]);
+  const [filter, setFilter] = React.useState<string>("all");
+  const [loading, setLoading] = React.useState(true);
 
-  useEffect(() => {
+  React.useEffect(() => {
     checkAuth();
     fetchNotifications();
 

@@ -29,12 +29,12 @@ interface FriendsListProps {
 }
 
 export default function FriendsList({ currentUserId, onSelectFriend, selectedFriendId }: FriendsListProps) {
-  const [friends, setFriends] = useState<Friend[]>([]);
-  const [pendingRequests, setPendingRequests] = useState<Friend[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [friends, setFriends] = React.useState<Friend[]>([]);
+  const [pendingRequests, setPendingRequests] = React.useState<Friend[]>([]);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchResults, setSearchResults] = React.useState<any[]>([]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchFriends();
     fetchPendingRequests();
     subscribeToFriendships();
