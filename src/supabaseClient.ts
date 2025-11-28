@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Debugging – shows if Vite can read the .env file
-console.log("URL:", import.meta.env.VITE_SUPABASE_URL);
-console.log("KEY:", import.meta.env.VITE_SUPABASE_ANON_KEY);
+console.log("ENV CHECK:", {
+  url: import.meta.env.VITE_SUPABASE_URL,
+  key: import.meta.env.VITE_SUPABASE_ANON_KEY
+});
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
