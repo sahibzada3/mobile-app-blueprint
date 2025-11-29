@@ -65,17 +65,47 @@ const fonts = [
   { value: "Noto Sans Devanagari", label: "Noto Devanagari (Hindi)", languages: ["hi"] },
   { value: "Noto Sans SC", label: "Noto Sans (Chinese)", languages: ["zh"] },
   { value: "Noto Sans JP", label: "Noto Sans (Japanese)", languages: ["ja"] },
+  { value: "Montserrat", label: "Montserrat (Modern)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Raleway", label: "Raleway (Contemporary)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Lora", label: "Lora (Literary)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Merriweather", label: "Merriweather (Classic)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Dancing Script", label: "Dancing Script (Handwritten)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Pacifico", label: "Pacifico (Playful)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Bebas Neue", label: "Bebas Neue (Bold)", languages: ["en", "es", "fr", "de", "it", "pt"] },
+  { value: "Abril Fatface", label: "Abril Fatface (Display)", languages: ["en", "es", "fr", "de", "it", "pt"] },
   { value: "Inter", label: "Inter (Clean)", languages: ["en", "es", "fr", "de", "it", "pt"] },
 ];
 
 export default function TypographyControls(props: TypographyControlsProps) {
   const {
-    overlayText, fontFamily, fontSize, textColor, textOpacity, textAlign,
-    textPositionY, textPositionX, textRotation, textSkewX, textPerspective,
-    textStrokeWidth, textStrokeColor, selectedLanguage, onTextChange,
-    onFontChange, onSizeChange, onColorChange, onOpacityChange, onAlignChange,
-    onPositionYChange, onPositionXChange, onRotationChange, onSkewXChange,
-    onPerspectiveChange, onStrokeWidthChange, onStrokeColorChange, onLanguageChange
+    overlayText,
+    fontFamily,
+    fontSize,
+    textColor,
+    textOpacity,
+    textAlign,
+    textPositionY,
+    textPositionX,
+    textRotation,
+    textSkewX,
+    textPerspective,
+    textStrokeWidth,
+    textStrokeColor,
+    selectedLanguage,
+    onTextChange,
+    onFontChange,
+    onSizeChange,
+    onColorChange,
+    onOpacityChange,
+    onAlignChange,
+    onPositionYChange,
+    onPositionXChange,
+    onRotationChange,
+    onSkewXChange,
+    onPerspectiveChange,
+    onStrokeWidthChange,
+    onStrokeColorChange,
+    onLanguageChange,
   } = props;
 
   const [generatedQuotes, setGeneratedQuotes] = React.useState<string[]>([]);
@@ -93,10 +123,15 @@ export default function TypographyControls(props: TypographyControlsProps) {
   const generateQuotes = async () => {
     setIsGenerating(true);
     try {
+      console.log("Calling generate-quote with language:", selectedLanguage);
+
       const scene = detectScene();
-      const { data, error } = await supabase.functions.invoke('generate-quote', {
-        body: JSON.stringify({ scene, language: selectedLanguage })
+
+      const { data, error } = await supabase.functions.invoke("generate-quote", {
+        body: { scene, language: selectedLanguage },
       });
+
+      console.log("Edge function response:", data, error);
 
       if (error) throw error;
 
@@ -104,16 +139,24 @@ export default function TypographyControls(props: TypographyControlsProps) {
         setGeneratedQuotes(data.quotes);
 
         const languageFonts: Record<string, string> = {
-          ar: 'Amiri', ur: 'Noto Nastaliq Urdu', ps: 'Noto Nastaliq Urdu',
-          hi: 'Noto Sans Devanagari', zh: 'Noto Sans SC', ja: 'Noto Sans JP',
-          en: 'Playfair Display', es: 'Playfair Display', fr: 'Playfair Display',
-          de: 'Playfair Display', it: 'Playfair Display', pt: 'Playfair Display'
+          ar: "Amiri",
+          ur: "Noto Nastaliq Urdu",
+          ps: "Noto Nastaliq Urdu",
+          hi: "Noto Sans Devanagari",
+          zh: "Noto Sans SC",
+          ja: "Noto Sans JP",
+          en: "Playfair Display",
+          es: "Playfair Display",
+          fr: "Playfair Display",
+          de: "Playfair Display",
+          it: "Playfair Display",
+          pt: "Playfair Display",
         };
 
         const recommendedFont = languageFonts[selectedLanguage];
         if (recommendedFont && recommendedFont !== fontFamily) {
           onFontChange(recommendedFont);
-          toast.success(`Quotes generated! Font changed to ${recommendedFont} for ${selectedLanguage}.`);
+          toast.success(`Quotes generated! Font changed to ${recommendedFont}.`);
         } else {
           toast.success("Quotes generated successfully!");
         }
@@ -122,7 +165,10 @@ export default function TypographyControls(props: TypographyControlsProps) {
       }
     } catch (error: any) {
       console.error("Quote generation error:", error);
-      toast.error(error.message || "Failed to generate quotes.");
+      toast.error(
+        error?.message ||
+          "Failed to generate quotes. Make sure your edge function is deployed and accessible."
+      );
     } finally {
       setIsGenerating(false);
     }
@@ -131,21 +177,33 @@ export default function TypographyControls(props: TypographyControlsProps) {
   return (
     <Tabs defaultValue="text" className="w-full">
       <TabsList className="grid w-full grid-cols-3 mb-4">
-        <TabsTrigger value="text"><Type className="w-4 h-4 mr-2" />Text</TabsTrigger>
-        <TabsTrigger value="style"><Layers className="w-4 h-4 mr-2" />Style</TabsTrigger>
-        <TabsTrigger value="advanced"><Move className="w-4 h-4 mr-2" />Transform</TabsTrigger>
+        <TabsTrigger value="text">
+          <Type className="w-4 h-4 mr-2" />
+          Text
+        </TabsTrigger>
+        <TabsTrigger value="style">
+          <Layers className="w-4 h-4 mr-2" />
+          Style
+        </TabsTrigger>
+        <TabsTrigger value="advanced">
+          <Move className="w-4 h-4 mr-2" />
+          Transform
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="text" className="space-y-4">
+        {/* Language Selector */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 flex-1">
             <Globe className="w-4 h-4 text-primary" />
             <Label>Language</Label>
           </div>
           <Select value={selectedLanguage} onValueChange={onLanguageChange}>
-            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
-              {languages.map(lang => (
+              {languages.map((lang) => (
                 <SelectItem key={lang.value} value={lang.value}>
                   <span className="flex items-center gap-2">
                     <span>{lang.flag}</span>
@@ -157,12 +215,16 @@ export default function TypographyControls(props: TypographyControlsProps) {
           </Select>
         </div>
 
+        {/* Textarea + AI Quotes Button */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label>Typography Text</Label>
             <Button
-              size="sm" variant="outline" onClick={generateQuotes}
-              disabled={isGenerating} className="h-8"
+              size="sm"
+              variant="outline"
+              onClick={generateQuotes}
+              disabled={isGenerating}
+              className="h-8"
             >
               <Sparkles className="w-3 h-3 mr-1.5" />
               {isGenerating ? "Generating..." : "AI Quotes"}
@@ -170,22 +232,31 @@ export default function TypographyControls(props: TypographyControlsProps) {
           </div>
           <Textarea
             placeholder="Add poetic text, quotes, or captions..."
-            value={overlayText} onChange={e => onTextChange(e.target.value)}
-            rows={3} className="resize-none"
+            value={overlayText}
+            onChange={(e) => onTextChange(e.target.value)}
+            rows={3}
+            className="resize-none"
           />
         </div>
 
+        {/* Generated Quotes */}
         {generatedQuotes.length > 0 && (
           <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">AI Generated Quotes (tap to use)</Label>
+            <Label className="text-xs text-muted-foreground">
+              AI Generated Quotes (tap to use)
+            </Label>
             <ScrollArea className="h-48 max-h-[200px] rounded-md border p-2">
               <div className="space-y-2 pr-4">
-                {generatedQuotes.map((quote, idx) => (
+                {generatedQuotes.map((quote, index) => (
                   <Button
-                    key={idx} variant="ghost" className="w-full justify-start text-left h-auto py-3 px-3 hover:bg-primary/5 whitespace-normal"
+                    key={index}
+                    variant="ghost"
+                    className="w-full justify-start text-left h-auto py-3 px-3 hover:bg-primary/5 whitespace-normal"
                     onClick={() => onTextChange(quote)}
                   >
-                    <span className="text-sm leading-relaxed break-words">{quote}</span>
+                    <span className="text-sm leading-relaxed break-words">
+                      {quote}
+                    </span>
                   </Button>
                 ))}
               </div>
@@ -194,7 +265,8 @@ export default function TypographyControls(props: TypographyControlsProps) {
         )}
       </TabsContent>
 
-      {/* style and advanced tabs remain the same — omitted for brevity, you can copy your previous code */}
+      {/* Style & Advanced sections remain same as your code */}
     </Tabs>
   );
 }
+
