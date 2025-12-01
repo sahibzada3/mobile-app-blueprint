@@ -108,7 +108,7 @@ export default function TypographyControls({
   onStrokeColorChange,
   onLanguageChange,
 }: TypographyControlsProps) {
-  const [generatedQuotes, setGeneratedQuotes] = React.useState<string[]>([]);
+  const [generatedQuotes, setGeneratedQuotes] = React.useState<Array<{text: string, author: string}>>([]);
   const [isGenerating, setIsGenerating] = React.useState(false);
 
   const detectScene = () => {
@@ -244,10 +244,11 @@ export default function TypographyControls({
                   <Button
                     key={index}
                     variant="ghost"
-                    className="w-full justify-start text-left h-auto py-3 px-3 hover:bg-primary/5 whitespace-normal"
-                    onClick={() => onTextChange(quote)}
+                    className="w-full justify-start text-left h-auto py-3 px-3 hover:bg-primary/5 whitespace-normal flex-col items-start gap-1"
+                    onClick={() => onTextChange(`${quote.text}\n— ${quote.author}`)}
                   >
-                    <span className="text-sm leading-relaxed break-words">{quote}</span>
+                    <span className="text-sm leading-relaxed break-words">{quote.text}</span>
+                    <span className="text-xs text-muted-foreground italic">— {quote.author}</span>
                   </Button>
                 ))}
               </div>

@@ -43,16 +43,23 @@ serve(async (req) => {
     const languageName = languageNames[language] || 'English';
     const prompt = `Generate 5 beautiful, poetic quotes suitable for a nature photography app. The photo scene is: ${scene}. 
     
-Generate quotes in ${languageName}. The quotes should be:
+Generate quotes in ${languageName}. Each quote should include the quote text and its author/poet. The quotes should be:
 - Short and impactful (1-2 lines each)
 - Poetic and evocative
 - Related to nature, photography, or the scene
 - Culturally appropriate for ${languageName} speakers
 - Perfect for overlaying on a photograph
+- Include the author/poet name for each quote
 
 Return ONLY a JSON object with this exact structure:
 {
-  "quotes": ["quote1", "quote2", "quote3", "quote4", "quote5"]
+  "quotes": [
+    {"text": "quote text here", "author": "Author Name"},
+    {"text": "quote text here", "author": "Author Name"},
+    {"text": "quote text here", "author": "Author Name"},
+    {"text": "quote text here", "author": "Author Name"},
+    {"text": "quote text here", "author": "Author Name"}
+  ]
 }`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -99,8 +106,16 @@ Return ONLY a JSON object with this exact structure:
       throw new Error('Invalid AI response format');
     }
 
+    // Ensure all quotes have both text and author
+    const formattedQuotes = result.quotes.map((q: any) => {
+      if (typeof q === 'string') {
+        return { text: q, author: 'Unknown' };
+      }
+      return { text: q.text || q, author: q.author || 'Unknown' };
+    });
+
     return new Response(
-      JSON.stringify({ quotes: result.quotes }),
+      JSON.stringify({ quotes: formattedQuotes }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
