@@ -41,24 +41,27 @@ serve(async (req) => {
     };
 
     const languageName = languageNames[language] || 'English';
-    const prompt = `Generate 5 beautiful, poetic quotes suitable for a nature photography app. The photo scene is: ${scene}. 
+    const prompt = `Generate 5 beautiful texts suitable for a nature photography app. The photo scene is: ${scene}. 
     
-Generate quotes in ${languageName}. Each quote should include the quote text and its author/poet. The quotes should be:
+Generate in ${languageName}. Create exactly:
+- 3 poetry lines (short poetic verses without author attribution)
+- 2 famous quotes with their author/poet name
+
+Requirements:
 - Short and impactful (1-2 lines each)
 - Poetic and evocative
 - Related to nature, photography, or the scene
 - Culturally appropriate for ${languageName} speakers
 - Perfect for overlaying on a photograph
-- Include the author/poet name for each quote
 
 Return ONLY a JSON object with this exact structure:
 {
   "quotes": [
-    {"text": "quote text here", "author": "Author Name"},
-    {"text": "quote text here", "author": "Author Name"},
-    {"text": "quote text here", "author": "Author Name"},
-    {"text": "quote text here", "author": "Author Name"},
-    {"text": "quote text here", "author": "Author Name"}
+    {"text": "poetry line 1", "author": null},
+    {"text": "poetry line 2", "author": null},
+    {"text": "poetry line 3", "author": null},
+    {"text": "famous quote 1", "author": "Poet/Author Name"},
+    {"text": "famous quote 2", "author": "Poet/Author Name"}
   ]
 }`;
 
