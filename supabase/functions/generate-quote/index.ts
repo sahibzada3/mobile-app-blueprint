@@ -44,12 +44,13 @@ serve(async (req) => {
     const prompt = `Generate 5 beautiful texts suitable for a nature photography app. The photo scene is: ${scene}. 
     
 Generate in ${languageName}. Create exactly:
-- 3 poetry lines (short poetic verses without author attribution)
+- 3 poetry couplets (2-line verses in traditional poetic style, separated by a line break "\\n")
 - 2 famous quotes with their author/poet name
 
 Requirements:
-- Short and impactful (1-2 lines each)
-- Poetic and evocative
+- Poetry must be in couplet form (2 lines that flow together naturally)
+- Use natural line breaks between the two lines of each couplet
+- Poetic, evocative, and emotionally resonant
 - Related to nature, photography, or the scene
 - Culturally appropriate for ${languageName} speakers
 - Perfect for overlaying on a photograph
@@ -57,11 +58,11 @@ Requirements:
 Return ONLY a JSON object with this exact structure:
 {
   "quotes": [
-    {"text": "poetry line 1", "author": null},
-    {"text": "poetry line 2", "author": null},
-    {"text": "poetry line 3", "author": null},
-    {"text": "famous quote 1", "author": "Poet/Author Name"},
-    {"text": "famous quote 2", "author": "Poet/Author Name"}
+    {"text": "First line of poetry\\nSecond line completing the verse", "author": null},
+    {"text": "First line of poetry\\nSecond line completing the verse", "author": null},
+    {"text": "First line of poetry\\nSecond line completing the verse", "author": null},
+    {"text": "famous quote", "author": "Poet/Author Name"},
+    {"text": "famous quote", "author": "Poet/Author Name"}
   ]
 }`;
 
