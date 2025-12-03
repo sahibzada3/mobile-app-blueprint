@@ -44,25 +44,26 @@ serve(async (req) => {
     const prompt = `Generate 5 beautiful texts suitable for a nature photography app. The photo scene is: ${scene}. 
     
 Generate in ${languageName}. Create exactly:
-- 3 poetry couplets (2-line verses in traditional poetic style, separated by a line break "\\n")
-- 2 famous quotes with their author/poet name
+- 3 poetry couplets (2-line verses) from REAL famous poets known for nature/romantic poetry
+- 2 famous quotes from REAL well-known authors, philosophers, or poets
 
-Requirements:
-- Poetry must be in couplet form (2 lines that flow together naturally)
-- Use natural line breaks between the two lines of each couplet
-- Poetic, evocative, and emotionally resonant
-- Related to nature, photography, or the scene
+CRITICAL REQUIREMENTS:
+- ALL 5 items MUST have a real author/poet name - NO "Unknown", NO null, NO anonymous
+- For poetry: Use famous poets like Rumi, Hafiz, Wordsworth, Keats, Tagore, Ghalib, Rahman Baba, Khushal Khan Khattak, etc.
+- For quotes: Use real authors like Thoreau, Emerson, Muir, Einstein, etc.
+- Poetry must be in couplet form (2 lines that flow together naturally with "\\n" between them)
 - Culturally appropriate for ${languageName} speakers
-- Perfect for overlaying on a photograph
+- If ${languageName} is Pashto, use famous Pashto poets like Rahman Baba, Khushal Khan Khattak, Hamza Shinwari
+- If ${languageName} is Urdu, use famous Urdu poets like Ghalib, Iqbal, Faiz, Mir Taqi Mir
 
 Return ONLY a JSON object with this exact structure:
 {
   "quotes": [
-    {"text": "First line of poetry\\nSecond line completing the verse", "author": null},
-    {"text": "First line of poetry\\nSecond line completing the verse", "author": null},
-    {"text": "First line of poetry\\nSecond line completing the verse", "author": null},
-    {"text": "famous quote", "author": "Poet/Author Name"},
-    {"text": "famous quote", "author": "Poet/Author Name"}
+    {"text": "First line of poetry\\nSecond line completing the verse", "author": "Famous Poet Name"},
+    {"text": "First line of poetry\\nSecond line completing the verse", "author": "Famous Poet Name"},
+    {"text": "First line of poetry\\nSecond line completing the verse", "author": "Famous Poet Name"},
+    {"text": "famous quote about nature or life", "author": "Famous Author Name"},
+    {"text": "famous quote about nature or life", "author": "Famous Author Name"}
   ]
 }`;
 
@@ -75,7 +76,7 @@ Return ONLY a JSON object with this exact structure:
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
         messages: [
-          { role: 'system', content: 'You are a poetic quote generator for a nature photography app. Always return valid JSON with the exact structure requested.' },
+          { role: 'system', content: 'You are a poetic quote generator for a nature photography app. Always return valid JSON with the exact structure requested. NEVER use "Unknown" or null for author names - always use real famous poet/author names.' },
           { role: 'user', content: prompt }
         ],
         response_format: { type: "json_object" }
@@ -110,12 +111,16 @@ Return ONLY a JSON object with this exact structure:
       throw new Error('Invalid AI response format');
     }
 
-    // Ensure all quotes have both text and author
-    const formattedQuotes = result.quotes.map((q: any) => {
+    // Ensure all quotes have both text and author - use a default poet if missing
+    const defaultPoets = ['Rumi', 'Hafiz', 'Tagore', 'Wordsworth', 'Keats'];
+    const formattedQuotes = result.quotes.map((q: any, index: number) => {
       if (typeof q === 'string') {
-        return { text: q, author: 'Unknown' };
+        return { text: q, author: defaultPoets[index % defaultPoets.length] };
       }
-      return { text: q.text || q, author: q.author || 'Unknown' };
+      const author = q.author && q.author !== 'Unknown' && q.author !== 'unknown' && q.author !== null 
+        ? q.author 
+        : defaultPoets[index % defaultPoets.length];
+      return { text: q.text || q, author };
     });
 
     return new Response(
