@@ -384,6 +384,17 @@
       box-shadow: 0 0 40px rgba(255, 255, 200, 0.5), 0 0 80px rgba(255, 255, 200, 0.3);
     }
   }
+
+  @keyframes confettiFall {
+    0% {
+      transform: translateY(0) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(300px) rotate(720deg);
+      opacity: 0;
+    }
+  }
 }
 
 @layer utilities {
