@@ -15,6 +15,7 @@ import { useTheme } from "@/hooks/useTheme";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import { useDebounce } from "@/hooks/useDebounce";
 import FeedbackDialog from "@/components/feedback/FeedbackDialog";
+import FlareBuddyCard from "@/components/profile/FlareBuddyCard";
 
 export default function Feed() {
   const navigate = useNavigate();
@@ -367,8 +368,9 @@ export default function Feed() {
       </header>
 
       <main className="max-w-2xl mx-auto py-5">
-        <div className="px-5 mb-5">
+        <div className="px-5 mb-5 space-y-4">
           <WeatherWidget />
+          {user && <FlareBuddyCard userId={user.id} compact />}
         </div>
 
         {photos.length === 0 ? (

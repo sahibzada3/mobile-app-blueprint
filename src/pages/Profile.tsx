@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import RankBadgeDisplay from "@/components/profile/RankBadgeDisplay";
 import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
+import FlareBuddyCard from "@/components/profile/FlareBuddyCard";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -210,6 +211,9 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Flare Buddy Section */}
+        {profile?.id && <FlareBuddyCard userId={profile.id} />}
 
         {/* Clean Photo Gallery */}
         <Tabs defaultValue="photos" className="w-full">
