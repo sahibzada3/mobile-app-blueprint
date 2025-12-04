@@ -289,6 +289,101 @@
       opacity: 0;
     }
   }
+
+  /* Weather animations */
+  @keyframes cloudFloat {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(200%);
+    }
+  }
+
+  @keyframes rainFall {
+    0% {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(300px);
+      opacity: 0;
+    }
+  }
+
+  @keyframes snowFall {
+    0% {
+      transform: translateY(-10px) translateX(0) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(300px) translateX(30px) rotate(360deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes fogDrift {
+    0% {
+      transform: translateX(-20%);
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translateX(20%);
+      opacity: 0.3;
+    }
+  }
+
+  @keyframes lightning {
+    0%, 94%, 96%, 98%, 100% {
+      background-color: transparent;
+    }
+    95%, 97% {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  @keyframes sunPulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes sunRay {
+    0%, 100% {
+      opacity: 0.6;
+      transform: translate(-50%, -100%) rotate(var(--rotation)) scaleY(1);
+    }
+    50% {
+      opacity: 0.9;
+      transform: translate(-50%, -100%) rotate(var(--rotation)) scaleY(1.2);
+    }
+  }
+
+  @keyframes moonGlow {
+    0%, 100% {
+      box-shadow: 0 0 30px rgba(255, 255, 200, 0.4), 0 0 60px rgba(255, 255, 200, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 40px rgba(255, 255, 200, 0.5), 0 0 80px rgba(255, 255, 200, 0.3);
+    }
+  }
 }
 
 @layer utilities {

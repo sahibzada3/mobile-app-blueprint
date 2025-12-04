@@ -2,8 +2,8 @@ import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { MapPin, Sunrise, Sunset, Camera, ChevronRight, Loader2, Cloud, Droplets, Wind, Eye } from "lucide-react";
+import { MapPin, Sunrise, Sunset, Camera, ChevronRight, Loader2 } from "lucide-react";
+import WeatherGraphics from "./WeatherGraphics";
 
 interface WeatherWidgetData {
   temperature: number;
@@ -14,6 +14,7 @@ interface WeatherWidgetData {
   sunset: string;
   photographyTip: string;
   isNight: boolean;
+  weatherCode: number;
 }
 
 export default function WeatherWidget() {
@@ -72,7 +73,8 @@ export default function WeatherWidget() {
         sunrise: sunrise.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         sunset: sunset.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         photographyTip: getPhotographyTip(weatherCode, isNight),
-        isNight
+        isNight,
+        weatherCode
       });
     } catch (error) {
       console.error("Weather widget error:", error);
@@ -196,74 +198,16 @@ export default function WeatherWidget() {
   if (!weather) return null;
 
   const cardClassName = weather.isNight 
-    ? "shadow-2xl border-0 bg-black cursor-pointer hover:shadow-[0_0_40px_rgba(59,130,246,0.5)] transition-all duration-500 overflow-hidden group relative text-white"
-    : "shadow-lg border-0 bg-gradient-to-br from-primary/10 via-card to-accent/10 cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden group relative";
+    ? "shadow-2xl border-0 bg-slate-950 cursor-pointer hover:shadow-[0_0_40px_rgba(59,130,246,0.5)] transition-all duration-500 overflow-hidden group relative text-white"
+    : "shadow-lg border-0 bg-gradient-to-br from-sky-50 via-card to-amber-50/50 dark:from-slate-900 dark:via-card dark:to-slate-800 cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden group relative";
 
   return (
     <Card 
       className={cardClassName}
       onClick={() => navigate("/weather")}
     >
-      {/* Night Sky with Stars */}
-      {weather.isNight && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden bg-gradient-to-b from-black via-blue-950/20 to-black">
-          {/* Small twinkling stars */}
-          {[...Array(80)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute bg-white rounded-full animate-pulse"
-              style={{
-                width: `${1 + Math.random() * 2}px`,
-                height: `${1 + Math.random() * 2}px`,
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${2 + Math.random() * 4}s`,
-                opacity: 0.4 + Math.random() * 0.6,
-                boxShadow: '0 0 2px rgba(255, 255, 255, 0.6)',
-              }}
-            />
-          ))}
-          {/* Bright stars */}
-          {[...Array(30)].map((_, i) => (
-            <div
-              key={`bright-${i}`}
-              className="absolute bg-white rounded-full animate-pulse"
-              style={{
-                width: `${2 + Math.random() * 3}px`,
-                height: `${2 + Math.random() * 3}px`,
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 4}s`,
-                animationDuration: `${1.5 + Math.random() * 3}s`,
-                opacity: 0.6 + Math.random() * 0.4,
-                boxShadow: '0 0 6px rgba(255, 255, 255, 0.9), 0 0 12px rgba(255, 255, 255, 0.5)',
-              }}
-            />
-          ))}
-          {/* Shooting stars */}
-          {[...Array(3)].map((_, i) => (
-            <div
-              key={`shooting-${i}`}
-              className="absolute h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-0"
-              style={{
-                width: '100px',
-                top: `${20 + Math.random() * 60}%`,
-                left: '-100px',
-                animation: `shooting-star ${8 + Math.random() * 12}s ${Math.random() * 10}s infinite`,
-                transform: 'rotate(-45deg)',
-              }}
-            />
-          ))}
-        </div>
-      )}
-      
-      {/* Decorative Background Pattern */}
-      {!weather.isNight && (
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(0,0,0,0.1)_1px,_transparent_1px)] bg-[size:20px_20px]"></div>
-        </div>
-      )}
+      {/* Dynamic Weather Graphics */}
+      <WeatherGraphics weatherCode={weather.weatherCode} isNight={weather.isNight} />
       
       <CardContent className="p-5 relative z-10">
         {/* Header with Location */}
