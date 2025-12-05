@@ -1,3 +1,9 @@
+import natureLeafImg from "@/assets/ideas/nature-leaf.jpg";
+import everydayCoffeeImg from "@/assets/ideas/everyday-coffee.jpg";
+import lightSilhouetteImg from "@/assets/ideas/light-silhouette.jpg";
+import feelingsCalmImg from "@/assets/ideas/feelings-calm.jpg";
+import writeSkyImg from "@/assets/ideas/write-sky.jpg";
+
 export interface InspirationIdea {
   id: string;
   title: string;
@@ -12,6 +18,7 @@ export interface InspirationCategory {
   subtitle: string;
   icon: string;
   gradient: string;
+  image: string;
   ideas: InspirationIdea[];
 }
 
@@ -22,6 +29,7 @@ export const inspirationCategories: InspirationCategory[] = [
     subtitle: "Express peace, hope & emotions through nature",
     icon: "Leaf",
     gradient: "from-emerald-500/20 to-cyan-500/20",
+    image: natureLeafImg,
     ideas: [
       {
         id: "n1",
@@ -73,6 +81,7 @@ export const inspirationCategories: InspirationCategory[] = [
     subtitle: "Find stories in ordinary objects",
     icon: "Coffee",
     gradient: "from-amber-500/20 to-orange-500/20",
+    image: everydayCoffeeImg,
     ideas: [
       {
         id: "e1",
@@ -124,6 +133,7 @@ export const inspirationCategories: InspirationCategory[] = [
     subtitle: "Create emotional moods with contrast",
     icon: "Sun",
     gradient: "from-violet-500/20 to-purple-500/20",
+    image: lightSilhouetteImg,
     ideas: [
       {
         id: "l1",
@@ -175,6 +185,7 @@ export const inspirationCategories: InspirationCategory[] = [
     subtitle: "Visual prompts for emotions",
     icon: "Heart",
     gradient: "from-pink-500/20 to-rose-500/20",
+    image: feelingsCalmImg,
     ideas: [
       {
         id: "f1",
@@ -226,6 +237,7 @@ export const inspirationCategories: InspirationCategory[] = [
     subtitle: "Pair images with words that resonate",
     icon: "PenTool",
     gradient: "from-cyan-500/20 to-blue-500/20",
+    image: writeSkyImg,
     ideas: [
       {
         id: "w1",
