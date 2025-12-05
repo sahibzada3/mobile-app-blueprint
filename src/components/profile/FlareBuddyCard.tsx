@@ -135,7 +135,60 @@ export default function FlareBuddyCard({ userId, compact = false }: FlareBuddyCa
     }
   };
 
-  if (loading || !flareBuddy) return null;
+  if (loading) return null;
+
+  // Placeholder when no buddy exists
+  if (!flareBuddy) {
+    if (compact) {
+      return (
+        <div 
+          className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50 cursor-pointer hover:bg-muted/70 transition-colors"
+          onClick={() => navigate("/spotlight")}
+        >
+          <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+            <Zap className="w-5 h-5 text-accent/60" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-accent font-medium">Find Your Flare Buddy</p>
+            <p className="text-sm text-muted-foreground">Start a chain with friends</p>
+          </div>
+          <Sparkles className="w-5 h-5 text-muted-foreground/50" />
+        </div>
+      );
+    }
+
+    return (
+      <Card className="relative overflow-hidden border-border/50">
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-primary/5" />
+        <CardContent className="p-5 relative z-10">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
+              <Zap className="w-4 h-4 text-accent/60" />
+            </div>
+            <div>
+              <h3 className="font-bold text-foreground">Find Your Flare Buddy</h3>
+              <p className="text-xs text-muted-foreground">Collaborate to unlock</p>
+            </div>
+          </div>
+
+          <div className="text-center py-4">
+            <div className="w-16 h-16 mx-auto rounded-full bg-muted/50 flex items-center justify-center mb-3">
+              <Sparkles className="w-8 h-8 text-muted-foreground/40" />
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">
+              Your Flare Buddy is the friend you share the most chains and challenges with
+            </p>
+            <button
+              onClick={() => navigate("/spotlight")}
+              className="px-4 py-2 rounded-lg bg-accent/20 text-accent hover:bg-accent/30 transition-colors text-sm font-medium"
+            >
+              Start a Flare Chain
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (compact) {
     return (
