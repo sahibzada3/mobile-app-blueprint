@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Zap, Trophy, Sparkles, Star } from "lucide-react";
+import { useConfetti } from "@/hooks/useConfetti";
 
 interface FlareBuddy {
   id: string;
@@ -22,9 +23,11 @@ interface FlareBuddyCardProps {
 
 export default function FlareBuddyCard({ userId, compact = false }: FlareBuddyCardProps) {
   const navigate = useNavigate();
+  const { celebrate } = useConfetti();
   const [flareBuddy, setFlareBuddy] = React.useState<FlareBuddy | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [showCelebration, setShowCelebration] = React.useState(false);
+  const hasTriggeredConfetti = React.useRef(false);
 
   React.useEffect(() => {
     calculateFlareBuddy();
@@ -118,14 +121,28 @@ export default function FlareBuddyCard({ userId, compact = false }: FlareBuddyCa
           .single();
 
         if (buddyProfile) {
+          // Check if this is the first time finding a buddy
+          const buddyKey = `flare_buddy_celebrated_${userId}`;
+          const hasCelebrated = localStorage.getItem(buddyKey);
+          
           setFlareBuddy({
             ...buddyProfile,
             interactionCount: maxInteractions,
             sharedChains: interactionCounts[buddyId].chains,
             sharedChallenges: interactionCounts[buddyId].challenges,
           });
+          
           setShowCelebration(true);
           setTimeout(() => setShowCelebration(false), 3000);
+          
+          // Trigger confetti for first buddy discovery
+          if (!hasCelebrated && !hasTriggeredConfetti.current) {
+            hasTriggeredConfetti.current = true;
+            setTimeout(() => {
+              celebrate('high');
+              localStorage.setItem(buddyKey, 'true');
+            }, 500);
+          }
         }
       }
     } catch (error) {
