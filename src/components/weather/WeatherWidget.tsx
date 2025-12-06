@@ -236,9 +236,9 @@ export default function WeatherWidget() {
 
         {/* Main Temperature Display */}
         <div className="flex items-start justify-between mb-5">
-          <div className="flex items-start gap-3">
-            <div className="text-7xl leading-none filter drop-shadow-lg">{weather.icon}</div>
-            <div className="pt-2">
+          <div className="flex items-start gap-4">
+            <div className="text-6xl leading-none filter drop-shadow-lg">{weather.icon}</div>
+            <div className="pt-1">
               <div className="flex items-baseline gap-1">
                 <span className={`text-5xl font-bold tracking-tight ${
                   weather.isNight ? 'text-white' : 'text-foreground'
@@ -251,13 +251,12 @@ export default function WeatherWidget() {
                   °C
                 </span>
               </div>
-              <Badge variant="secondary" className={`mt-2 font-medium ${
-                weather.isNight 
-                  ? 'bg-white/10 text-white border-white/20' 
-                  : 'bg-primary/15 text-primary border-primary/30'
+              {/* Prominent Weather Condition */}
+              <h3 className={`text-xl font-bold mt-1 ${
+                weather.isNight ? 'text-white' : 'text-foreground'
               }`}>
                 {weather.condition}
-              </Badge>
+              </h3>
             </div>
           </div>
         </div>
