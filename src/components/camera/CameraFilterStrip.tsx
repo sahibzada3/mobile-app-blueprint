@@ -1,18 +1,20 @@
 import { type FilterType } from "@/utils/cameraFilters";
 import { X } from "lucide-react";
-import goldenHourImg from "@/assets/filters/golden-hour.jpg";
-import middaySunImg from "@/assets/filters/midday-sun.jpg";
-import nightImg from "@/assets/filters/night.jpg";
-import fogMistImg from "@/assets/filters/fog-mist.jpg";
-import silhouetteImg from "@/assets/filters/silhouette.jpg";
-import urbanImg from "@/assets/filters/urban.jpg";
-import waterImg from "@/assets/filters/water.jpg";
-import forestImg from "@/assets/filters/forest.jpg";
-import beachDesertImg from "@/assets/filters/beach-desert.jpg";
-import skyCloudsImg from "@/assets/filters/sky-clouds.jpg";
-import rainImg from "@/assets/filters/rain.jpg";
-import indoorGoldenImg from "@/assets/filters/indoor-golden.jpg";
-import oldArchitectureImg from "@/assets/filters/old-architecture.jpg";
+import solflareImg from "@/assets/filters/solflare.jpg";
+import emberkissImg from "@/assets/filters/emberkiss.jpg";
+import cloudmatteImg from "@/assets/filters/cloudmatte.jpg";
+import mosstoneImg from "@/assets/filters/mosstone.jpg";
+import breezeblueImg from "@/assets/filters/breezeblue.jpg";
+import retroforgeImg from "@/assets/filters/retroforge.jpg";
+import oldfilm98Img from "@/assets/filters/oldfilm98.jpg";
+import neonpulseImg from "@/assets/filters/neonpulse.jpg";
+import rainglowImg from "@/assets/filters/rainglow.jpg";
+import midnightglassImg from "@/assets/filters/midnightglass.jpg";
+import dreammistImg from "@/assets/filters/dreammist.jpg";
+import blushbloomImg from "@/assets/filters/blushbloom.jpg";
+import cinetealImg from "@/assets/filters/cineteal.jpg";
+import noiredgeImg from "@/assets/filters/noiredge.jpg";
+import prismdriftImg from "@/assets/filters/prismdrift.jpg";
 
 interface CameraFilterStripProps {
   selectedFilter: FilterType | null;
@@ -20,19 +22,21 @@ interface CameraFilterStripProps {
 }
 
 const filters: { id: FilterType; label: string; image: string }[] = [
-  { id: "golden-hour", label: "Golden Hour", image: goldenHourImg },
-  { id: "midday-sun", label: "Midday Sun", image: middaySunImg },
-  { id: "night", label: "Night", image: nightImg },
-  { id: "fog-mist", label: "Fog & Mist", image: fogMistImg },
-  { id: "silhouette", label: "Silhouette", image: silhouetteImg },
-  { id: "urban", label: "Urban", image: urbanImg },
-  { id: "old-architecture", label: "Old Buildings", image: oldArchitectureImg },
-  { id: "water", label: "Water", image: waterImg },
-  { id: "forest", label: "Forest", image: forestImg },
-  { id: "beach-desert", label: "Beach/Desert", image: beachDesertImg },
-  { id: "sky-clouds", label: "Sky & Clouds", image: skyCloudsImg },
-  { id: "rain", label: "Rain", image: rainImg },
-  { id: "indoor-golden", label: "Indoor Golden", image: indoorGoldenImg },
+  { id: "solflare", label: "Solflare", image: solflareImg },
+  { id: "emberkiss", label: "Emberkiss", image: emberkissImg },
+  { id: "cloudmatte", label: "CloudMatte", image: cloudmatteImg },
+  { id: "mosstone", label: "MossTone", image: mosstoneImg },
+  { id: "breezeblue", label: "BreezeBlue", image: breezeblueImg },
+  { id: "retroforge", label: "RetroForge", image: retroforgeImg },
+  { id: "oldfilm98", label: "OldFilm98", image: oldfilm98Img },
+  { id: "neonpulse", label: "NeonPulse", image: neonpulseImg },
+  { id: "rainglow", label: "RainGlow", image: rainglowImg },
+  { id: "midnightglass", label: "MidnightGlass", image: midnightglassImg },
+  { id: "dreammist", label: "DreamMist", image: dreammistImg },
+  { id: "blushbloom", label: "BlushBloom", image: blushbloomImg },
+  { id: "cineteal", label: "CineTeal", image: cinetealImg },
+  { id: "noiredge", label: "NoirEdge", image: noiredgeImg },
+  { id: "prismdrift", label: "PrismDrift", image: prismdriftImg },
 ];
 
 export function CameraFilterStrip({ selectedFilter, onFilterChange }: CameraFilterStripProps) {
