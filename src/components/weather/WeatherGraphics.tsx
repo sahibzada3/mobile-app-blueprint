@@ -6,14 +6,15 @@ interface WeatherGraphicsProps {
 }
 
 export default function WeatherGraphics({ weatherCode, isNight }: WeatherGraphicsProps) {
-  // Determine weather type
-  const isClear = weatherCode === 0;
-  const isPartlyCloudy = weatherCode === 1 || weatherCode === 2;
-  const isCloudy = weatherCode === 3;
+  // Determine weather type - WMO weather codes
+  // 0 = Clear sky, 1 = Mainly clear, 2 = Partly cloudy, 3 = Overcast
+  const isClear = weatherCode === 0 || weatherCode === 1;
+  const isPartlyCloudy = weatherCode === 2 || weatherCode === 3; // Show sun with some clouds for 2-3
+  const isOvercast = weatherCode >= 45; // Only truly overcast for fog, rain, etc.
   const isFoggy = weatherCode === 45 || weatherCode === 48;
-  const isRainy = weatherCode === 51 || weatherCode === 61 || weatherCode === 80;
-  const isSnowy = weatherCode === 71;
-  const isStormy = weatherCode === 95;
+  const isRainy = weatherCode >= 51 && weatherCode <= 82; // All rain/drizzle codes
+  const isSnowy = weatherCode >= 71 && weatherCode <= 77; // All snow codes
+  const isStormy = weatherCode >= 95; // Thunderstorm codes
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -21,21 +22,26 @@ export default function WeatherGraphics({ weatherCode, isNight }: WeatherGraphic
       <div className={`absolute inset-0 ${getBaseGradient(isNight, weatherCode)}`} />
 
       {/* Stars for night */}
-      {isNight && <Stars intensity={isCloudy ? 0.3 : 1} />}
+      {isNight && <Stars intensity={isOvercast ? 0.3 : 1} />}
 
       {/* Moon for night */}
-      {isNight && !isCloudy && <Moon />}
+      {isNight && !isOvercast && <Moon />}
 
-      {/* Sun for clear/partly cloudy day */}
-      {!isNight && (isClear || isPartlyCloudy) && <Sun />}
+      {/* Sun for clear/partly cloudy day - always show sun unless truly overcast */}
+      {!isNight && (isClear || isPartlyCloudy) && !isOvercast && <Sun />}
 
-      {/* Clouds */}
-      {(isCloudy || isPartlyCloudy || isRainy || isStormy) && (
-        <Clouds isNight={isNight} intensity={isCloudy ? 1 : 0.6} isStormy={isStormy} />
+      {/* Light clouds for partly cloudy - small, sparse clouds that don't block sun */}
+      {isPartlyCloudy && !isOvercast && !isRainy && !isStormy && (
+        <Clouds isNight={isNight} intensity={0.3} isStormy={false} />
+      )}
+
+      {/* Heavy clouds for overcast/rain/storm */}
+      {(isOvercast || isRainy || isStormy) && (
+        <Clouds isNight={isNight} intensity={1} isStormy={isStormy} />
       )}
 
       {/* Night clouds */}
-      {isNight && (isPartlyCloudy || isCloudy) && <NightClouds />}
+      {isNight && isPartlyCloudy && <NightClouds />}
 
       {/* Rain */}
       {isRainy && <Rain isNight={isNight} />}
@@ -54,16 +60,21 @@ export default function WeatherGraphics({ weatherCode, isNight }: WeatherGraphic
 
 function getBaseGradient(isNight: boolean, weatherCode: number): string {
   if (isNight) {
-    if (weatherCode === 3) return "bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900";
-    if (weatherCode === 61 || weatherCode === 80) return "bg-gradient-to-b from-slate-900 via-blue-950 to-slate-900";
+    if (weatherCode >= 45) return "bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900";
+    if (weatherCode >= 51) return "bg-gradient-to-b from-slate-900 via-blue-950 to-slate-900";
     return "bg-gradient-to-b from-indigo-950 via-slate-900 to-black";
   }
   
-  if (weatherCode === 0) return "bg-gradient-to-b from-cyan-400/20 via-sky-300/10 to-amber-200/10";
-  if (weatherCode === 1 || weatherCode === 2) return "bg-gradient-to-b from-sky-400/15 via-slate-200/10 to-white/5";
-  if (weatherCode === 3) return "bg-gradient-to-b from-slate-400/20 via-slate-300/15 to-slate-200/10";
-  if (weatherCode === 61 || weatherCode === 80) return "bg-gradient-to-b from-slate-500/20 via-blue-400/10 to-slate-300/10";
-  if (weatherCode === 95) return "bg-gradient-to-b from-slate-700/30 via-purple-900/20 to-slate-600/20";
+  // Clear and mainly clear - bright sunny gradient
+  if (weatherCode === 0 || weatherCode === 1) return "bg-gradient-to-b from-cyan-400/20 via-sky-300/10 to-amber-200/10";
+  // Partly cloudy to overcast - still show some warmth
+  if (weatherCode === 2 || weatherCode === 3) return "bg-gradient-to-b from-sky-400/15 via-amber-100/10 to-white/5";
+  // Fog
+  if (weatherCode === 45 || weatherCode === 48) return "bg-gradient-to-b from-slate-400/20 via-slate-300/15 to-slate-200/10";
+  // Rain
+  if (weatherCode >= 51 && weatherCode <= 82) return "bg-gradient-to-b from-slate-500/20 via-blue-400/10 to-slate-300/10";
+  // Storm
+  if (weatherCode >= 95) return "bg-gradient-to-b from-slate-700/30 via-purple-900/20 to-slate-600/20";
   
   return "bg-gradient-to-b from-sky-300/10 to-transparent";
 }
